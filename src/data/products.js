@@ -1,0 +1,306 @@
+// ========== PRODUITS FEMME (40+ produits) ==========
+export const womenProducts = [
+  // Soins visage
+  { id: 'w1', name: 'Racle langue', category: 'product', priceRange: '1000-1500', description: 'Pour une haleine fraîche et saine', emoji: '🪥', tags: ['Soin', 'Hygiène'] },
+  { id: 'w2', name: 'Baume lèvre nourrissant', category: 'product', priceRange: '1000-2000', description: 'Lèvres douces et hydratées 24h', emoji: '💋', tags: ['Soin', 'Lèvres'] },
+  { id: 'w3', name: 'Set lèvre rossissant', category: 'product', priceRange: '3000-5000', description: 'Effet volume instantané', emoji: '👄', tags: ['Maquillage', 'Lèvres'] },
+  { id: 'w4', name: 'Stylo élégant', category: 'product', priceRange: '1000-3000', description: 'Écriture fluide et élégante', emoji: '🖊️', tags: ['Accessoire'] },
+  { id: 'w5', name: 'Casque audio', category: 'product', priceRange: '5000-10000', description: 'Son immersif haute qualité', emoji: '🎧', tags: ['Accessoire', 'Tech'] },
+  { id: 'w6', name: 'Serviette douce', category: 'product', priceRange: '2000-5000', description: 'Doux et absorbant pour une peau parfaite', emoji: '🧖', tags: ['Soin', 'Bain'] },
+  { id: 'w7', name: 'Essuie visage', category: 'product', priceRange: '1000-2000', description: 'Essentiel beauté quotidien', emoji: '🧻', tags: ['Soin', 'Hygiène'] },
+  { id: 'w8', name: 'Set voyage Sol de Janeiro', category: 'product', priceRange: '3000-5000', description: 'Voyagez avec style et élégance', emoji: '✈️', tags: ['Voyage', 'Soin'] },
+  { id: 'w9', name: 'Huile corporel nourrissante', category: 'product', priceRange: '3000-5000', description: 'Peau nourrie et lumineuse', emoji: '✨', tags: ['Soin', 'Corps'] },
+  { id: 'w10', name: 'Gloss Vip', category: 'product', priceRange: '1500-2000', description: 'Brillance intense et longue tenue', emoji: '💎', tags: ['Maquillage', 'Lèvres'] },
+  { id: 'w11', name: 'Gloss chichi', category: 'product', priceRange: '500-1000', description: 'Gloss à petit prix, effet garanti', emoji: '💖', tags: ['Maquillage', 'Lèvres'] },
+  { id: 'w12', name: 'Mini spray parfumé', category: 'product', priceRange: '1500-2000', description: 'Frais et léger au quotidien', emoji: '🌸', tags: ['Parfum'] },
+  { id: 'w13', name: 'Lip balm réparateur', category: 'product', price: 1500, description: 'Baume réparateur aux huiles naturelles', emoji: '💄', tags: ['Soin', 'Lèvres'] },
+  { id: 'w14', name: 'Lingette nettoyante', category: 'product', priceRange: '1000-2000', description: 'Nettoyage en douceur', emoji: '🧼', tags: ['Soin', 'Hygiène'] },
+  { id: 'w15', name: 'Pépite gloss pailleté', category: 'product', priceRange: '2000-3000', description: 'Gloss pailleté effet miroir', emoji: '✨', tags: ['Maquillage', 'Lèvres'] },
+  { id: 'w16', name: 'Pack air pods', category: 'product', price: 10000, description: 'Écouteurs premium sans fil', emoji: '🎵', tags: ['Tech', 'Accessoire'] },
+  { id: 'w17', name: 'Masque visage en tissu', category: 'product', priceRange: '500-2000', description: 'Soin express pour un teint frais', emoji: '🧖', tags: ['Soin', 'Visage'] },
+  { id: 'w18', name: 'Base all day', category: 'product', price: 2000, description: 'Tient toute la journée', emoji: '🎨', tags: ['Maquillage', 'Base'] },
+  { id: 'w19', name: 'Brosse cheveux', category: 'product', priceRange: '1500-2500', description: 'Démêle en douceur sans casser', emoji: '🪥', tags: ['Cheveux', 'Accessoire'] },
+  { id: 'w20', name: 'Kit ongle complet', category: 'product', priceRange: '2000-5000', description: 'Manucure professionnelle à domicile', emoji: '💅', tags: ['Ongles', 'Soin'] },
+  { id: 'w21', name: 'Mousse visage nettoyante', category: 'product', priceRange: '2000-3000', description: 'Nettoyage en profondeur', emoji: '🧴', tags: ['Soin', 'Visage'] },
+  { id: 'w22', name: 'Extension cils', category: 'product', priceRange: '4500-5000', description: 'Regard de biche instantané', emoji: '👁️', tags: ['Maquillage', 'Cils'] },
+  { id: 'w23', name: 'Mini ventilateur', category: 'product', priceRange: '2000-3000', description: 'Frais en été', emoji: '🌀', tags: ['Accessoire'] },
+  { id: 'w24', name: 'Gel nutrition hyaluronique', category: 'product', priceRange: '1000-2000', description: 'Hydratation intense', emoji: '💧', tags: ['Soin', 'Visage'] },
+  { id: 'w25', name: 'Dupe rhode', category: 'product', priceRange: '1000-3000', description: 'Alternative abordable des produits tendance', emoji: '🌹', tags: ['Soin', 'Visage'] },
+  { id: 'w26', name: 'Labubu gloss-porte clé', category: 'product', priceRange: '1500-3000', description: 'Accessoire trendy', emoji: '🔑', tags: ['Accessoire'] },
+  { id: 'w27', name: 'Miroir de sac', category: 'product', priceRange: '2500-3000', description: 'Miroir compact et élégant', emoji: '🪞', tags: ['Accessoire'] },
+  { id: 'w28', name: 'I Beauty', category: 'product', priceRange: '500-1000', description: 'Soin express pour une peau parfaite', emoji: '💎', tags: ['Soin', 'Visage'] },
+  { id: 'w29', name: 'Anti-cerne', category: 'product', priceRange: '1500-2000', description: 'Regard éclatant', emoji: '👁️', tags: ['Maquillage'] },
+  { id: 'w30', name: 'Fixateur', category: 'product', priceRange: '1500-2000', description: 'Maquillage longue tenue', emoji: '🔒', tags: ['Maquillage'] },
+  { id: 'w31', name: 'Crayon noir/marrons', category: 'product', priceRange: '500-1000', description: 'Sourcils parfaits', emoji: '✏️', tags: ['Maquillage', 'Sourcils'] },
+  { id: 'w32', name: 'Crème main', category: 'product', priceRange: '1000-3000', description: 'Mains douces et nourries', emoji: '🤲', tags: ['Soin', 'Mains'] },
+  { id: 'w33', name: 'Savon pétal', category: 'product', priceRange: '1000-3000', description: 'Savon artisanal aux pétales', emoji: '🌸', tags: ['Soin', 'Corps'] },
+  { id: 'w34', name: 'Masque noir purifiant', category: 'product', priceRange: '1500-3000', description: 'Masque purifiant aux charbons', emoji: '🖤', tags: ['Soin', 'Visage'] },
+  { id: 'w35', name: 'Combo gel et sourcils', category: 'product', priceRange: '2000-2500', description: 'Set complet pour sourcils', emoji: '✨', tags: ['Maquillage', 'Sourcils'] },
+  { id: 'w36', name: 'Gommage corporel', category: 'product', priceRange: '2000-5000', description: 'Peau lisse et lumineuse', emoji: '🧖', tags: ['Soin', 'Corps'] },
+  { id: 'w37', name: 'Masque à lèvre', category: 'product', priceRange: '1000-2000', description: 'Lèvres repulpées', emoji: '💋', tags: ['Soin', 'Lèvres'] },
+  { id: 'w38', name: 'Chiffon nettoyant', category: 'product', priceRange: '500-1000', description: 'Zéro déchet', emoji: '♻️', tags: ['Soin', 'Accessoire'] },
+  { id: 'w39', name: 'Gel Aloe Vera', category: 'product', priceRange: '2000-3000', description: 'Apaisant naturel', emoji: '🌿', tags: ['Soin', 'Visage'] },
+  { id: 'w40', name: 'Crème solaire', category: 'product', priceRange: '1500-3000', description: 'Protection UV 50+', emoji: '☀️', tags: ['Soin', 'Protection'] },
+  { id: 'w41', name: 'Parfum élégant', category: 'product', priceRange: '2000-10000', description: 'Fragrance captivante', emoji: '🌹', tags: ['Parfum'] },
+  { id: 'w42', name: 'Brume parfumée', category: 'product', priceRange: '1000-2000', description: 'Eau de parfum légère', emoji: '🌸', tags: ['Parfum'] },
+  { id: 'w43', name: 'Déodorant', category: 'product', priceRange: '1500-5000', description: 'Protection 24h', emoji: '🧴', tags: ['Soin', 'Hygiène'] },
+  { id: 'w44', name: 'Set bon senteur', category: 'product', priceRange: '3000-5000', description: 'Coffret fragrance', emoji: '🎁', tags: ['Parfum', 'Coffret'] },
+  { id: 'w45', name: 'Bracelet Pandora', category: 'product', price: 3000, description: 'Bracelet en argent', emoji: '💎', tags: ['Bijou'] },
+  { id: 'w46', name: 'Bracelet en perles', category: 'product', priceRange: '500-3000', description: 'Élégant et raffiné', emoji: '📿', tags: ['Bijou'] },
+  { id: 'w47', name: 'Bracelet minimaliste', category: 'product', priceRange: '2000-5000', description: 'Bijou sobre et chic', emoji: '✨', tags: ['Bijou'] },
+  { id: 'w48', name: 'Collier/Boucle', category: 'product', priceRange: '1500-5000', description: 'Pièce maîtresse', emoji: '📿', tags: ['Bijou'] },
+  { id: 'w49', name: 'Piercing', category: 'product', priceRange: '1500-5000', description: 'Accessoire tendance', emoji: '💎', tags: ['Bijou'] },
+  { id: 'w50', name: 'Trousse', category: 'product', priceRange: '2000-3000', description: 'Organiseur', emoji: '👜', tags: ['Accessoire'] },
+  { id: 'w51', name: 'Pochette', category: 'product', priceRange: '2000-3000', description: 'Élégante et pratique', emoji: '👛', tags: ['Accessoire'] },
+  { id: 'w52', name: 'Bague', category: 'product', priceRange: '1000-5000', description: 'Accessoire tendance', emoji: '💍', tags: ['Bijou'] },
+];
+
+// ========== PACKS FEMME (12 packs) ==========
+export const womenPacks = [
+  // Campus Girl Packs
+  {
+    id: 'p1',
+    name: 'Campus Girl - Basic',
+    category: 'pack',
+    price: 5000,
+    description: 'Petit pack pour une grande praticité au quotidien',
+    emoji: '🎓',
+    items: ['Parfum léger 🍭', 'Petit carnet ou agenda 📓', 'Stylo unique 🧑‍🎨', 'Guide étude + Lingette intime', 'Gloss + Crayon ✨'],
+    popularity: '🔥',
+    color: 'from-pink-400 to-rose-400'
+  },
+  {
+    id: 'p2',
+    name: 'Campus Girl - Classique',
+    category: 'pack',
+    price: 10000,
+    description: 'Organisation, style et confiance… tout en un pack',
+    emoji: '📚',
+    items: ['Parfum léger + astuce beauté', 'Carnet + agenda + carte motivation', 'Stylo + Bracelets', 'Guide étude + surprise', 'Pochette + Gourde', 'Kit beauté'],
+    popularity: '⭐',
+    color: 'from-pink-500 to-purple-500'
+  },
+  {
+    id: 'p3',
+    name: 'Campus Girl - Premium',
+    category: 'pack',
+    price: 15000,
+    description: 'Pack complet pour les journées studieuses',
+    emoji: '👑',
+    items: ['Parfum + Body spray + Bijoux', 'Carte de motivation', 'Carnet + Agenda + Stylo chic', 'Guide étude + surprise', 'Pochette + Gourde', 'Kit beauté', 'Savon pétal + Skincare'],
+    popularity: '🌟',
+    color: 'from-purple-500 to-pink-500'
+  },
+  // Glow Queen Packs
+  {
+    id: 'p4',
+    name: 'Glow Queen - Basic',
+    category: 'pack',
+    price: 5000,
+    description: 'Même petit budget, tu peux déjà briller',
+    emoji: '✨',
+    items: ['Savon visage + Masque', 'Mini parfum ou body spray', 'Petit miroir de sac', 'Gloss + Surchines'],
+    popularity: '🔥',
+    color: 'from-yellow-400 to-orange-400'
+  },
+  {
+    id: 'p5',
+    name: 'Glow Queen - Classique',
+    category: 'pack',
+    price: 10000,
+    description: 'Ton glow n\'est pas un hasard… c\'est un choix',
+    emoji: '🌟',
+    items: ['Savon + gommage + masque', 'Crème hydratante', 'Parfum doux + kit cheveux', 'Miroir + accessoire', 'Cadeau surprise'],
+    popularity: '⭐',
+    color: 'from-orange-400 to-pink-400'
+  },
+  {
+    id: 'p6',
+    name: 'Glow Queen - Premium',
+    category: 'pack',
+    price: 15000,
+    description: 'Tu ne passes pas inaperçue… tu marques les esprits',
+    emoji: '💫',
+    items: ['Savon + gommage + crème + huile', 'Parfum durable + Gel', 'Accessoires beauté', 'Masque visage + kit cheveux', 'Masque à lèvre + Gloss', 'Carte motivation + Cadeau surprise'],
+    popularity: '🌟',
+    color: 'from-pink-500 to-red-500'
+  },
+  // Confidence Packs
+  {
+    id: 'p7',
+    name: 'Confidence - Basic',
+    category: 'pack',
+    price: 5000,
+    description: 'Même un petit geste peut révéler une grande confiance',
+    emoji: '💪',
+    items: ['Brume + Mini kit manucure', 'Lingette intime + carte motivation', 'Bracelet ou accessoire chic', 'Astuce beauté'],
+    popularity: '🔥',
+    color: 'from-blue-400 to-indigo-400'
+  },
+  {
+    id: 'p8',
+    name: 'Confidence - Classique',
+    category: 'pack',
+    price: 10000,
+    description: 'Ton style, ton attitude, ta confiance… tout parle pour toi',
+    emoji: '🦋',
+    items: ['Parfum doux mais affirmé', 'Bracelet + accessoire mode', 'Carnet + mini-guide', 'Kit beauté express', 'Cadeau surprise'],
+    popularity: '⭐',
+    color: 'from-indigo-400 to-purple-400'
+  },
+  {
+    id: 'p9',
+    name: 'Confidence - Premium',
+    category: 'pack',
+    price: 15000,
+    description: 'Révèle ta meilleure version',
+    emoji: '👑',
+    items: ['Parfum intense + lunette', 'Bijoux mode (bracelet + collier)', 'Carnet + guide mindset', 'Kit beauté complet', 'Pochette élégante', 'Mini kit manucure', 'Cadeau surprise'],
+    popularity: '🌟',
+    color: 'from-purple-500 to-pink-500'
+  },
+  // Nouveaux packs spéciaux
+  {
+    id: 'p10',
+    name: 'Self Care Queen Pack',
+    category: 'pack',
+    price: 12000,
+    description: 'Prends soin de toi comme une reine',
+    emoji: '🧖',
+    items: ['Masque visage', 'Gommage corporel', 'Huile de soin', 'Baume à lèvre', 'Crème main', 'Savon pétal'],
+    popularity: '✨',
+    color: 'from-teal-400 to-emerald-400'
+  },
+  {
+    id: 'p11',
+    name: 'Date Night Pack',
+    category: 'pack',
+    price: 10000,
+    description: 'Prépare-toi pour une soirée inoubliable',
+    emoji: '🌙',
+    items: ['Parfum élégant', 'Bijoux assortis', 'Gloss brillant', 'Anti-cerne', 'Fixateur'],
+    popularity: '💕',
+    color: 'from-red-400 to-pink-400'
+  },
+  {
+    id: 'p12',
+    name: 'Wellness Girl Pack',
+    category: 'pack',
+    price: 8000,
+    description: 'Bien-être et sérénité au quotidien',
+    emoji: '☮️',
+    items: ['Gel Aloe Vera', 'Crème solaire', 'Brume relaxante', 'Carte motivation', 'Mini guide bien-être'],
+    popularity: '🌿',
+    color: 'from-green-400 to-teal-400'
+  },
+];
+
+// ========== PRODUITS HOMME (30+ produits) ==========
+export const menProducts = [
+  { id: 'm1', name: 'Racle langue', category: 'product', priceRange: '1000-1500', description: 'Haleine fraîche', emoji: '🪥', tags: ['Soin', 'Hygiène'] },
+  { id: 'm2', name: 'Baume lèvre', category: 'product', priceRange: '1000-2000', description: 'Lèvres hydratées', emoji: '💋', tags: ['Soin', 'Lèvres'] },
+  { id: 'm3', name: 'Stylo élégant', category: 'product', priceRange: '1000-3000', description: 'Écriture élégante', emoji: '🖊️', tags: ['Accessoire'] },
+  { id: 'm4', name: 'Casque audio', category: 'product', priceRange: '5000-10000', description: 'Son immersif', emoji: '🎧', tags: ['Accessoire', 'Tech'] },
+  { id: 'm5', name: 'Serviette', category: 'product', priceRange: '2000-5000', description: 'Doux et absorbant', emoji: '🧖', tags: ['Soin', 'Bain'] },
+  { id: 'm6', name: 'Essuie', category: 'product', priceRange: '1000-2000', description: 'Essentiel du quotidien', emoji: '🧻', tags: ['Soin', 'Hygiène'] },
+  { id: 'm7', name: 'Huile corporel', category: 'product', priceRange: '3000-5000', description: 'Peau nourrie', emoji: '✨', tags: ['Soin', 'Corps'] },
+  { id: 'm8', name: 'Brosse cheveux', category: 'product', priceRange: '1500-2500', description: 'Démêle en douceur', emoji: '🪥', tags: ['Cheveux', 'Accessoire'] },
+  { id: 'm9', name: 'Kit ongle', category: 'product', priceRange: '2000-5000', description: 'Soin complet', emoji: '💅', tags: ['Ongles', 'Soin'] },
+  { id: 'm10', name: 'Mini ventilateur', category: 'product', priceRange: '2000-3000', description: 'Frais en été', emoji: '🌀', tags: ['Accessoire'] },
+  { id: 'm11', name: 'Gel Aloe Vera', category: 'product', priceRange: '2000-3000', description: 'Apaisant naturel', emoji: '🌿', tags: ['Soin', 'Visage'] },
+  { id: 'm12', name: 'Crème solaire', category: 'product', priceRange: '1500-3000', description: 'Protection UV 50+', emoji: '☀️', tags: ['Soin', 'Protection'] },
+  { id: 'm13', name: 'Parfum', category: 'product', priceRange: '2000-10000', description: 'Fragrance captivante', emoji: '🌹', tags: ['Parfum'] },
+  { id: 'm14', name: 'Brume', category: 'product', priceRange: '1000-2000', description: 'Eau de parfum légère', emoji: '🌸', tags: ['Parfum'] },
+  { id: 'm15', name: 'Déodorant', category: 'product', priceRange: '1500-5000', description: 'Protection 24h', emoji: '🧴', tags: ['Soin', 'Hygiène'] },
+  { id: 'm16', name: 'Masque visage en tissu', category: 'product', priceRange: '500-2000', description: 'Soin express', emoji: '🧖', tags: ['Soin', 'Visage'] },
+  { id: 'm17', name: 'Gel nutrition hyaluronique', category: 'product', priceRange: '1000-2000', description: 'Hydratation intense', emoji: '💧', tags: ['Soin', 'Visage'] },
+  { id: 'm18', name: 'Crème main', category: 'product', priceRange: '1000-3000', description: 'Mains douces', emoji: '🤲', tags: ['Soin', 'Mains'] },
+  { id: 'm19', name: 'Gommage corporel', category: 'product', priceRange: '2000-5000', description: 'Peau lisse', emoji: '🧖', tags: ['Soin', 'Corps'] },
+  { id: 'm20', name: 'Savon pétal', category: 'product', priceRange: '1000-3000', description: 'Savon artisanal', emoji: '🌸', tags: ['Soin', 'Corps'] },
+  { id: 'm21', name: 'Chiffon nettoyant', category: 'product', priceRange: '500-1000', description: 'Zéro déchet', emoji: '♻️', tags: ['Soin', 'Accessoire'] },
+  { id: 'm22', name: 'Masque noir', category: 'product', priceRange: '1500-3000', description: 'Masque purifiant', emoji: '🖤', tags: ['Soin', 'Visage'] },
+  { id: 'm23', name: 'Bracelet Pandora', category: 'product', price: 3000, description: 'Bracelet en argent', emoji: '💎', tags: ['Bijou'] },
+  { id: 'm24', name: 'Bracelet en perles', category: 'product', priceRange: '500-3000', description: 'Élégant et raffiné', emoji: '📿', tags: ['Bijou'] },
+  { id: 'm25', name: 'Bracelet minimaliste', category: 'product', priceRange: '2000-5000', description: 'Bijou sobre et chic', emoji: '✨', tags: ['Bijou'] },
+  { id: 'm26', name: 'Collier', category: 'product', priceRange: '1500-5000', description: 'Pièce maîtresse', emoji: '📿', tags: ['Bijou'] },
+  { id: 'm27', name: 'Piercing', category: 'product', priceRange: '1500-5000', description: 'Accessoire tendance', emoji: '💎', tags: ['Bijou'] },
+  { id: 'm28', name: 'Trousse', category: 'product', priceRange: '2000-3000', description: 'Organiseur', emoji: '👜', tags: ['Accessoire'] },
+  { id: 'm29', name: 'Pochette', category: 'product', priceRange: '2000-3000', description: 'Élégante et pratique', emoji: '👛', tags: ['Accessoire'] },
+  { id: 'm30', name: 'Bague', category: 'product', priceRange: '1000-5000', description: 'Accessoire tendance', emoji: '💍', tags: ['Bijou'] },
+];
+
+// ========== PACKS HOMME (8 packs) ==========
+export const menPacks = [
+  {
+    id: 'mp1',
+    name: 'Pack Sportif - Basic',
+    category: 'pack',
+    price: 5000,
+    description: 'Pour rester frais et performant',
+    emoji: '🏃',
+    items: ['Déodorant', 'Gel Aloe Vera', 'Mini ventilateur', 'Lingette', 'Carte motivation'],
+    popularity: '🔥',
+    color: 'from-blue-400 to-cyan-400'
+  },
+  {
+    id: 'mp2',
+    name: 'Pack Sportif - Classique',
+    category: 'pack',
+    price: 10000,
+    description: 'Confort et style pour l\'homme actif',
+    emoji: '💪',
+    items: ['Parfum sport', 'Serviette', 'Crème solaire', 'Gommage corporel', 'Casque', 'Cadeau surprise'],
+    popularity: '⭐',
+    color: 'from-cyan-400 to-indigo-400'
+  },
+  {
+    id: 'mp3',
+    name: 'Pack Premium Homme',
+    category: 'pack',
+    price: 15000,
+    description: 'L\'excellence au quotidien',
+    emoji: '👑',
+    items: ['Parfum premium', 'Kit ongle complet', 'Crème main', 'Huile corporel', 'Brosse cheveux', 'Set voyage', 'Carte mindset'],
+    popularity: '🌟',
+    color: 'from-indigo-500 to-purple-500'
+  },
+  {
+    id: 'mp4',
+    name: 'Pack Professionnel',
+    category: 'pack',
+    price: 12000,
+    description: 'Pour briller au travail',
+    emoji: '💼',
+    items: ['Stylo élégant', 'Parfum discret', 'Crème main', 'Trousse', 'Carte motivation'],
+    popularity: '✨',
+    color: 'from-gray-600 to-gray-800'
+  },
+  {
+    id: 'mp5',
+    name: 'Pack Wellness Homme',
+    category: 'pack',
+    price: 8000,
+    description: 'Bien-être et sérénité',
+    emoji: '🧘',
+    items: ['Gel Aloe Vera', 'Crème solaire', 'Masque visage', 'Brume', 'Guide bien-être'],
+    popularity: '🌿',
+    color: 'from-green-400 to-emerald-400'
+  },
+  {
+    id: 'mp6',
+    name: 'Pack Voyage Homme',
+    category: 'pack',
+    price: 10000,
+    description: 'Tout pour voyager léger',
+    emoji: '✈️',
+    items: ['Set voyage', 'Serviette', 'Mini ventilateur', 'Crème solaire', 'Pochette'],
+    popularity: '🧳',
+    color: 'from-blue-500 to-indigo-500'
+  },
+];
+
+// Export combiné
+export const allProducts = {
+  women: [...womenProducts, ...womenPacks],
+  men: [...menProducts, ...menPacks],
+};
