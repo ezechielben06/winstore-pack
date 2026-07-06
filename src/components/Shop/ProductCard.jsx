@@ -1,4 +1,4 @@
-// 📄 src/components/Shop/ProductCard.jsx - Version avec distinction claire
+// 📄 src/components/Shop/ProductCard.jsx - Version définitive
 import { useState } from 'react';
 import { ShoppingBag, Heart, Share2, Package, Sparkles, Check, Crown, Gift, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
@@ -8,7 +8,6 @@ const ProductCard = ({ product, isWomen }) => {
   const { addToCart } = useCart();
   const { isDark } = useTheme();
   const [isLiked, setIsLiked] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   
@@ -30,46 +29,43 @@ const ProductCard = ({ product, isWomen }) => {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  // Couleur de fond pour l'image selon le type
+  const getBgColor = () => {
+    if (isPack) {
+      return isDark ? '#1A1A35' : '#FFF8F0';
+    }
+    return isDark ? '#141425' : '#F5F5F5';
+  };
+
   return (
     <div 
-      className={`w-full overflow-hidden transition-all duration-300 ${
-        isPack 
-          ? `border-2 border-gold/40 ${isDark ? 'bg-[#1a1a35]' : 'bg-white'}`
-          : `border ${isDark ? 'border-[#2A2A4A] bg-[#1A1A2E]' : 'border-gray-200/70 bg-white'}`
-      }`}
+      className="w-full overflow-hidden"
       style={{
         borderRadius: '8px',
+        background: isDark ? '#1A1A2E' : '#FFFFFF',
+        border: isPack 
+          ? `2px solid ${isDark ? '#D4AF37' : '#D4AF37'}`
+          : `1px solid ${isDark ? '#2A2A4A' : '#EEEEEE'}`,
         boxShadow: isPack 
-          ? '0 4px 24px rgba(212,175,55,0.15)' 
+          ? '0 4px 20px rgba(212,175,55,0.15)' 
           : '0 2px 8px rgba(0,0,0,0.04)',
       }}
     >
       {/* ===== IMAGE ===== */}
       <div 
-        className="relative"
+        className="relative flex items-center justify-center"
         style={{ 
           aspectRatio: '1/1',
-          background: isDark ? '#141425' : '#F5F5F5',
-          overflow: 'hidden',
-          borderTopLeftRadius: '8px',
-          borderTopRightRadius: '8px',
+          background: getBgColor(),
+          borderBottom: isPack ? '2px solid #D4AF37' : 'none',
         }}
       >
-        {product.image && !imageError ? (
-          <img 
-            src={product.image} 
-            alt={product.name}
-            className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl opacity-30">
-            {isPack ? '📦' : (product.emoji || '✨')}
-          </div>
-        )}
+        {/* Grand emoji */}
+        <span className="text-7xl opacity-80">
+          {isPack ? '📦' : (product.emoji || '✨')}
+        </span>
 
-        {/* ✅ BADGE PACK - Très visible */}
+        {/* Badge PACK/PRODUIT */}
         <div 
           className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider flex items-center gap-1"
           style={{
@@ -82,18 +78,32 @@ const ProductCard = ({ product, isWomen }) => {
           {isPack ? 'PACK' : 'PRODUIT'}
         </div>
 
-        {/* ✅ Prix avec distinction */}
+        {/* Popularité */}
+        {product.popularity && (
+          <div 
+            className="absolute top-2 right-12 px-1.5 py-0.5 text-[7px] font-bold"
+            style={{
+              background: 'rgba(212,175,55,0.9)',
+              color: '#1A1A1A',
+              borderRadius: '2px',
+            }}
+          >
+            {product.popularity}
+          </div>
+        )}
+
+        {/* Prix */}
         <div 
           className="absolute bottom-2 left-2 right-2 px-2 py-1 flex items-center justify-between"
           style={{
             background: isPack ? 'rgba(212,175,55,0.95)' : 'rgba(255,255,255,0.95)',
             borderRadius: '6px',
             backdropFilter: 'blur(8px)',
-            border: isPack ? '1px solid rgba(212,175,55,0.3)' : 'none',
+            border: isPack ? '1px solid rgba(212,175,55,0.3)' : '1px solid rgba(0,0,0,0.05)',
           }}
         >
           <span 
-            className={`text-xs font-bold truncate ${isPack ? 'text-gray-900' : 'text-gray-900 dark:text-gray-900'}`}
+            className={`text-xs font-bold truncate ${isPack ? 'text-gray-900' : 'text-gray-900'}`}
           >
             {product.price 
               ? `${product.price.toLocaleString()} FCFA`
@@ -133,7 +143,7 @@ const ProductCard = ({ product, isWomen }) => {
           </button>
         </div>
 
-        {/* ✅ Badge "Économie" pour les packs */}
+        {/* Badge économie pour packs */}
         {isPack && (
           <div 
             className="absolute bottom-12 right-2 px-1.5 py-0.5 text-[7px] font-bold"
@@ -167,7 +177,7 @@ const ProductCard = ({ product, isWomen }) => {
           ))}
         </div>
 
-        {/* ✅ Nom avec icône distincte */}
+        {/* Nom */}
         <h3 className={`text-xs font-semibold leading-tight truncate flex items-center gap-1 ${
           isPack ? 'text-gold' : 'text-gray-900 dark:text-white'
         }`}>
@@ -181,7 +191,7 @@ const ProductCard = ({ product, isWomen }) => {
           </p>
         )}
 
-        {/* ✅ Statut distinct */}
+        {/* Statut distinct */}
         <div className="mt-1 flex items-center gap-1.5">
           {isPack ? (
             <span 
@@ -209,7 +219,7 @@ const ProductCard = ({ product, isWomen }) => {
           )}
         </div>
 
-        {/* ✅ Bouton + Détails pour packs */}
+        {/* Bouton + Détails */}
         <div className="mt-1.5 flex items-center gap-1">
           <button
             onClick={handleAddToCart}
@@ -236,7 +246,6 @@ const ProductCard = ({ product, isWomen }) => {
             )}
           </button>
 
-          {/* ✅ Bouton détails pour packs */}
           {isPack && product.items && (
             <button
               onClick={() => setShowDetails(!showDetails)}
@@ -256,7 +265,7 @@ const ProductCard = ({ product, isWomen }) => {
           )}
         </div>
 
-        {/* ✅ Détails du pack - Détaillés */}
+        {/* Détails du pack */}
         {isPack && product.items && showDetails && (
           <div 
             className="mt-1.5 p-2 transition-all duration-300"
@@ -282,8 +291,6 @@ const ProductCard = ({ product, isWomen }) => {
                 </li>
               )}
             </ul>
-            
-            {/* ✅ Valeur du pack */}
             <div className="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-[#2A2A4A] flex items-center justify-between">
               <span className="text-[7px] text-gray-400 dark:text-gray-500">
                 💎 Économisez jusqu'à 30%
