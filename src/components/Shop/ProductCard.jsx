@@ -1,6 +1,6 @@
-// 📄 src/components/Shop/ProductCard.jsx - Version mobile robuste
+// 📄 src/components/Shop/ProductCard.jsx - Version avec distinction claire
 import { useState } from 'react';
-import { ShoppingBag, Heart, Share2, Package, Sparkles, Crown, Check } from 'lucide-react';
+import { ShoppingBag, Heart, Share2, Package, Sparkles, Check, Crown, Gift, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -10,17 +10,18 @@ const ProductCard = ({ product, isWomen }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   
   const isPack = product.category === 'pack';
   
   const colors = isWomen ? {
     primary: '#E91E8C',
-    primaryDark: '#C2185B',
     primaryLight: '#FCE4EC',
+    primaryDark: '#C2185B',
   } : {
     primary: '#1A237E',
-    primaryDark: '#0D1445',
     primaryLight: '#E8EAF6',
+    primaryDark: '#0D1445',
   };
 
   const handleAddToCart = () => {
@@ -29,37 +30,27 @@ const ProductCard = ({ product, isWomen }) => {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const handleShare = async (e) => {
-    e.stopPropagation();
-    const text = `✨ "${product.name}" - WIN'STORE PACKS`;
-    if (navigator.share) {
-      try { await navigator.share({ title: product.name, text, url: window.location.href }); } 
-      catch (err) {}
-    } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, '_blank');
-    }
-  };
-
   return (
     <div 
-      className={`bg-white dark:bg-[#141425] transition-all duration-300 border ${
-        isDark ? 'border-[#2A2A4A]' : 'border-gray-200/70'
-      } ${isPack ? 'border-gold/30' : ''}`}
+      className={`w-full overflow-hidden transition-all duration-300 ${
+        isPack 
+          ? `border-2 border-gold/40 ${isDark ? 'bg-[#1a1a35]' : 'bg-white'}`
+          : `border ${isDark ? 'border-[#2A2A4A] bg-[#1A1A2E]' : 'border-gray-200/70 bg-white'}`
+      }`}
       style={{
         borderRadius: '8px',
         boxShadow: isPack 
-          ? '0 4px 20px rgba(212,175,55,0.08)' 
-          : '0 2px 12px rgba(0,0,0,0.04)',
-        overflow: 'hidden',
-        minWidth: 0, // ✅ Évite le débordement
+          ? '0 4px 24px rgba(212,175,55,0.15)' 
+          : '0 2px 8px rgba(0,0,0,0.04)',
       }}
     >
       {/* ===== IMAGE ===== */}
       <div 
-        className="relative overflow-hidden"
+        className="relative"
         style={{ 
-          aspectRatio: '1/1', 
-          background: isDark ? '#1A1A2E' : '#F5F5F5',
+          aspectRatio: '1/1',
+          background: isDark ? '#141425' : '#F5F5F5',
+          overflow: 'hidden',
           borderTopLeftRadius: '8px',
           borderTopRightRadius: '8px',
         }}
@@ -68,41 +59,41 @@ const ProductCard = ({ product, isWomen }) => {
           <img 
             src={product.image} 
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover"
             onError={() => setImageError(true)}
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl opacity-30">
+          <div className="w-full h-full flex items-center justify-center text-5xl opacity-30">
             {isPack ? '📦' : (product.emoji || '✨')}
           </div>
         )}
 
-        {/* Badge - Version compacte mobile */}
+        {/* ✅ BADGE PACK - Très visible */}
         <div 
-          className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase"
+          className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider flex items-center gap-1"
           style={{
             background: isPack ? '#D4AF37' : colors.primary,
             color: isPack ? '#1A1A1A' : '#FFFFFF',
             borderRadius: '4px',
-            letterSpacing: '0.06em',
           }}
         >
-          {isPack ? 'Pack' : 'Produit'}
+          {isPack ? <Crown size={10} /> : <Sparkles size={10} />}
+          {isPack ? 'PACK' : 'PRODUIT'}
         </div>
 
-        {/* Prix en bas - Version compacte */}
+        {/* ✅ Prix avec distinction */}
         <div 
           className="absolute bottom-2 left-2 right-2 px-2 py-1 flex items-center justify-between"
           style={{
             background: isPack ? 'rgba(212,175,55,0.95)' : 'rgba(255,255,255,0.95)',
+            borderRadius: '6px',
             backdropFilter: 'blur(8px)',
-            borderRadius: '4px',
+            border: isPack ? '1px solid rgba(212,175,55,0.3)' : 'none',
           }}
         >
           <span 
-            className="text-xs font-bold truncate"
-            style={{ color: isPack ? '#1A1A1A' : '#1A1A1A' }}
+            className={`text-xs font-bold truncate ${isPack ? 'text-gray-900' : 'text-gray-900 dark:text-gray-900'}`}
           >
             {product.price 
               ? `${product.price.toLocaleString()} FCFA`
@@ -110,41 +101,63 @@ const ProductCard = ({ product, isWomen }) => {
             }
           </span>
           {isPack && product.items && (
-            <span className="text-[8px] font-medium opacity-60 flex-shrink-0" style={{ color: isPack ? '#1A1A1A' : '#666' }}>
-              {product.items.length} art.
+            <span className="text-[8px] font-medium bg-white/30 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <Package size={8} />
+              {product.items.length} articles
             </span>
           )}
         </div>
 
-        {/* Actions - Version compacte */}
+        {/* Actions */}
         <div className="absolute top-2 right-2 flex flex-col gap-1">
           <button 
             onClick={() => setIsLiked(!isLiked)}
-            className="w-6 h-6 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 bg-white/90 dark:bg-[#1A1A2E]/90 backdrop-blur-sm"
+            className="w-6 h-6 flex items-center justify-center bg-white/90 dark:bg-[#1A1A2E]/90 backdrop-blur-sm"
             style={{ borderRadius: '4px' }}
           >
             <Heart size={12} className={isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'} />
           </button>
           <button 
-            onClick={handleShare}
-            className="w-6 h-6 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 bg-white/90 dark:bg-[#1A1A2E]/90 backdrop-blur-sm"
+            onClick={() => {
+              const text = `✨ "${product.name}" - WIN'STORE PACKS`;
+              if (navigator.share) {
+                navigator.share({ title: product.name, text, url: window.location.href });
+              } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, '_blank');
+              }
+            }}
+            className="w-6 h-6 flex items-center justify-center bg-white/90 dark:bg-[#1A1A2E]/90 backdrop-blur-sm"
             style={{ borderRadius: '4px' }}
           >
-            <Share2 size={12} className="text-gray-400 hover:text-gold transition-colors" />
+            <Share2 size={12} className="text-gray-400" />
           </button>
         </div>
+
+        {/* ✅ Badge "Économie" pour les packs */}
+        {isPack && (
+          <div 
+            className="absolute bottom-12 right-2 px-1.5 py-0.5 text-[7px] font-bold"
+            style={{
+              background: 'rgba(212,175,55,0.9)',
+              color: '#1A1A1A',
+              borderRadius: '2px',
+            }}
+          >
+            -30%
+          </div>
+        )}
       </div>
 
-      {/* ===== BODY - Version compacte ===== */}
-      <div className="p-2 sm:p-3">
+      {/* ===== BODY ===== */}
+      <div className="p-2">
         {/* Tags */}
-        <div className="flex flex-wrap gap-0.5 mb-1">
+        <div className="flex flex-wrap gap-0.5 mb-0.5">
           {product.tags && product.tags.slice(0, 2).map((tag, i) => (
             <span 
               key={i} 
               className="text-[7px] font-medium px-1.5 py-0.5 truncate max-w-[50px]"
               style={{ 
-                color: isPack ? '#D4AF37' : '#666',
+                color: isPack ? '#D4AF37' : '#888',
                 background: isPack ? 'rgba(212,175,55,0.08)' : '#F0F0F0',
                 borderRadius: '2px',
               }}
@@ -154,45 +167,59 @@ const ProductCard = ({ product, isWomen }) => {
           ))}
         </div>
 
-        {/* Nom - Avec truncate */}
-        <h3 className={`text-xs font-semibold leading-tight mb-0.5 truncate ${
+        {/* ✅ Nom avec icône distincte */}
+        <h3 className={`text-xs font-semibold leading-tight truncate flex items-center gap-1 ${
           isPack ? 'text-gold' : 'text-gray-900 dark:text-white'
         }`}>
+          {isPack ? <Crown size={10} className="text-gold" /> : <Sparkles size={10} className="text-gray-400" />}
           {product.name}
         </h3>
         
         {product.description && (
-          <p className="text-[9px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed break-words">
+          <p className="text-[8px] text-gray-500 dark:text-gray-400 line-clamp-1 leading-tight">
             {product.description}
           </p>
         )}
 
-        {/* Statut */}
-        <div className="mt-1 flex items-center gap-2">
-          <span 
-            className="text-[7px] font-medium px-1.5 py-0.5 truncate"
-            style={{
-              color: isPack ? '#D4AF37' : colors.primary,
-              background: isPack ? 'rgba(212,175,55,0.08)' : colors.primaryLight,
-              borderRadius: '2px',
-            }}
-          >
-            {isPack ? `📦 ${product.items?.length || 0} art.` : 'À l\'unité'}
-          </span>
+        {/* ✅ Statut distinct */}
+        <div className="mt-1 flex items-center gap-1.5">
+          {isPack ? (
+            <span 
+              className="text-[7px] font-medium px-1.5 py-0.5 flex items-center gap-0.5"
+              style={{
+                color: '#D4AF37',
+                background: 'rgba(212,175,55,0.12)',
+                borderRadius: '2px',
+              }}
+            >
+              <Gift size={8} />
+              Pack {product.items?.length || 0} articles
+            </span>
+          ) : (
+            <span 
+              className="text-[7px] font-medium px-1.5 py-0.5"
+              style={{
+                color: colors.primary,
+                background: colors.primaryLight,
+                borderRadius: '2px',
+              }}
+            >
+              À l'unité
+            </span>
+          )}
         </div>
 
-        {/* Actions */}
-        <div className="mt-2 pt-2 flex items-center gap-1.5" style={{ borderTop: '1px solid', borderColor: isDark ? '#2A2A4A' : '#EEEEEE' }}>
+        {/* ✅ Bouton + Détails pour packs */}
+        <div className="mt-1.5 flex items-center gap-1">
           <button
             onClick={handleAddToCart}
-            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[9px] font-medium transition-all duration-200 active:scale-95 ${
-              isAdded ? 'opacity-70 pointer-events-none' : ''
+            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-[8px] font-medium transition-all active:scale-95 ${
+              isAdded ? 'opacity-70' : ''
             }`}
             style={{
               background: isAdded ? '#D4AF37' : (isPack ? '#1A1A1A' : colors.primary),
               color: isAdded ? '#1A1A1A' : '#FFFFFF',
               borderRadius: '4px',
-              letterSpacing: '0.03em',
               minHeight: '28px',
             }}
           >
@@ -203,12 +230,71 @@ const ProductCard = ({ product, isWomen }) => {
               </>
             ) : (
               <>
-                {isPack ? <Package size={10} /> : <ShoppingBag size={10} />}
-                {isPack ? 'Choisir' : 'Ajouter'}
+                {isPack ? <Gift size={10} /> : <ShoppingBag size={10} />}
+                {isPack ? 'Choisir le pack' : 'Ajouter'}
               </>
             )}
           </button>
+
+          {/* ✅ Bouton détails pour packs */}
+          {isPack && product.items && (
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="px-2 py-1.5 transition-all active:scale-95"
+              style={{
+                background: isDark ? '#2A2A4A' : '#F0F0F0',
+                borderRadius: '4px',
+                minHeight: '28px',
+              }}
+            >
+              {showDetails ? (
+                <ChevronUp size={12} className="text-gold" />
+              ) : (
+                <ChevronDown size={12} className="text-gray-400" />
+              )}
+            </button>
+          )}
         </div>
+
+        {/* ✅ Détails du pack - Détaillés */}
+        {isPack && product.items && showDetails && (
+          <div 
+            className="mt-1.5 p-2 transition-all duration-300"
+            style={{
+              background: isDark ? '#141425' : '#F8F8F8',
+              borderRadius: '4px',
+              border: `1px solid ${isDark ? '#2A2A4A' : '#EEEEEE'}`,
+            }}
+          >
+            <p className="text-[7px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
+              Contenu du pack
+            </p>
+            <ul className="space-y-0.5">
+              {product.items.slice(0, 5).map((item, i) => (
+                <li key={i} className="text-[8px] text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-gold flex-shrink-0" />
+                  <span className="truncate">{item}</span>
+                </li>
+              ))}
+              {product.items.length > 5 && (
+                <li className="text-[7px] text-gray-400 dark:text-gray-500">
+                  + {product.items.length - 5} autres articles
+                </li>
+              )}
+            </ul>
+            
+            {/* ✅ Valeur du pack */}
+            <div className="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-[#2A2A4A] flex items-center justify-between">
+              <span className="text-[7px] text-gray-400 dark:text-gray-500">
+                💎 Économisez jusqu'à 30%
+              </span>
+              <span className="text-[7px] font-semibold text-gold flex items-center gap-0.5">
+                <Crown size={8} />
+                Pack exclusif
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

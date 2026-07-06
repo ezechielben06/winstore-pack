@@ -1,4 +1,4 @@
-// 📄 src/components/Shop/ProductGrid.jsx - Version mobile robuste
+// 📄 src/components/Shop/ProductGrid.jsx - Version Ultra-Compacte
 import ProductCard from './ProductCard';
 
 const ProductGrid = ({ products, isWomen }) => {
@@ -17,23 +17,22 @@ const ProductGrid = ({ products, isWomen }) => {
   const themeBg = isWomen ? 'bg-feminine-light' : 'bg-masculine-light';
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       {/* Packs */}
       {packs.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span className="w-4 h-px bg-gray-300 dark:bg-gray-600" />
-            Packs
-            <span className="w-4 h-px bg-gray-300 dark:bg-gray-600" />
-            <span className={`text-[8px] ${themeBg} ${themeColor} px-1.5 py-0.5 rounded-full`}>
+        <div className="mb-3">
+          <div className="flex items-center gap-1 mb-1.5">
+            <span className="text-[8px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              Packs
+            </span>
+            <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className={`text-[7px] ${themeBg} ${themeColor} px-1.5 py-0.5 rounded-full`}>
               {packs.length}
             </span>
-          </h3>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
             {packs.map((product) => (
-              <div key={product.id}>
-                <ProductCard product={product} isWomen={isWomen} />
-              </div>
+              <ProductCard key={product.id} product={product} isWomen={isWomen} />
             ))}
           </div>
         </div>
@@ -42,19 +41,18 @@ const ProductGrid = ({ products, isWomen }) => {
       {/* Produits */}
       {items.length > 0 && (
         <div>
-          <h3 className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span className="w-4 h-px bg-gray-300 dark:bg-gray-600" />
-            Produits
-            <span className="w-4 h-px bg-gray-300 dark:bg-gray-600" />
-            <span className="text-[8px] bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
+          <div className="flex items-center gap-1 mb-1.5">
+            <span className="text-[8px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              Produits
+            </span>
+            <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-[7px] bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
               {items.length}
             </span>
-          </h3>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
             {items.map((product) => (
-              <div key={product.id}>
-                <ProductCard product={product} isWomen={isWomen} />
-              </div>
+              <ProductCard key={product.id} product={product} isWomen={isWomen} />
             ))}
           </div>
         </div>

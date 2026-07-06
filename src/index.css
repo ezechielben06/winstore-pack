@@ -649,3 +649,61 @@ img {
   padding-left: 12px;
   padding-right: 12px;
 }
+/* 📄 src/index.css - Ajouter au début du fichier */
+
+/* ✅ Reset mobile - Évite les débordements */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ✅ Conteneurs qui ne débordent pas */
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ✅ Éviter les débordements des images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ✅ Grilles mobiles */
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* ✅ Forcer le débordement caché */
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+/* ✅ Texte qui ne déborde pas */
+.truncate {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 100%;
+}
+
+.line-clamp-1 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
