@@ -1,3 +1,4 @@
+// 📄 src/components/Layout/WhatsAppFloat.jsx
 import { MessageCircle, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -6,13 +7,11 @@ const WhatsAppFloat = () => {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // Cacher le bouton après 10 secondes sur mobile
     const timer = setTimeout(() => {
       if (window.innerWidth < 768) {
         setShow(false);
       }
     }, 10000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -26,15 +25,15 @@ const WhatsAppFloat = () => {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-3 animate-float">
       {/* Message tooltip */}
       {!isOpen && (
         <div 
-          className="bg-white shadow-lg rounded-2xl p-3 mb-2 animate-slide-up max-w-[200px] text-sm text-gray-700 border border-gray-100"
+          className="bg-white dark:bg-[#1a1a2e] shadow-xl rounded-2xl p-3 mb-2 animate-fade-in-up max-w-[180px] text-sm text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-[#2d3748]"
           onClick={() => setIsOpen(true)}
         >
           <p className="font-semibold text-green-600">💬 Discutons !</p>
-          <p className="text-xs text-gray-500">Clique pour commander</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Clique pour commander</p>
         </div>
       )}
 
@@ -56,22 +55,22 @@ const WhatsAppFloat = () => {
 
       {/* Infos supplémentaires */}
       {isOpen && (
-        <div className="bg-white shadow-xl rounded-2xl p-4 max-w-xs animate-slide-up border border-gray-100">
+        <div className="bg-white dark:bg-[#1a1a2e] shadow-xl rounded-2xl p-4 max-w-xs animate-slide-in-right border border-gray-100 dark:border-[#2d3748]">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white">
               <MessageCircle className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-semibold text-gray-800">Win'Store Packs</p>
-              <p className="text-xs text-gray-500">Réponse en 5min ⚡</p>
+              <p className="font-semibold text-gray-800 dark:text-white">Win'Store Packs</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Réponse en 5min ⚡</p>
             </div>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             💬 Discutons de votre pack idéal !
           </p>
           <button
             onClick={handleClick}
-            className="w-full mt-3 bg-green-500 text-white py-2 rounded-full font-semibold hover:bg-green-600 transition-colors text-sm"
+            className="w-full mt-3 bg-green-500 text-white py-2 rounded-xl font-semibold hover:bg-green-600 transition-colors text-sm hover:scale-105 active:scale-95"
           >
             Ouvrir WhatsApp
           </button>

@@ -165,3 +165,436 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+/* 📄 src/index.css - Ajouter à la fin */
+
+/* ===== MODE SOMBRE CORRIGÉ ===== */
+.dark {
+  --bg-primary: #0d0d1a;
+  --bg-secondary: #14142b;
+  --bg-card: #1a1a35;
+  --bg-card-hover: #22224a;
+  --bg-input: #25254a;
+  --bg-elevated: #2a2a4a;
+  
+  --text-primary: #f0f0ff;
+  --text-secondary: #c8c8e0;
+  --text-muted: #8888aa;
+  --text-inverse: #0d0d1a;
+  
+  --border-light: #2a2a4a;
+  --border-medium: #3a3a5a;
+  --border-heavy: #4a4a6a;
+  
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== FONDS ===== */
+.dark body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dark .bg-white {
+  background: var(--bg-card) !important;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-gray-200 {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .bg-gray-50\/50 {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .bg-gradient-to-b {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-br {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-r {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .bg-gradient-to-t {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .bg-white\/80,
+.dark .bg-white\/90,
+.dark .bg-white\/20 {
+  background: rgba(26, 26, 53, 0.85) !important;
+  backdrop-filter: blur(12px);
+}
+
+.dark .bg-gray-50\/30 {
+  background: var(--bg-secondary) !important;
+}
+
+/* ===== TEXTES ===== */
+.dark .text-gray-600,
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-gray-900 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-300 {
+  color: var(--text-muted) !important;
+}
+
+.dark .text-white {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-black {
+  color: var(--text-primary) !important;
+}
+
+/* ===== BORDURES ===== */
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: var(--border-light) !important;
+}
+
+.dark .border-white\/20 {
+  border-color: var(--border-light) !important;
+}
+
+.dark .border-gray-100\/50 {
+  border-color: var(--border-light) !important;
+}
+
+.dark .border {
+  border-color: var(--border-light) !important;
+}
+
+.dark .divide-gray-100 > * + * {
+  border-color: var(--border-light) !important;
+}
+
+/* ===== OMBRES ===== */
+.dark .shadow-sm,
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+  box-shadow: var(--shadow-card) !important;
+}
+
+.dark .hover\:shadow-xl:hover {
+  box-shadow: var(--shadow-hover) !important;
+}
+
+/* ===== INPUTS & FORMULAIRES ===== */
+.dark input,
+.dark select,
+.dark textarea {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #D4AF37 !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15) !important;
+}
+
+/* ===== HEADER ===== */
+.dark header.bg-white {
+  background: var(--bg-secondary) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+
+.dark header .border-gray-100 {
+  border-color: var(--border-light) !important;
+}
+
+.dark header .border-b {
+  border-color: var(--border-light) !important;
+}
+
+/* ===== FOOTER ===== */
+.dark footer.bg-gray-900 {
+  background: var(--bg-primary) !important;
+}
+
+.dark footer .border-gray-800 {
+  border-color: var(--border-light) !important;
+}
+
+.dark footer .bg-gray-800 {
+  background: var(--bg-card) !important;
+}
+
+.dark footer .hover\:bg-gold:hover {
+  background: #D4AF37 !important;
+}
+
+/* ===== CARTES & CONTAINERS ===== */
+.dark .bg-white\/30 {
+  background: rgba(26, 26, 53, 0.5) !important;
+}
+
+.dark .bg-gray-100\/10 {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .backdrop-blur-sm {
+  background: rgba(20, 20, 43, 0.8) !important;
+  backdrop-filter: blur(12px);
+}
+
+.dark .backdrop-blur-md {
+  background: rgba(20, 20, 43, 0.9) !important;
+  backdrop-filter: blur(16px);
+}
+
+/* ===== BOUTONS ===== */
+.dark .bg-gray-100 {
+  background: var(--bg-input) !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background: var(--bg-card-hover) !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background: var(--bg-card-hover) !important;
+}
+
+.dark .hover\:bg-gray-200:hover {
+  background: var(--bg-input) !important;
+}
+
+/* ===== LIENS ===== */
+.dark a:not(.text-feminine-primary):not(.text-masculine-primary):not(.text-gold) {
+  color: var(--text-secondary);
+}
+
+.dark a:hover:not(.text-feminine-primary):not(.text-masculine-primary):not(.text-gold) {
+  color: var(--text-primary);
+}
+
+/* ===== SCROLLBAR ===== */
+.dark ::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--bg-input);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--border-medium);
+}
+
+/* ===== SECTIONS SPÉCIFIQUES ===== */
+/* Hero section */
+.dark .bg-gradient-to-br.from-feminine-light\/60 {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-br.from-white {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-br.to-masculine-light\/40 {
+  background: var(--bg-primary) !important;
+}
+
+/* Shop entrances */
+.dark .bg-gradient-to-b.from-white {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-b.from-gray-50 {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .bg-gradient-to-b.to-white {
+  background: var(--bg-primary) !important;
+}
+
+/* Testimonials */
+.dark .bg-gradient-to-b.from-gray-50 {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .bg-gradient-to-b.to-white {
+  background: var(--bg-primary) !important;
+}
+
+/* Newsletter */
+.dark .bg-gradient-to-br.from-feminine-light {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-br.to-masculine-light {
+  background: var(--bg-primary) !important;
+}
+
+/* ===== PRODUCT CARDS ===== */
+.dark .hover\:border-gold\/30:hover {
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+.dark .bg-feminine-light {
+  background: rgba(233, 30, 140, 0.15) !important;
+}
+
+.dark .bg-masculine-light {
+  background: rgba(26, 35, 126, 0.15) !important;
+}
+
+/* ===== MODALS & DRAWERS ===== */
+.dark .bg-black\/50 {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+.dark .bg-gray-50 {
+  background: var(--bg-secondary) !important;
+}
+
+/* ===== BADGES ===== */
+.dark .bg-blue-50 {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .text-blue-500 {
+  color: #60a5fa !important;
+}
+
+.dark .bg-pink-50 {
+  background: rgba(236, 72, 153, 0.15) !important;
+}
+
+.dark .text-pink-500 {
+  color: #f472b6 !important;
+}
+
+/* ===== SEPARATEURS ===== */
+.dark .w-px.bg-gray-200 {
+  background: var(--border-light) !important;
+}
+
+.dark .h-px.bg-gray-200 {
+  background: var(--border-light) !important;
+}
+
+/* ===== BOUTON FERMER ===== */
+.dark .hover\:bg-gray-100:hover {
+  background: var(--bg-input) !important;
+}
+
+/* ===== PACK BUILDER ===== */
+.dark .bg-gray-50 {
+  background: var(--bg-secondary) !important;
+}
+
+.dark .border-gray-200 {
+  border-color: var(--border-light) !important;
+}
+
+.dark .hover\:border-gold:hover {
+  border-color: #D4AF37 !important;
+}
+
+/* ===== TOASTS ===== */
+.dark .bg-green-50 {
+  background: rgba(34, 197, 94, 0.15) !important;
+}
+
+.dark .bg-red-50 {
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .bg-blue-50 {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .text-green-800 {
+  color: #4ade80 !important;
+}
+
+.dark .text-red-800 {
+  color: #f87171 !important;
+}
+
+.dark .text-blue-800 {
+  color: #60a5fa !important;
+}
+
+/* ===== ANIMATIONS ===== */
+.dark .animate-pulse {
+  opacity: 0.6;
+}
+
+/* ===== SÉLECTION ===== */
+.dark ::selection {
+  background: #D4AF37;
+  color: #0d0d1a;
+}
+
+/* 📄 src/index.css - Ajouter à la fin */
+
+/* ===== ANIMATIONS POUR THEME TOGGLE ===== */
+
+/* Particules flottantes */
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* Effet ripple au clic */
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Animation de rotation du cercle */
+@keyframes rotateSun {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation de brillance */
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

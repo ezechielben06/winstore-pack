@@ -1,208 +1,269 @@
-// 📄 src/components/Shop/ProductCard.jsx
-import { useState } from 'react';  // ✅ AJOUTÉ
-import { ShoppingBag, Star, Heart, Share2, Package, Sparkles, Info } from 'lucide-react';
+// 📄 src/components/Shop/ProductCard.jsx - Version finale
+import { useState } from 'react';
+import { 
+  ShoppingBag, Heart, Share2, Package, Sparkles, 
+  Info, ChevronDown, ChevronUp, Crown, Check,
+  Gift
+} from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import ProductImage from '../Shared/ProductImage';
+import { useTheme } from '../../context/ThemeContext';
 
 const ProductCard = ({ product, isWomen }) => {
   const { addToCart } = useCart();
+  const { isDark } = useTheme();
   const [isLiked, setIsLiked] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
   
-  const theme = isWomen ? 'feminine' : 'masculine';
-  const themeBg = isWomen ? 'bg-feminine-primary' : 'bg-masculine-primary';
-  const themeLight = isWomen ? 'bg-feminine-light' : 'bg-masculine-light';
   const isPack = product.category === 'pack';
+  
+  // ✅ Palettes de couleurs
+  const colors = isWomen ? {
+    primary: '#E91E8C',
+    primaryDark: '#C2185B',
+    primaryLight: '#FCE4EC',
+    accent: '#D4AF37',
+  } : {
+    primary: '#1A237E',
+    primaryDark: '#0D1445',
+    primaryLight: '#E8EAF6',
+    accent: '#D4AF37',
+  };
 
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
+  const handleAddToCart = () => {
     addToCart(product);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleShare = async (e) => {
     e.stopPropagation();
-    const text = `✨ Découvre "${product.name}" chez WIN'STORE PACKS ! ${isPack ? '📦 Pack disponible' : '🛍️ Produit disponible'}`;
-    
+    const text = `✨ "${product.name}" - WIN'STORE PACKS`;
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product.name,
-          text: text,
-          url: window.location.href,
-        });
-      } catch (err) {}
+      try { await navigator.share({ title: product.name, text, url: window.location.href }); } 
+      catch (err) {}
     } else {
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`;
-      window.open(whatsappUrl, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, '_blank');
     }
   };
 
   return (
     <div 
-      className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100/50"
-      onMouseEnter={() => setShowDetails(true)}
-      onMouseLeave={() => setShowDetails(false)}
+      className={`group bg-white dark:bg-[#141425] transition-all duration-300 ${
+        isDark ? 'border border-[#2A2A4A]' : 'border border-gray-200/70'
+      } ${isPack ? 'border-gold/30' : ''}`}
+      style={{
+        borderRadius: '8px',
+        boxShadow: isPack 
+          ? '0 4px 20px rgba(212,175,55,0.08)' 
+          : '0 2px 12px rgba(0,0,0,0.04)',
+      }}
     >
-      {/* === IMAGE === */}
-      <div className="relative overflow-hidden">
-        <ProductImage
-          src={product.image}
-          alt={product.name}
-          className="w-full aspect-square"
-          emoji={product.emoji || (isPack ? '📦' : '✨')}
-          fallback="/images/placeholder-product.jpg"
-        />
-
-        {/* === BADGES === */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {isPack && (
-            <span className="bg-gradient-to-r from-feminine-primary to-gold text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-              <Package className="w-3 h-3" />
-              PACK
-            </span>
-          )}
-          {!isPack && (
-            <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              PRODUIT
-            </span>
-          )}
-          {product.popularity && (
-            <span className="bg-gold/90 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-              {product.popularity} Populaire
-            </span>
-          )}
-        </div>
-
-        {/* Prix */}
-        {product.price && (
-          <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 font-bold px-3 py-1.5 rounded-full shadow-lg text-sm">
-            {product.price.toLocaleString()} FCFA
-          </span>
-        )}
-        {product.priceRange && !product.price && (
-          <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-600 font-medium px-3 py-1.5 rounded-full shadow-lg text-xs">
-            {product.priceRange} FCFA
-          </span>
+      {/* ===== IMAGE ===== */}
+      <div 
+        className="relative overflow-hidden"
+        style={{ 
+          aspectRatio: '1/1', 
+          background: isDark ? '#1A1A2E' : '#F5F5F5',
+          borderTopLeftRadius: '8px',
+          borderTopRightRadius: '8px',
+        }}
+      >
+        {product.image && !imageError ? (
+          <img 
+            src={product.image} 
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-6xl opacity-30">
+            {isPack ? '📦' : (product.emoji || '✨')}
+          </div>
         )}
 
-        {/* === HOVER OVERLAY === */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end p-4">
-          <button
-            onClick={handleAddToCart}
-            className={`${themeBg} text-white px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform shadow-lg flex items-center gap-2 w-full max-w-[200px] justify-center`}
-          >
-            <ShoppingBag className="w-4 h-4" />
-            {isPack ? 'Ajouter le pack' : 'Ajouter au panier'}
-          </button>
+        {/* ✅ Badge - Arrondi subtil */}
+        <div 
+          className="absolute top-3 left-3 px-3 py-1 text-[10px] font-bold tracking-wider uppercase"
+          style={{
+            background: isPack ? '#D4AF37' : colors.primary,
+            color: isPack ? '#1A1A1A' : '#FFFFFF',
+            borderRadius: '4px',
+            letterSpacing: '0.06em',
+          }}
+        >
+          {isPack ? 'Pack' : 'Produit'}
         </div>
 
-        {/* === ACTIONS RAPIDES === */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2">
+        {/* Actions */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5">
           <button 
             onClick={() => setIsLiked(!isLiked)}
-            className={`w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+            className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 bg-white/90 dark:bg-[#1A1A2E]/90 backdrop-blur-sm"
+            style={{ borderRadius: '6px' }}
           >
-            <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-500' : ''}`} />
+            <Heart size={16} className={isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'} />
           </button>
           <button 
             onClick={handleShare}
-            className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform text-gray-400 hover:text-gold"
+            className="w-8 h-8 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 bg-white/90 dark:bg-[#1A1A2E]/90 backdrop-blur-sm"
+            style={{ borderRadius: '6px' }}
           >
-            <Share2 className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => setShowDetails(!showDetails)}
-            className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform text-gray-400 hover:text-gold"
-          >
-            <Info className="w-4 h-4" />
+            <Share2 size={16} className="text-gray-400 hover:text-gold transition-colors" />
           </button>
         </div>
-      </div>
 
-      {/* === CONTENU === */}
-      <div className="p-4">
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1 mb-2">
-          {product.tags && product.tags.slice(0, 2).map((tag, i) => (
-            <span key={i} className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-              {tag}
-            </span>
-          ))}
+        {/* ✅ Prix - En bas de l'image */}
+        <div 
+          className="absolute bottom-3 left-3 right-3 px-3 py-1.5 flex items-center justify-between"
+          style={{
+            background: isPack ? 'rgba(212,175,55,0.95)' : 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: '6px',
+          }}
+        >
+          <span 
+            className="text-sm font-bold"
+            style={{ color: isPack ? '#1A1A1A' : '#1A1A1A' }}
+          >
+            {product.price 
+              ? `${product.price.toLocaleString()} FCFA`
+              : product.priceRange || ''
+            }
+          </span>
           {isPack && product.items && (
-            <span className="text-xs text-feminine-primary bg-feminine-light px-2 py-0.5 rounded-full">
+            <span className="text-[9px] font-medium opacity-60" style={{ color: isPack ? '#1A1A1A' : '#666' }}>
               {product.items.length} articles
             </span>
           )}
         </div>
+      </div>
 
-        <h3 className="font-semibold text-gray-800 group-hover:text-gold transition-colors text-base line-clamp-1">
+      {/* ===== BODY ===== */}
+      <div className="p-4">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-2">
+          {product.tags && product.tags.slice(0, 2).map((tag, i) => (
+            <span 
+              key={i} 
+              className="text-[9px] font-medium px-2 py-0.5"
+              style={{ 
+                color: isPack ? '#D4AF37' : '#666',
+                background: isPack ? 'rgba(212,175,55,0.08)' : '#F0F0F0',
+                borderRadius: '4px',
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+          {isPack && (
+            <span 
+              className="text-[9px] font-medium px-2 py-0.5"
+              style={{
+                color: '#D4AF37',
+                background: 'rgba(212,175,55,0.08)',
+                borderRadius: '4px',
+              }}
+            >
+              Éco +30%
+            </span>
+          )}
+        </div>
+
+        {/* Nom */}
+        <h3 className={`text-sm font-semibold leading-tight mb-1 transition-colors ${
+          isPack ? 'text-gold' : 'text-gray-900 dark:text-white'
+        }`}>
           {product.name}
         </h3>
         
         {product.description && (
-          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+            {product.description}
+          </p>
         )}
 
-        {/* Différence PRODUIT vs PACK */}
-        <div className="mt-2 flex items-center gap-2">
-          {isPack ? (
-            <div className="flex items-center gap-1 text-xs text-feminine-primary bg-feminine-light px-2 py-1 rounded-lg">
-              <Package className="w-3 h-3" />
-              Pack personnalisable
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 text-xs text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">
-              <Sparkles className="w-3 h-3" />
-              À l'unité
-            </div>
+        {/* ===== STATUT ===== */}
+        <div className="mt-3 flex items-center gap-3">
+          <span 
+            className="text-[10px] font-medium px-2 py-0.5"
+            style={{
+              color: isPack ? '#D4AF37' : colors.primary,
+              background: isPack ? 'rgba(212,175,55,0.08)' : colors.primaryLight,
+              borderRadius: '4px',
+            }}
+          >
+            {isPack ? `📦 ${product.items?.length || 0} articles` : '• À l\'unité'}
+          </span>
+        </div>
+
+        {/* ===== ACTIONS ===== */}
+        <div className="mt-3 pt-3 flex items-center gap-2" style={{ borderTop: '1px solid', borderColor: isDark ? '#2A2A4A' : '#EEEEEE' }}>
+          {/* Bouton principal */}
+          <button
+            onClick={handleAddToCart}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-medium transition-all duration-200 active:scale-95 ${
+              isAdded ? 'opacity-70 pointer-events-none' : ''
+            }`}
+            style={{
+              background: isAdded ? '#D4AF37' : (isPack ? '#1A1A1A' : colors.primary),
+              color: isAdded ? '#1A1A1A' : '#FFFFFF',
+              borderRadius: '6px',
+              letterSpacing: '0.03em',
+            }}
+          >
+            {isAdded ? (
+              <>
+                <Check size={14} />
+                Ajouté
+              </>
+            ) : (
+              <>
+                {isPack ? <Gift size={14} /> : <ShoppingBag size={14} />}
+                {isPack ? 'Choisir le pack' : 'Ajouter'}
+              </>
+            )}
+          </button>
+
+          {/* Bouton détails - pour packs uniquement */}
+          {isPack && product.items && (
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="px-3 py-2.5 transition-all duration-200 hover:scale-105 active:scale-95"
+              style={{
+                background: isDark ? '#2A2A4A' : '#F5F5F5',
+                borderRadius: '6px',
+              }}
+            >
+              <Info size={16} className={showDetails ? 'text-gold' : 'text-gray-400'} />
+            </button>
           )}
         </div>
 
-        {/* Étoiles */}
-        <div className="flex items-center gap-1 mt-2">
-          <Star className="w-4 h-4 fill-gold text-gold" />
-          <span className="text-sm font-medium text-gray-600">4.8</span>
-          <span className="text-xs text-gray-400">(120 avis)</span>
-        </div>
-
-        {/* === FOOTER === */}
-        <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-          <div>
-            {product.price && (
-              <span className="font-bold text-gray-900 text-lg">
-                {product.price.toLocaleString()} FCFA
-              </span>
-            )}
-            {product.priceRange && !product.price && (
-              <span className="text-sm text-gray-500">
-                {product.priceRange} FCFA
-              </span>
-            )}
-          </div>
-
-          <button
-            onClick={handleAddToCart}
-            className={`${themeBg} text-white p-2.5 rounded-full hover:scale-110 transition-transform shadow-lg ${themeBg}/30`}
-          >
-            <ShoppingBag className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Détails du pack */}
+        {/* ===== DÉTAILS DU PACK ===== */}
         {isPack && product.items && showDetails && (
-          <div className="mt-3 p-3 bg-gray-50 rounded-xl animate-slide-up">
-            <p className="text-xs font-semibold text-gray-700 mb-2">📋 Contenu du pack :</p>
+          <div 
+            className="mt-3 p-3 transition-all duration-300"
+            style={{
+              background: isDark ? '#1A1A2E' : '#F8F8F8',
+              borderRadius: '6px',
+            }}
+          >
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-gold/80 mb-2">
+              Contenu du pack
+            </p>
             <ul className="space-y-1">
-              {product.items.slice(0, 5).map((item, i) => (
-                <li key={i} className="text-xs text-gray-600 flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-gold" />
-                  {item}
+              {product.items.slice(0, 4).map((item, i) => (
+                <li key={i} className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-gold flex-shrink-0" />
+                  <span className="truncate">{item}</span>
                 </li>
               ))}
-              {product.items.length > 5 && (
-                <li className="text-xs text-gray-400">
-                  + {product.items.length - 5} autres articles
+              {product.items.length > 4 && (
+                <li className="text-[10px] text-gray-400 dark:text-gray-500">
+                  + {product.items.length - 4} autres articles
                 </li>
               )}
             </ul>
