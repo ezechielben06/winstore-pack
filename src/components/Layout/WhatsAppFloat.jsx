@@ -17,7 +17,7 @@ const WhatsAppFloat = () => {
 
   const handleClick = () => {
     const phoneNumber = '2290153096537';
-    const message = 'Bonjour WIN\'STORE PACKS ! 👋 Je souhaite passer une commande.';
+    const message = 'Bonjour WIN\'S PACKS ! 👋 Je souhaite passer une commande.';
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };

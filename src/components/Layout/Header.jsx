@@ -1,8 +1,9 @@
-// 📄 src/components/Layout/Header.jsx - Version sans recherche
+// 📄 src/components/Layout/Header.jsx - Ajout du lien admin avec déconnexion
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, Settings, LogOut } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import WomenLogo from "../Logo/WomenLogo";
 import MenLogo from "../Logo/MenLogo";
 import MainLogo from "../Logo/MainLogo";
@@ -11,10 +12,12 @@ import ThemeToggle from "../Shared/ThemeToggle";
 const Header = ({ onCartClick }) => {
   const { totalItems } = useCart();
   const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isWomen = location.pathname === "/femme";
   const isMen = location.pathname === "/homme";
+  const isAdmin = location.pathname === "/admin";
 
   const getLogo = () => {
     if (isWomen)
@@ -48,11 +51,43 @@ const Header = ({ onCartClick }) => {
             {getLogo()}
           </Link>
 
-          {/* Espaceur pour équilibrer */}
+          {/* Espaceur */}
           <div className="flex-1" />
 
           {/* Actions */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* Admin - Desktop */}
+            {isAuthenticated ? (
+              <div className="hidden md:flex items-center gap-1">
+                <Link
+                  to="/admin"
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    isAdmin
+                      ? "bg-gold text-gray-900"
+                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a4a]"
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  Admin
+                </Link>
+                <button
+                  onClick={logout}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                  title="Déconnexion"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/admin/login"
+                className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a4a] transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                Admin
+              </Link>
+            )}
+
             {/* Theme Toggle */}
             <div className="hidden xs:block">
               <ThemeToggle />
@@ -103,8 +138,10 @@ const Header = ({ onCartClick }) => {
                         ? isWomen
                           ? "bg-feminine-light dark:bg-feminine-primary/20 text-feminine-primary dark:text-feminine-primary"
                           : isMen
-                            ? "bg-masculine-light dark:bg-masculine-primary/20 text-masculine-primary dark:text-masculine-primary"
-                            : "bg-gray-100 dark:bg-[#2a2a4a] text-gold dark:text-gold"
+                          ? "bg-masculine-light dark:bg-masculine-primary/20 text-masculine-primary dark:text-masculine-primary"
+                          : isAdmin
+                          ? "bg-gold text-gray-900"
+                          : "bg-gray-100 dark:bg-[#2a2a4a] text-gold dark:text-gold"
                         : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
                     }`}
                   >
@@ -112,6 +149,43 @@ const Header = ({ onCartClick }) => {
                   </Link>
                 );
               })}
+
+              {/* Admin - Mobile */}
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`font-medium py-2.5 px-3 rounded-lg transition-all text-sm ${
+                      isAdmin
+                        ? "bg-gold text-gray-900"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
+                    }`}
+                  >
+                    <Settings className="w-4 h-4 inline mr-2" />
+                    Administration
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="font-medium py-2.5 px-3 rounded-lg transition-all text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 text-left flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/admin/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="font-medium py-2.5 px-3 rounded-lg transition-all text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
+                >
+                  <Settings className="w-4 h-4 inline mr-2" />
+                  Administration
+                </Link>
+              )}
 
               {/* Theme Toggle - Mobile Menu */}
               <div className="flex items-center justify-between py-2.5 px-3 mt-1 border-t border-gray-200 dark:border-[#2d3748]">

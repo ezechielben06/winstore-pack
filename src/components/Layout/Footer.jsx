@@ -1,4 +1,4 @@
-// 📄 src/components/Layout/Footer.jsx - Avec logos
+// 📄 src/components/Layout/Footer.jsx
 import { Heart, Phone, Truck, Shield, Mail, Instagram, Facebook, Youtube } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import WomenLogo from '../Logo/WomenLogo';
@@ -24,7 +24,7 @@ const Footer = () => {
             <div className="flex items-center gap-3">
               {getLogo()}
               <span className="text-lg font-display font-bold">
-                WIN'<span className="text-gold">STORE</span>
+                WIN'S <span className="text-gold">PACK</span>
               </span>
             </div>
             <div className="flex gap-2 w-full md:w-auto">
@@ -48,7 +48,7 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               {getLogo()}
               <h3 className="text-xl font-display font-bold">
-                WIN'<span className="text-gold">STORE</span>
+                WIN'S <span className="text-gold">PACK</span>
               </h3>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
@@ -104,7 +104,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-gold" />
-                contact@winstore.com
+                contact@wins-pack.com
               </li>
             </ul>
           </div>
@@ -135,7 +135,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
           <p className="flex items-center justify-center gap-1">
-            Made with <Heart className="w-4 h-4 text-feminine-primary fill-feminine-primary" /> by WIN'STORE PACKS
+            Made with <Heart className="w-4 h-4 text-feminine-primary fill-feminine-primary" /> by WIN'S PACK
           </p>
           <p className="mt-1">© 2026 Tous droits réservés</p>
         </div>

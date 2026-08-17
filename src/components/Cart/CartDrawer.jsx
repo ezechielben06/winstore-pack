@@ -23,7 +23,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
     message += 'Nom: %0A';
     message += 'Adresse: %0A';
     message += 'Téléphone: %0A%0A';
-    message += '🙏 Merci pour votre confiance ! WIN\'STORE PACKS ✨';
+    message += '🙏 Merci pour votre confiance ! WIN\'S PACKS ✨';
 
     // Ouvrir WhatsApp
     const url = `https://wa.me/${phoneNumber}?text=${message}`;

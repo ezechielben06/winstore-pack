@@ -1,4 +1,4 @@
-// 📄 src/components/Shop/ProductGrid.jsx - Version Ultra-Compacte
+// 📄 src/components/Shop/ProductGrid.jsx - Version corrigée
 import ProductCard from './ProductCard';
 
 const ProductGrid = ({ products, isWomen }) => {
@@ -32,7 +32,10 @@ const ProductGrid = ({ products, isWomen }) => {
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {packs.map((product) => (
-              <ProductCard key={product.id} product={product} isWomen={isWomen} />
+              // ✅ ICI : on utilise un div, pas un Link
+              <div key={product.id}>
+                <ProductCard product={product} isWomen={isWomen} />
+              </div>
             ))}
           </div>
         </div>
@@ -52,7 +55,10 @@ const ProductGrid = ({ products, isWomen }) => {
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {items.map((product) => (
-              <ProductCard key={product.id} product={product} isWomen={isWomen} />
+              // ✅ ICI : on utilise un div, pas un Link
+              <div key={product.id}>
+                <ProductCard product={product} isWomen={isWomen} />
+              </div>
             ))}
           </div>
         </div>
