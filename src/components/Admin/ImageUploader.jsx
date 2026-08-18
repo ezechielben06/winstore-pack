@@ -1,56 +1,26 @@
-// 📄 src/components/Admin/ImageUploader.jsx
+// 📄 src/components/Admin/ImageUploader.jsx - Version corrigée
 import { useState } from 'react';
-import { Upload, X, Image, Check, AlertCircle } from 'lucide-react';
+import { Upload, X, Image, Check, AlertCircle, Camera } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 const ImageUploader = ({ onImageUpload, currentImage }) => {
   const { isDark } = useTheme();
-  const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(false); // ✅ setSuccess
+  const [preview, setPreview] = useState(currentImage ? `/images/${currentImage}` : null);
 
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  };
+  const handleFileSelect = (file) => {
+    if (!file) return;
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      handleFiles(files);
-    }
-  };
-
-  const handleFileInput = (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFiles(files);
-    }
-  };
-
-  const handleFiles = async (files) => {
-    const file = files[0];
-    
-    // Vérifier le type
     if (!file.type.startsWith('image/')) {
       setError('Veuillez sélectionner une image');
       return;
     }
 
-    // Vérifier la taille (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError('L\'image ne doit pas dépasser 5MB');
+      setError("L'image ne doit pas dépasser 5MB");
       return;
     }
 
@@ -58,142 +28,159 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
     setError(null);
     setSuccess(false);
 
-    try {
-      // Simuler l'upload (dans la réalité, tu enverrais à un serveur)
-      for (let i = 0; i <= 100; i += 10) {
-        setUploadProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
 
-      // Créer une URL locale pour l'image
-      const imageUrl = URL.createObjectURL(file);
-      
-      // Simuler le nom du fichier
-      const fileName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, '');
-      
-      setSuccess(true);
-      setUploadProgress(100);
-      
-      // Appeler le callback avec le nom du fichier
-      if (onImageUpload) {
-        onImageUpload(fileName);
-      }
-      
-      setTimeout(() => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      setUploadProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
         setUploading(false);
-        setSuccess(false);
-        setUploadProgress(0);
-      }, 2000);
+        setSuccess(true); // ✅ Utiliser setSuccess
 
-    } catch (err) {
-      setError('Erreur lors de l\'upload');
-      setUploading(false);
+        const ext = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+
+        if (onImageUpload) {
+          onImageUpload(fileName);
+        }
+
+        setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
+      }
+    }, 100);
+  };
+
+  const handleButtonClick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.multiple = false;
+    
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleFileSelect(file);
+      }
+    };
+    
+    input.click();
+  };
+
+  const handleRemove = () => {
+    setPreview(null);
+    setSuccess(false);
+    setError(null);
+    if (onImageUpload) {
+      onImageUpload('');
     }
   };
 
-  const reset = () => {
-    setError(null);
-    setSuccess(false);
-    setUploadProgress(0);
-  };
-
   return (
-    <div className="space-y-4">
-      {/* Zone de dépôt */}
+    <div className="space-y-3">
       <div
-        className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
-          dragActive 
-            ? 'border-gold bg-gold/5' 
-            : isDark 
-              ? 'border-[#2d3748] hover:border-gold/50' 
-              : 'border-gray-300 hover:border-gold/50'
-        } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
+        className={`relative rounded-xl p-4 text-center transition-all ${
+          uploading ? 'opacity-50 pointer-events-none' : ''
+        } ${
+          isDark 
+            ? 'bg-[#2a2a4a] border border-[#2d3748]' 
+            : 'bg-gray-50 border border-gray-200'
+        }`}
       >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileInput}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          disabled={uploading}
-        />
-
-        <div className="flex flex-col items-center gap-3">
-          {currentImage ? (
-            <div className="relative w-32 h-32 rounded-xl overflow-hidden">
-              <img 
-                src={`/images/${currentImage}`} 
-                alt="Aperçu"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23f0f0f0"/><text x="50" y="55" text-anchor="middle" fill="%23999" font-size="12">Image</text></svg>';
-                }}
-              />
-            </div>
-          ) : (
-            <Image className={`w-12 h-12 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
-          )}
-
-          <div>
-            <p className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              {currentImage ? 'Image actuelle' : 'Déposez votre image ici'}
-            </p>
-            <p className="text-xs text-gray-400">
-              ou cliquez pour parcourir • JPG, PNG, WebP • Max 5MB
-            </p>
-            {currentImage && (
-              <p className="text-xs text-gold font-medium mt-1">
+        {preview ? (
+          <div className="relative">
+            <img
+              src={preview}
+              alt="Aperçu"
+              className="w-full max-h-48 object-contain rounded-lg mx-auto"
+            />
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            {currentImage && !preview.startsWith('data:') && (
+              <p className="text-xs text-gray-400 mt-1 truncate">
                 📁 {currentImage}
               </p>
             )}
           </div>
-        </div>
+        ) : (
+          <div className="py-4">
+            <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              📸 Prendre une photo
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              ou choisir dans la galerie
+            </p>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={handleButtonClick}
+          disabled={uploading}
+          className={`w-full mt-3 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 text-sm ${
+            isDark
+              ? 'bg-gold/20 text-gold hover:bg-gold/30'
+              : 'bg-gold text-gray-900 hover:bg-gold/90'
+          } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {uploading ? (
+            <>
+              <span className="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+              Téléchargement...
+            </>
+          ) : (
+            <>
+              <Upload className="w-5 h-5" />
+              {preview ? 'Changer l\'image' : 'Choisir une image'}
+            </>
+          )}
+        </button>
+
+        {uploading && (
+          <div className="mt-3">
+            <div className="w-full h-2 bg-gray-200 dark:bg-[#2a2a4a] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gold rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">{uploadProgress}%</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-3 flex items-center justify-center gap-2 text-green-500 text-sm">
+            <Check className="w-4 h-4" />
+            Image téléchargée !
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-3 flex items-center justify-center gap-2 text-red-500 text-sm">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
       </div>
 
-      {/* Barre de progression */}
-      {uploading && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Upload en cours...</span>
-            <span className="text-gray-500">{uploadProgress}%</span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 dark:bg-[#2a2a4a] rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gold rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Message de succès */}
-      {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-500/10 rounded-xl border border-green-200 dark:border-green-500/20">
-          <Check className="w-4 h-4 text-green-500" />
-          <span className="text-sm text-green-600 dark:text-green-400">Image téléchargée avec succès !</span>
-        </div>
-      )}
-
-      {/* Message d'erreur */}
-      {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-500/10 rounded-xl border border-red-200 dark:border-red-500/20">
-          <AlertCircle className="w-4 h-4 text-red-500" />
-          <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto">
-            <X className="w-4 h-4 text-red-400" />
-          </button>
-        </div>
-      )}
-
-      {/* Instructions */}
-      <div className={`p-4 rounded-xl ${isDark ? 'bg-[#141425]' : 'bg-gray-50'} border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
+      <div className={`p-3 rounded-xl ${isDark ? 'bg-[#141425]' : 'bg-gray-100'} border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
           <span>💡</span>
           <span>
-            Placez manuellement les images dans le dossier <span className="font-mono bg-gray-200 dark:bg-[#2a2a4a] px-1.5 py-0.5 rounded">public/images/</span>
+            Les images sont sauvegardées dans <span className="font-mono bg-gray-200 dark:bg-[#2a2a4a] px-1.5 py-0.5 rounded">public/images/</span>
           </span>
         </p>
       </div>

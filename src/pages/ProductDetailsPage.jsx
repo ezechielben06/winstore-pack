@@ -1,4 +1,4 @@
-// 📄 src/pages/ProductDetailsPage.jsx - Version corrigée
+// 📄 src/pages/ProductDetailsPage.jsx - Version Supabase
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -12,6 +12,7 @@ import { useTheme } from '../context/ThemeContext';
 import { allProducts } from '../data/products';
 import ProductCard from '../components/Shop/ProductCard';
 import ProductImage from '../components/Shared/ProductImage';
+import { supabase } from '../config/supabase';
 
 const ProductDetailsPage = () => {
   const { productId } = useParams();
@@ -24,37 +25,74 @@ const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
 
   useEffect(() => {
-    const all = [...allProducts.women, ...allProducts.men];
-    const found = all.find(p => p.id === productId);
-    
-    if (found) {
-      setProduct(found);
+    const loadProduct = async () => {
+      setLoading(true);
       
-      if (found.variants && found.variants.length > 0) {
-        setSelectedVariant(found.variants[0]);
-        const colors = found.variants.filter(v => v.name === 'couleur' || v.name === 'color');
-        const sizes = found.variants.filter(v => v.name === 'taille' || v.name === 'size');
-        if (colors.length > 0) setSelectedColor(colors[0]);
-        if (sizes.length > 0) setSelectedSize(sizes[0]);
+      try {
+        // ✅ Chercher dans Supabase
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', productId)
+          .single();
+        
+        if (data) {
+          setProduct(data);
+          
+          if (data.variants && data.variants.length > 0) {
+            setSelectedVariant(data.variants[0]);
+            const colors = data.variants.filter(v => v.name === 'couleur' || v.name === 'color');
+            const sizes = data.variants.filter(v => v.name === 'taille' || v.name === 'size');
+            if (colors.length > 0) setSelectedColor(colors[0]);
+            if (sizes.length > 0) setSelectedSize(sizes[0]);
+          }
+          
+          // ✅ Produits similaires
+          const { data: similar } = await supabase
+            .from('products')
+            .select('*')
+            .neq('id', productId)
+            .limit(4);
+          
+          if (similar) {
+            setRelatedProducts(similar);
+          }
+        } else {
+          // Fallback local
+          const all = [...allProducts.women, ...allProducts.men];
+          const found = all.find(p => p.id === productId);
+          if (found) {
+            setProduct(found);
+            const similar = all.filter(p => p.id !== found.id).slice(0, 4);
+            setRelatedProducts(similar);
+          } else {
+            navigate('/');
+          }
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        const all = [...allProducts.women, ...allProducts.men];
+        const found = all.find(p => p.id === productId);
+        if (found) {
+          setProduct(found);
+          const similar = all.filter(p => p.id !== found.id).slice(0, 4);
+          setRelatedProducts(similar);
+        } else {
+          navigate('/');
+        }
       }
       
-      const similar = all
-        .filter(p => 
-          p.id !== found.id && 
-          (p.category === found.category || 
-           p.tags?.some(t => found.tags?.includes(t)))
-        )
-        .slice(0, 4);
-      setRelatedProducts(similar);
-    } else {
-      navigate('/');
-    }
+      setLoading(false);
+    };
+    
+    loadProduct();
   }, [productId, navigate]);
 
   const handleAddToCart = () => {
@@ -68,32 +106,19 @@ const ProductDetailsPage = () => {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  // ✅ Fonction UNIVERSELLE pour obtenir le chemin de l'image
   const getImagePath = (image) => {
     if (!image) return null;
-    // Si c'est déjà une URL complète
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      return image;
-    }
-    // Si ça commence par /, on garde tel quel
-    if (image.startsWith('/')) {
-      return image;
-    }
-    // Si ça commence par images/ (sans /)
-    if (image.startsWith('images/')) {
-      return `/${image}`;
-    }
-    // Cas normal : simple nom de fichier
+    if (image.startsWith('http://') || image.startsWith('https://')) return image;
+    if (image.startsWith('/')) return image;
+    if (image.startsWith('images/')) return `/${image}`;
     return `/images/${image}`;
   };
 
-  // ✅ Obtenir l'image de la variante
   const getVariantImage = (variant) => {
     if (!variant?.image) return null;
     return getImagePath(variant.image);
   };
 
-  // ✅ Obtenir le prix avec variante
   const getCurrentPrice = () => {
     if (selectedVariant && selectedVariant.price) {
       return selectedVariant.price;
@@ -101,7 +126,6 @@ const ProductDetailsPage = () => {
     return product?.price || parseInt(product?.priceRange?.split('-')[0]) || 0;
   };
 
-  // ✅ Obtenir l'image affichée
   const getCurrentImage = () => {
     if (selectedVariant && selectedVariant.image) {
       return getVariantImage(selectedVariant);
@@ -109,16 +133,18 @@ const ProductDetailsPage = () => {
     return getImagePath(product?.image);
   };
 
-  if (!product) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="mt-4 text-gray-500 dark:text-gray-400">Chargement...</p>
+          <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="mt-3 text-gray-500 dark:text-gray-400">Chargement...</p>
         </div>
       </div>
     );
   }
+
+  if (!product) return null;
 
   const isPack = product.category === 'pack';
   const isWomen = allProducts.women.some(p => p.id === product.id);
@@ -129,7 +155,6 @@ const ProductDetailsPage = () => {
   const priceMax = product.priceRange ? parseInt(product.priceRange.split('-')[1]) : price;
   const currentImage = getCurrentImage();
 
-  // ✅ Grouper les variantes par type
   const variantGroups = {};
   if (product.variants && product.variants.length > 0) {
     product.variants.forEach(v => {
@@ -140,35 +165,27 @@ const ProductDetailsPage = () => {
 
   const getVariantIcon = (name) => {
     const icons = {
-      'couleur': '🎨',
-      'color': '🎨',
-      'taille': '📏',
-      'size': '📏',
-      'motif': '✨',
-      'pattern': '✨',
-      'matiere': '🧵',
-      'material': '🧵'
+      'couleur': '🎨', 'color': '🎨',
+      'taille': '📏', 'size': '📏',
+      'motif': '✨', 'pattern': '✨',
+      'matiere': '🧵', 'material': '🧵'
     };
     return icons[name] || '📌';
   };
 
   const getVariantLabel = (name) => {
     const labels = {
-      'couleur': 'Couleur',
-      'color': 'Couleur',
-      'taille': 'Taille',
-      'size': 'Taille',
-      'motif': 'Motif',
-      'pattern': 'Motif',
-      'matiere': 'Matière',
-      'material': 'Matière'
+      'couleur': 'Couleur', 'color': 'Couleur',
+      'taille': 'Taille', 'size': 'Taille',
+      'motif': 'Motif', 'pattern': 'Motif',
+      'matiere': 'Matière', 'material': 'Matière'
     };
     return labels[name] || name;
   };
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-[#0d0d1a]' : 'bg-gray-50'}`}>
-      {/* ===== BANNIÈRE ===== */}
+      {/* Bannière */}
       <div className={`relative overflow-hidden ${isDark ? 'bg-[#1a1a2e]' : themeBg} py-4 md:py-6`}>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-32 h-32 md:w-64 md:h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
@@ -203,7 +220,7 @@ const ProductDetailsPage = () => {
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div className="grid md:grid-cols-2 gap-8">
-          {/* ===== IMAGE ===== */}
+          {/* Image */}
           <div className={`relative rounded-2xl overflow-hidden ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-sm border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
             <ProductImage
               src={currentImage}
@@ -214,7 +231,6 @@ const ProductDetailsPage = () => {
               fit="contain"
             />
             
-            {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
               {isPack && (
                 <span className="bg-gradient-to-r from-gold to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
@@ -234,7 +250,6 @@ const ProductDetailsPage = () => {
               )}
             </div>
 
-            {/* Actions */}
             <div className="absolute top-4 right-4 flex flex-col gap-2">
               <button 
                 onClick={() => setIsLiked(!isLiked)}
@@ -257,7 +272,6 @@ const ProductDetailsPage = () => {
               </button>
             </div>
 
-            {/* Badge prix */}
             <div className="absolute bottom-4 left-4 right-4 px-3 py-2 rounded-xl bg-white/95 dark:bg-[#1a1a2e]/95 backdrop-blur-sm shadow-lg border border-gray-100 dark:border-[#2d3748]">
               <div className="flex items-center justify-between">
                 <div className="flex items-end gap-2">
@@ -284,9 +298,8 @@ const ProductDetailsPage = () => {
             </div>
           </div>
 
-          {/* ===== INFOS PRODUIT ===== */}
+          {/* Infos */}
           <div className="space-y-6">
-            {/* En-tête */}
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 {isPack ? (
@@ -316,7 +329,6 @@ const ProductDetailsPage = () => {
               </p>
             </div>
 
-            {/* Étoiles */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
@@ -327,7 +339,6 @@ const ProductDetailsPage = () => {
               <span className="text-sm text-gray-400 dark:text-gray-500">(120 avis)</span>
             </div>
 
-            {/* ✅ VARIANTES avec miniatures */}
             {Object.keys(variantGroups).length > 0 && (
               <div className={`p-4 rounded-xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-gray-50'} border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
@@ -347,7 +358,7 @@ const ProductDetailsPage = () => {
                       <div className="flex flex-wrap gap-2">
                         {variants.map((variant) => {
                           const isSelected = selectedVariant?.id === variant.id;
-                          const variantImage = getVariantImage(variant);
+                          const isColorSelected = isColor && selectedColor?.id === variant.id;
                           
                           return (
                             <button
@@ -356,33 +367,21 @@ const ProductDetailsPage = () => {
                                 setSelectedVariant(variant);
                                 if (isColor) setSelectedColor(variant);
                               }}
-                              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                isSelected
-                                  ? 'bg-gold text-gray-900 shadow-md ring-2 ring-gold/50'
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                isSelected || isColorSelected
+                                  ? 'bg-gold text-gray-900 shadow-md'
                                   : isDark
                                     ? 'bg-[#2a2a4a] text-gray-300 hover:bg-[#3a3a5a]'
                                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                               }`}
                             >
-                              {/* ✅ Miniature de la variante */}
-                              {variantImage ? (
-                                <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
-                                  <img 
-                                    src={variantImage} 
-                                    alt={variant.value}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.target.style.display = 'none';
-                                    }}
-                                  />
-                                </div>
-                              ) : isColor ? (
-                                <span className="w-4 h-4 rounded-full flex-shrink-0" 
+                              {isColor && (
+                                <span className="inline-block w-3 h-3 rounded-full mr-1.5 align-middle" 
                                   style={{ 
                                     background: variant.color || variant.value.toLowerCase() 
                                   }} 
                                 />
-                              ) : null}
+                              )}
                               {variant.value}
                               {variant.price && variant.price !== price && (
                                 <span className="ml-1 text-[8px] opacity-70">
@@ -404,7 +403,6 @@ const ProductDetailsPage = () => {
               </div>
             )}
 
-            {/* Quantité */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Quantité</span>
               <div className="flex items-center gap-2">
@@ -424,7 +422,6 @@ const ProductDetailsPage = () => {
               </div>
             </div>
 
-            {/* Boutons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleAddToCart}
@@ -457,7 +454,6 @@ const ProductDetailsPage = () => {
               </button>
             </div>
 
-            {/* Livraison */}
             <div className={`grid grid-cols-2 gap-3 p-4 rounded-xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-gray-50'} border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-gold" />
@@ -479,7 +475,6 @@ const ProductDetailsPage = () => {
           </div>
         </div>
 
-        {/* ===== CONTENU DU PACK ===== */}
         {isPack && product.items && (
           <div className="mt-8">
             <h2 className="text-xl font-display font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
@@ -504,7 +499,6 @@ const ProductDetailsPage = () => {
           </div>
         )}
 
-        {/* ===== PRODUITS SIMILAIRES ===== */}
         {relatedProducts.length > 0 && (
           <div className="mt-12">
             <div className="flex items-center justify-between mb-4">

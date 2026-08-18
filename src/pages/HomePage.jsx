@@ -1,3 +1,4 @@
+// 📄 src/pages/HomePage.jsx
 import Hero from '../components/Home/Hero';
 import ShopEntrance from '../components/Home/ShopEntrance';
 import Categories from '../components/Home/Categories';

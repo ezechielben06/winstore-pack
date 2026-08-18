@@ -1,4 +1,4 @@
-// 📄 src/pages/AdminDashboard.jsx - Version avec images
+// 📄 src/pages/AdminDashboard.jsx - Version avec Supabase
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -15,13 +15,13 @@ import {
   Grid,
   List,
   RefreshCw,
-  Image,
   Palette,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { allProducts } from "../data/products";
 import ProductForm from "../components/Admin/ProductForm";
 import { downloadProductsFile } from "../utils/productExporter";
+import { supabase, initializeProducts } from "../config/supabase";
 
 const AdminDashboard = () => {
   const { isDark } = useTheme();
@@ -33,39 +33,219 @@ const AdminDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
+  const [syncStatus, setSyncStatus] = useState('idle');
 
+  // ✅ Charger les produits depuis Supabase
   useEffect(() => {
-    const all = [...allProducts.women, ...allProducts.men];
-    setProducts(all);
-    setIsLoading(false);
+    const loadProducts = async () => {
+      setIsLoading(true);
+      
+      try {
+        // ✅ Initialiser Supabase avec les produits locaux si besoin
+        await initializeProducts(allProducts);
+        
+        // ✅ Charger depuis Supabase
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('name');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const formatted = data.map(p => ({
+            ...p,
+            tags: p.tags || [],
+            items: p.items || [],
+            variants: p.variants || [],
+          }));
+          setProducts(formatted);
+        } else {
+          // Fallback sur les données locales
+          const all = [...allProducts.women, ...allProducts.men];
+          setProducts(all);
+        }
+      } catch (error) {
+        console.error('Erreur de chargement:', error);
+        const all = [...allProducts.women, ...allProducts.men];
+        setProducts(all);
+      }
+      
+      setIsLoading(false);
+    };
+    
+    loadProducts();
   }, []);
 
-  // Filtrer les produits
+  // ✅ Ajouter un produit
+  const handleAddProduct = async (newProduct) => {
+    try {
+      setSyncStatus('syncing');
+      
+      // Ajouter localement
+      const updated = [...products, newProduct];
+      setProducts(updated);
+      
+      // Ajouter dans Supabase
+      const { error } = await supabase
+        .from('products')
+        .insert([{
+          ...newProduct,
+          tags: newProduct.tags || [],
+          items: newProduct.items || [],
+          variants: newProduct.variants || [],
+        }]);
+      
+      if (error) throw error;
+      
+      setSyncStatus('success');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+      
+    } catch (error) {
+      console.error('Erreur de sauvegarde:', error);
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }
+    
+    setIsModalOpen(false);
+    setEditingProduct(null);
+  };
+
+  // ✅ Modifier un produit
+  const handleEditProduct = async (updatedProduct) => {
+    try {
+      setSyncStatus('syncing');
+      
+      const updated = products.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+      setProducts(updated);
+      
+      const { error } = await supabase
+        .from('products')
+        .update({
+          ...updatedProduct,
+          tags: updatedProduct.tags || [],
+          items: updatedProduct.items || [],
+          variants: updatedProduct.variants || [],
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', updatedProduct.id);
+      
+      if (error) throw error;
+      
+      setSyncStatus('success');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+      
+    } catch (error) {
+      console.error('Erreur de modification:', error);
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }
+    
+    setIsModalOpen(false);
+    setEditingProduct(null);
+  };
+
+  // ✅ Supprimer un produit
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm("Supprimer ce produit ?")) return;
+    
+    try {
+      setSyncStatus('syncing');
+      
+      setProducts(products.filter(p => p.id !== id));
+      
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setSyncStatus('success');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+      
+    } catch (error) {
+      console.error('Erreur de suppression:', error);
+      setSyncStatus('error');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }
+  };
+
+  // ✅ Synchroniser
+  const handleSync = async () => {
+    setSyncStatus('syncing');
+    
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const formatted = data.map(p => ({
+          ...p,
+          tags: p.tags || [],
+          items: p.items || [],
+          variants: p.variants || [],
+        }));
+        setProducts(formatted);
+        setSyncStatus('success');
+      } else {
+        setSyncStatus('error');
+      }
+    } catch (error) {
+      console.error('Erreur de synchronisation:', error);
+      setSyncStatus('error');
+    }
+    
+    setTimeout(() => setSyncStatus('idle'), 3000);
+  };
+
+  // ✅ Exporter
+  const handleExport = () => {
+    downloadProductsFile(products);
+  };
+
+  // ✅ Filtrer
   const filteredProducts = products.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategory =
-      selectedCategory === "all" || p.category === selectedCategory;
+    const matchCategory = selectedCategory === "all" || p.category === selectedCategory;
     return matchSearch && matchCategory;
   });
 
-  const handleAddProduct = (newProduct) => {
-    setProducts([...products, newProduct]);
-    setIsModalOpen(false);
-    setEditingProduct(null);
-  };
-
-  const handleEditProduct = (updatedProduct) => {
-    setProducts(
-      products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)),
-    );
-    setIsModalOpen(false);
-    setEditingProduct(null);
-  };
-
-  const handleDeleteProduct = (id) => {
-    if (window.confirm("Supprimer ce produit ?")) {
-      setProducts(products.filter((p) => p.id !== id));
+  const getCategoryBadge = (category) => {
+    if (category === "pack") {
+      return { label: "📦 Pack", className: "bg-gold/20 text-gold" };
     }
+    return {
+      label: "🛍️ Produit",
+      className: "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
+    };
+  };
+
+  const getPriceDisplay = (product) => {
+    if (product.price) return `${product.price.toLocaleString()} FCFA`;
+    if (product.priceRange) return product.priceRange;
+    return "-";
+  };
+
+  const getImagePath = (image) => {
+    if (!image) return null;
+    if (image.startsWith("http://") || image.startsWith("https://")) return image;
+    if (image.startsWith("/")) return image;
+    if (image.startsWith("images/")) return `/${image}`;
+    return `/images/${image}`;
+  };
+
+  const getProductImage = (product) => {
+    if (product.image) return getImagePath(product.image);
+    if (product.variants && product.variants.length > 0) {
+      const variantWithImage = product.variants.find((v) => v.image);
+      if (variantWithImage) return getImagePath(variantWithImage.image);
+    }
+    return null;
   };
 
   const openAddModal = () => {
@@ -78,94 +258,21 @@ const AdminDashboard = () => {
     setIsModalOpen(true);
   };
 
-  const handleExport = () => {
-    downloadProductsFile(products);
-  };
-
-  const getCategoryBadge = (category) => {
-    if (category === "pack") {
-      return { label: "📦 Pack", className: "bg-gold/20 text-gold" };
-    }
-    return {
-      label: "🛍️ Produit",
-      className:
-        "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
-    };
-  };
-
-  const getPriceDisplay = (product) => {
-    if (product.price) return `${product.price.toLocaleString()} FCFA`;
-    if (product.priceRange) return product.priceRange;
-    return "-";
-  };
-
-  const getImagePath = (image) => {
-    if (!image) return null;
-    if (image.startsWith("http://") || image.startsWith("https://")) {
-      return image;
-    }
-    if (image.startsWith("/")) {
-      return image;
-    }
-    if (image.startsWith("images/")) {
-      return `/${image}`;
-    }
-    return `/images/${image}`;
-  };
-
-  // ✅ Fonction pour obtenir l'image d'un produit (priorité à la première variante)
-  const getProductImage = (product) => {
-    // Si le produit a une image
-    if (product.image) {
-      return getImagePath(product.image);
-    }
-    // Si le produit a des variantes avec des images
-    if (product.variants && product.variants.length > 0) {
-      const variantWithImage = product.variants.find((v) => v.image);
-      if (variantWithImage) {
-        return getImagePath(variantWithImage.image);
-      }
-    }
-    return null;
-  };
-
-  // ✅ Compter le nombre de variantes
-  const getVariantCount = (product) => {
-    if (!product.variants || product.variants.length === 0) return 0;
-    return product.variants.length;
-  };
-
-  // ✅ Obtenir les couleurs des variantes
-  const getVariantColors = (product) => {
-    if (!product.variants) return [];
-    const colors = product.variants
-      .filter((v) => v.name === "couleur" || v.name === "color")
-      .slice(0, 3)
-      .map((v) => v.value);
-    return colors;
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-            Chargement...
-          </p>
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">Chargement...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      className={`min-h-screen pb-20 ${isDark ? "bg-[#0d0d1a]" : "bg-gray-50"}`}
-    >
-      {/* ===== HEADER ===== */}
-      <div
-        className={`sticky top-0 z-20 ${isDark ? "bg-[#1a1a2e]" : "bg-white"} border-b ${isDark ? "border-[#2d3748]" : "border-gray-200"} shadow-sm`}
-      >
+    <div className={`min-h-screen pb-20 ${isDark ? "bg-[#0d0d1a]" : "bg-gray-50"}`}>
+      {/* HEADER */}
+      <div className={`sticky top-0 z-20 ${isDark ? "bg-[#1a1a2e]" : "bg-white"} border-b ${isDark ? "border-[#2d3748]" : "border-gray-200"} shadow-sm`}>
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -173,26 +280,29 @@ const AdminDashboard = () => {
                 <Settings className="w-5 h-5 text-gold" />
               </div>
               <div>
-                <h1 className="text-base font-display font-bold text-gray-800 dark:text-white">
-                  Administration
-                </h1>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                  {products.length} produits
-                </p>
+                <h1 className="text-base font-display font-bold text-gray-800 dark:text-white">Administration</h1>
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{products.length} produits</p>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
+                    syncStatus === 'syncing' ? 'bg-yellow-500/20 text-yellow-500 animate-pulse' :
+                    syncStatus === 'success' ? 'bg-green-500/20 text-green-500' :
+                    syncStatus === 'error' ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'
+                  }`}>
+                    {syncStatus === 'syncing' ? '🔄 Sync...' :
+                     syncStatus === 'success' ? '✅ Sauvegardé' :
+                     syncStatus === 'error' ? '❌ Erreur' : '🟢 En ligne'}
+                  </span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <button
-                onClick={handleExport}
-                className="p-2 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors"
-                title="Exporter"
-              >
+              <button onClick={handleSync} className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors" title="Synchroniser">
+                <RefreshCw className={`w-4 h-4 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+              </button>
+              <button onClick={handleExport} className="p-2 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 transition-colors" title="Exporter">
                 <Download className="w-4 h-4" />
               </button>
-              <button
-                onClick={openAddModal}
-                className="p-2 rounded-xl bg-gold text-gray-900 hover:bg-gold/80 transition-colors"
-              >
+              <button onClick={openAddModal} className="p-2 rounded-xl bg-gold text-gray-900 hover:bg-gold/80 transition-colors">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -200,7 +310,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* ===== BARRE DE RECHERCHE ===== */}
+      {/* RECHERCHE */}
       <div className="px-4 py-3 sticky top-[61px] z-10 bg-gray-50/95 dark:bg-[#0d0d1a]/95 backdrop-blur-sm border-b border-gray-100 dark:border-[#2d3748]">
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
@@ -211,271 +321,95 @@ const AdminDashboard = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-sm ${
-                isDark
-                  ? "bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400"
-                  : "bg-white border-gray-200 text-gray-800"
+                isDark ? "bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400" : "bg-white border-gray-200 text-gray-800"
               } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
             />
           </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`p-2.5 rounded-xl border transition-all ${
-              showFilters
-                ? `border-gold text-gold ${isDark ? "bg-gold/10" : "bg-gold/5"}`
-                : `border-gray-200 dark:border-[#2d3748] text-gray-400`
-            }`}
-          >
+          <button onClick={() => setShowFilters(!showFilters)} className={`p-2.5 rounded-xl border transition-all ${
+            showFilters ? `border-gold text-gold ${isDark ? "bg-gold/10" : "bg-gold/5"}` : `border-gray-200 dark:border-[#2d3748] text-gray-400`
+          }`}>
             <Filter className="w-4 h-4" />
           </button>
-          <button
-            onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-            className="p-2.5 rounded-xl border border-gray-200 dark:border-[#2d3748] text-gray-400 hover:text-gold transition-colors"
-          >
-            {viewMode === "grid" ? (
-              <List className="w-4 h-4" />
-            ) : (
-              <Grid className="w-4 h-4" />
-            )}
+          <button onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")} className="p-2.5 rounded-xl border border-gray-200 dark:border-[#2d3748] text-gray-400 hover:text-gold transition-colors">
+            {viewMode === "grid" ? <List className="w-4 h-4" /> : <Grid className="w-4 h-4" />}
           </button>
         </div>
-
-        {/* Filtres */}
         {showFilters && (
           <div className="mt-3 flex flex-wrap gap-1.5 animate-fade-in">
-            <button
-              onClick={() => setSelectedCategory("all")}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                selectedCategory === "all"
-                  ? "bg-gold text-gray-900"
-                  : `bg-gray-100 dark:bg-[#2a2a4a] text-gray-600 dark:text-gray-400`
-              }`}
-            >
-              Tous
-            </button>
-            <button
-              onClick={() => setSelectedCategory("product")}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                selectedCategory === "product"
-                  ? "bg-blue-500 text-white"
-                  : `bg-gray-100 dark:bg-[#2a2a4a] text-gray-600 dark:text-gray-400`
-              }`}
-            >
-              Produits
-            </button>
-            <button
-              onClick={() => setSelectedCategory("pack")}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                selectedCategory === "pack"
-                  ? "bg-gold text-gray-900"
-                  : `bg-gray-100 dark:bg-[#2a2a4a] text-gray-600 dark:text-gray-400`
-              }`}
-            >
-              Packs
-            </button>
-
-            <span className="text-[10px] text-gray-400 dark:text-gray-500 self-center ml-1">
-              {filteredProducts.length} résultat
-              {filteredProducts.length > 1 ? "s" : ""}
-            </span>
+            <button onClick={() => setSelectedCategory("all")} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              selectedCategory === "all" ? "bg-gold text-gray-900" : `bg-gray-100 dark:bg-[#2a2a4a] text-gray-600 dark:text-gray-400`
+            }`}>Tous</button>
+            <button onClick={() => setSelectedCategory("product")} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              selectedCategory === "product" ? "bg-blue-500 text-white" : `bg-gray-100 dark:bg-[#2a2a4a] text-gray-600 dark:text-gray-400`
+            }`}>Produits</button>
+            <button onClick={() => setSelectedCategory("pack")} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              selectedCategory === "pack" ? "bg-gold text-gray-900" : `bg-gray-100 dark:bg-[#2a2a4a] text-gray-600 dark:text-gray-400`
+            }`}>Packs</button>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 self-center ml-1">{filteredProducts.length} résultat{filteredProducts.length > 1 ? "s" : ""}</span>
           </div>
         )}
       </div>
 
-      {/* ===== LISTE DES PRODUITS ===== */}
+      {/* LISTE DES PRODUITS */}
       <div className="px-4 py-3">
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <Package className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Aucun produit trouvé
-            </p>
-            <button
-              onClick={openAddModal}
-              className="mt-3 text-sm text-gold font-medium hover:underline"
-            >
-              Ajouter un produit
-            </button>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Aucun produit trouvé</p>
+            <button onClick={openAddModal} className="mt-3 text-sm text-gold font-medium hover:underline">Ajouter un produit</button>
           </div>
         ) : viewMode === "grid" ? (
-          // ===== VUE GRILLE =====
           <div className="grid grid-cols-2 gap-2.5">
             {filteredProducts.map((product) => {
               const badge = getCategoryBadge(product.category);
               const imageUrl = getProductImage(product);
-              const variantCount = getVariantCount(product);
-              const variantColors = getVariantColors(product);
-
               return (
-                <div
-                  key={product.id}
-                  className={`rounded-xl overflow-hidden border ${
-                    isDark
-                      ? "border-[#2d3748] bg-[#1a1a2e]"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  {/* ✅ Image / Emoji avec fallback */}
+                <div key={product.id} className={`rounded-xl overflow-hidden border ${isDark ? "border-[#2d3748] bg-[#1a1a2e]" : "border-gray-200 bg-white"}`}>
                   <div className="aspect-square flex items-center justify-center bg-gray-50 dark:bg-[#141425] relative">
                     {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.parentElement.innerHTML = `<span class="text-5xl">${product.emoji || "✨"}</span>`;
-                        }}
-                      />
+                      <img src={imageUrl} alt={product.name} className="w-full h-full object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
                     ) : (
                       <span className="text-5xl">{product.emoji || "✨"}</span>
                     )}
-
-                    {/* ✅ Badge variantes */}
-                    {variantCount > 0 && (
-                      <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[8px] flex items-center gap-0.5">
-                        <Palette className="w-2.5 h-2.5" />
-                        {variantCount}
-                      </div>
-                    )}
-
-                    {/* ✅ Aperçu des couleurs */}
-                    {variantColors.length > 0 && (
-                      <div className="absolute bottom-1 left-1 flex gap-0.5">
-                        {variantColors.map((color, i) => (
-                          <span
-                            key={i}
-                            className="w-3 h-3 rounded-full border border-white/50"
-                            style={{ background: color.toLowerCase() }}
-                          />
-                        ))}
-                      </div>
-                    )}
                   </div>
-
-                  {/* Infos */}
                   <div className="p-2.5">
                     <div className="flex items-start justify-between gap-1">
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-xs truncate text-gray-800 dark:text-white">
-                          {product.name}
-                        </p>
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded-full ${badge.className}`}
-                        >
-                          {badge.label}
-                        </span>
+                        <p className="font-semibold text-xs truncate text-gray-800 dark:text-white">{product.name}</p>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${badge.className}`}>{badge.label}</span>
                       </div>
                       <div className="flex items-center gap-0.5 flex-shrink-0">
-                        <button
-                          onClick={() => openEditModal(product)}
-                          className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg text-blue-500 transition-colors"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <button onClick={() => openEditModal(product)} className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg text-blue-500 transition-colors"><Edit className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDeleteProduct(product.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
-                    <p className="text-[10px] font-medium text-gray-700 dark:text-gray-300 mt-0.5">
-                      {getPriceDisplay(product)}
-                    </p>
-                    {product.tags && product.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-0.5 mt-1">
-                        {product.tags.slice(0, 2).map((tag, i) => (
-                          <span
-                            key={i}
-                            className="text-[7px] px-1.5 py-0.5 bg-gray-100 dark:bg-[#2a2a4a] rounded-full text-gray-500 dark:text-gray-400"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {product.tags.length > 2 && (
-                          <span className="text-[7px] text-gray-400">
-                            +{product.tags.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <p className="text-[9px] text-gray-400 dark:text-gray-500 mt-1">
-                      {product.id}
-                    </p>
+                    <p className="text-[10px] font-medium text-gray-700 dark:text-gray-300 mt-0.5">{getPriceDisplay(product)}</p>
+                    <p className="text-[9px] text-gray-400 dark:text-gray-500 mt-1">{product.id}</p>
                   </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          // ===== VUE LISTE =====
           <div className="space-y-2">
             {filteredProducts.map((product) => {
               const badge = getCategoryBadge(product.category);
               const imageUrl = getProductImage(product);
-              const variantCount = getVariantCount(product);
-
               return (
-                <div
-                  key={product.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl border ${
-                    isDark
-                      ? "border-[#2d3748] bg-[#1a1a2e]"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  {/* ✅ Mini image */}
+                <div key={product.id} className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "border-[#2d3748] bg-[#1a1a2e]" : "border-gray-200 bg-white"}`}>
                   <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-[#141425] flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.parentElement.innerHTML = `<span class="text-2xl">${product.emoji || "✨"}</span>`;
-                        }}
-                      />
-                    ) : (
-                      <span className="text-2xl">{product.emoji || "✨"}</span>
-                    )}
+                    {imageUrl ? <img src={imageUrl} alt={product.name} className="w-full h-full object-contain" onError={(e) => { e.target.style.display = 'none'; }} /> : <span className="text-2xl">{product.emoji || "✨"}</span>}
                   </div>
-
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate text-gray-800 dark:text-white">
-                      {product.name}
-                    </p>
+                    <p className="font-semibold text-sm truncate text-gray-800 dark:text-white">{product.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                      <span
-                        className={`text-[9px] px-1.5 py-0.5 rounded-full ${badge.className}`}
-                      >
-                        {badge.label}
-                      </span>
-                      <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
-                        {getPriceDisplay(product)}
-                      </span>
-                      {variantCount > 0 && (
-                        <span className="text-[9px] text-gray-400 flex items-center gap-0.5">
-                          <Palette className="w-2.5 h-2.5" />
-                          {variantCount} variantes
-                        </span>
-                      )}
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${badge.className}`}>{badge.label}</span>
+                      <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">{getPriceDisplay(product)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                      onClick={() => openEditModal(product)}
-                      className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg text-blue-500 transition-colors"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <button onClick={() => openEditModal(product)} className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg text-blue-500 transition-colors"><Edit className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => handleDeleteProduct(product.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               );
@@ -484,21 +418,15 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* ===== BOUTON FLOTTANT AJOUTER ===== */}
-      <button
-        onClick={openAddModal}
-        className="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-gold text-gray-900 shadow-xl shadow-gold/30 flex items-center justify-center hover:scale-110 transition-all active:scale-95"
-      >
+      {/* BOUTON AJOUTER */}
+      <button onClick={openAddModal} className="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-gold text-gray-900 shadow-xl shadow-gold/30 flex items-center justify-center hover:scale-110 transition-all active:scale-95">
         <Plus className="w-6 h-6" />
       </button>
 
-      {/* ===== MODAL ===== */}
+      {/* MODAL */}
       <ProductForm
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingProduct(null);
-        }}
+        onClose={() => { setIsModalOpen(false); setEditingProduct(null); }}
         onSave={editingProduct ? handleEditProduct : handleAddProduct}
         editingProduct={editingProduct}
         isDark={isDark}
