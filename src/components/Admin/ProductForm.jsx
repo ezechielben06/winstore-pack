@@ -1,4 +1,4 @@
-// 📄 src/components/Admin/ProductForm.jsx - Version finale avec bouton accessible
+// 📄 src/components/Admin/ProductForm.jsx - Version avec upload d'images
 import { useState, useEffect, useRef } from "react";
 import {
   Save,
@@ -12,6 +12,10 @@ import {
   Trash2,
   Palette,
   Image as ImageIcon,
+  Upload,
+  Camera,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -72,7 +76,83 @@ const ProductForm = ({
     stock: "",
   });
 
-  // ✅ Mettre à jour l'état depuis les refs
+  // ✅ États pour l'upload
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  // ✅ Référence pour l'input file
+  const fileInputRef = useRef(null);
+
+  // ✅ Gérer l'upload d'image
+  const handleImageUpload = (file) => {
+    if (!file) return;
+
+    // Vérifier le type
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Veuillez sélectionner une image");
+      return;
+    }
+
+    // Vérifier la taille (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("L'image ne doit pas dépasser 5MB");
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
+
+    // Créer une prévisualisation
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Simuler l'upload (dans la réalité, on enverrait à un serveur)
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      setUploadProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setUploading(false);
+        setUploadSuccess(true);
+
+        // ✅ Générer un nom de fichier unique
+        const ext = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+        
+        // ✅ Mettre à jour le champ image avec le nom du fichier
+        setFormData((prev) => ({ ...prev, image: fileName }));
+
+        // ✅ Afficher un message de succès
+        setTimeout(() => {
+          setUploadSuccess(false);
+        }, 3000);
+      }
+    }, 100);
+  };
+
+  // ✅ Gérer le téléchargement depuis l'appareil
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+  };
+
+  // ✅ Ouvrir la galerie/la caméra
+  const openFilePicker = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   const updateFromRefs = () => {
     const newData = { ...formData };
     Object.keys(inputRefs).forEach((key) => {
@@ -123,7 +203,6 @@ const ProductForm = ({
     return `${prefix}${maxNum + 1}`;
   };
 
-  // ✅ Initialisation du formulaire
   useEffect(() => {
     if (!isOpen) return;
 
@@ -194,9 +273,7 @@ const ProductForm = ({
     setFormData((prev) => ({ ...prev, id: newId }));
   };
 
-  // ✅ handleSubmit avec récupération des valeurs
   const handleSubmit = () => {
-    // Récupérer les valeurs des refs
     const currentData = updateFromRefs();
 
     if (!currentData.id) {
@@ -299,7 +376,6 @@ const ProductForm = ({
     </div>
   );
 
-  // ✅ Input utilisant useRef
   const Input = ({
     label,
     name,
@@ -339,7 +415,7 @@ const ProductForm = ({
       <div
         className={`w-full max-w-lg max-h-[90vh] rounded-t-2xl sm:rounded-2xl ${darkMode ? "bg-[#1a1a2e]" : "bg-white"} shadow-2xl border ${darkMode ? "border-[#2d3748]" : "border-gray-200"} flex flex-col`}
       >
-        {/* HEADER - Fixé en haut */}
+        {/* HEADER */}
         <div
           className={`sticky top-0 z-10 ${darkMode ? "bg-[#1a1a2e]" : "bg-white"} border-b ${darkMode ? "border-[#2d3748]" : "border-gray-200"} px-4 py-3 flex items-center justify-between flex-shrink-0`}
         >
@@ -366,7 +442,7 @@ const ProductForm = ({
           </button>
         </div>
 
-        {/* CORPS - Scrollable */}
+        {/* CORPS */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {/* Section: Informations de base */}
           <Section title="Informations" icon="📝" section="basic">
@@ -512,6 +588,133 @@ const ProductForm = ({
               rows="2"
             />
             <Input label="Emoji" name="emoji" placeholder="✨" />
+          </Section>
+
+          {/* ✅ Section: Image avec upload */}
+          <Section title="Image du produit" icon="🖼️" section="media">
+            {/* Input caché pour le fichier */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+
+            {/* Zone de téléchargement */}
+            <div
+              className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-all ${
+                darkMode
+                  ? "border-[#2d3748] hover:border-gold/50"
+                  : "border-gray-300 hover:border-gold/50"
+              } ${uploading ? "opacity-50 pointer-events-none" : ""}`}
+            >
+              {/* Aperçu de l'image */}
+              {imagePreview || formData.image ? (
+                <div className="relative">
+                  <img
+                    src={imagePreview || `/images/${formData.image}`}
+                    alt="Aperçu"
+                    className="w-full max-h-48 object-contain rounded-lg mx-auto"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview(null);
+                      setFormData((prev) => ({ ...prev, image: "" }));
+                    }}
+                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="py-6">
+                  <Camera className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Appuyez pour prendre une photo
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    ou choisir une image existante
+                  </p>
+                </div>
+              )}
+
+              {/* Bouton d'upload */}
+              <button
+                type="button"
+                onClick={openFilePicker}
+                disabled={uploading}
+                className={`mt-3 w-full py-2 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                  darkMode
+                    ? "bg-[#2a2a4a] text-white hover:bg-[#3a3a5a]"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                } ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                {uploading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+                    Téléchargement...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    {imagePreview || formData.image
+                      ? "Changer l'image"
+                      : "Ajouter une image"}
+                  </>
+                )}
+              </button>
+
+              {/* Barre de progression */}
+              {uploading && (
+                <div className="mt-3">
+                  <div className="w-full h-1.5 bg-gray-200 dark:bg-[#2a2a4a] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gold rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {uploadProgress}%
+                  </p>
+                </div>
+              )}
+
+              {/* Succès */}
+              {uploadSuccess && (
+                <div className="mt-3 flex items-center justify-center gap-2 text-green-500 text-sm">
+                  <Check className="w-4 h-4" />
+                  Image téléchargée !
+                </div>
+              )}
+
+              {/* Erreur */}
+              {uploadError && (
+                <div className="mt-3 flex items-center justify-center gap-2 text-red-500 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {uploadError}
+                </div>
+              )}
+            </div>
+
+            {/* Nom de l'image */}
+            {formData.image && (
+              <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-100 dark:bg-[#2a2a4a] px-3 py-1.5 rounded-lg">
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span className="truncate">{formData.image}</span>
+              </div>
+            )}
+
+            <Input
+              label="Tags (séparés par des virgules)"
+              name="tags"
+              placeholder="Soin, Visage"
+            />
           </Section>
 
           {/* Section: Variantes */}
@@ -706,23 +909,6 @@ const ProductForm = ({
             </div>
           </Section>
 
-          <Section title="Image & Tags" icon="🖼️" section="media">
-            <Input
-              label="Image principale"
-              name="image"
-              placeholder="racle-langue.jpeg"
-            />
-            <p className="text-[10px] text-gray-400">
-              📁 Place l'image dans{" "}
-              <span className="font-mono">public/images/</span>
-            </p>
-            <Input
-              label="Tags (séparés par des virgules)"
-              name="tags"
-              placeholder="Soin, Visage"
-            />
-          </Section>
-
           <Section title="Options avancées" icon="⚙️" section="advanced">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -771,10 +957,10 @@ const ProductForm = ({
             />
           </Section>
 
-          {/* ✅ Espace pour que le contenu ne soit pas caché par le footer */}
           <div className="h-4" />
         </div>
 
+        {/* FOOTER */}
         <div
           className={`sticky bottom-0 z-20 ${darkMode ? "bg-[#1a1a2e]" : "bg-white"} border-t ${darkMode ? "border-[#2d3748]" : "border-gray-200"} px-4 py-3 flex-shrink-0`}
         >

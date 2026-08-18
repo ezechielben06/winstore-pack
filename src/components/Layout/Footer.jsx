@@ -1,5 +1,5 @@
 // 📄 src/components/Layout/Footer.jsx
-import { Heart, Phone, Truck, Shield, Mail, Instagram, Facebook, Youtube } from 'lucide-react';
+import { Heart, Phone, Truck, Shield, Mail, Instagram, MessageCircle, Music } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import WomenLogo from '../Logo/WomenLogo';
 import MenLogo from '../Logo/MenLogo';
@@ -16,8 +16,31 @@ const Footer = () => {
     return <MainLogo className="w-8 h-8" text={false} />;
   };
 
+  // ✅ Liens réseaux sociaux cohérents
+  const socialLinks = [
+    {
+      icon: <Instagram className="w-4 h-4" />,
+      href: 'https://instagram.com/wins_packs',
+      label: 'Instagram',
+      color: 'hover:bg-pink-600'
+    },
+    {
+      icon: <Music className="w-4 h-4" />,
+      href: 'https://tiktok.com/@wins_packs',
+      label: 'TikTok',
+      color: 'hover:bg-gray-700'
+    },
+    {
+      icon: <MessageCircle className="w-4 h-4" />,
+      href: 'https://wa.me/2290153096537',
+      label: 'WhatsApp',
+      color: 'hover:bg-green-600'
+    },
+  ];
+
   return (
     <footer className="bg-gray-900 text-white">
+      {/* Newsletter */}
       <div className="border-b border-gray-800">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -55,19 +78,22 @@ const Footer = () => {
               Tout en un pour votre quotidien. Des packs pensés pour révéler votre confiance et votre style.
             </p>
             <div className="flex gap-3 mt-4">
-              <a href="#" className="bg-gray-800 p-2 rounded-full hover:bg-gold transition-colors">
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-full hover:bg-gold transition-colors">
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-full hover:bg-gold transition-colors">
-                <Youtube className="w-4 h-4" />
-              </a>
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`bg-gray-800 p-2 rounded-full transition-all hover:scale-110 ${social.color}`}
+                  aria-label={social.label}
+                >
+                  {social.icon}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Liens rapides */}
+          {/* Boutiques */}
           <div>
             <h4 className="font-semibold mb-4">Boutiques</h4>
             <ul className="space-y-3 text-gray-400 text-sm">
@@ -109,10 +135,11 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Packs populaires */}
+          {/* ✅ Packs populaires mis à jour */}
           <div>
             <h4 className="font-semibold mb-4">Packs populaires</h4>
             <ul className="space-y-3 text-gray-400 text-sm">
+              {/* Packs Femme */}
               <li className="hover:text-gold transition-colors cursor-pointer flex items-center gap-2">
                 <WomenLogo className="w-4 h-4" text={false} />
                 Campus Girl Pack
@@ -122,12 +149,17 @@ const Footer = () => {
                 Glow Queen Pack
               </li>
               <li className="hover:text-gold transition-colors cursor-pointer flex items-center gap-2">
+                <WomenLogo className="w-4 h-4" text={false} />
+                Confidence Pack
+              </li>
+              {/* Packs Homme */}
+              <li className="hover:text-gold transition-colors cursor-pointer flex items-center gap-2">
                 <MenLogo className="w-4 h-4" text={false} />
-                Pack Sportif Homme
+                Campus Boy Pack
               </li>
               <li className="hover:text-gold transition-colors cursor-pointer flex items-center gap-2">
                 <MenLogo className="w-4 h-4" text={false} />
-                Pack Premium Homme
+                Gentleman Pack
               </li>
             </ul>
           </div>

@@ -1,5 +1,6 @@
 // 📄 src/components/Home/Testimonials.jsx - Version améliorée
 import { Star, Quote, Instagram, MessageCircle, Music, Sparkles } from 'lucide-react';
+import { SOCIAL_LINKS } from '../../config/constants';
 
 const testimonials = [
   {
@@ -144,7 +145,7 @@ const Testimonials = () => {
         {/* ✅ Liens réseaux sociaux */}
         <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
           <a
-            href="https://instagram.com/wins_packs"
+            href={SOCIAL_LINKS.instagram}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-pink-500/30 text-sm"
@@ -153,7 +154,7 @@ const Testimonials = () => {
             Instagram
           </a>
           <a
-            href="https://tiktok.com/@wins_packs"
+            href={SOCIAL_LINKS.tiktok}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-black to-gray-800 text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-black/30 text-sm"

@@ -1,13 +1,15 @@
 // 📄 src/components/Home/SocialFeed.jsx - Version améliorée
 import { Instagram, MessageCircle, Music, Send, Heart, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import { SOCIAL_LINKS } from '../../config/constants';
 // ✅ Liens réseaux sociaux
-const SOCIAL_LINKS = {
-  instagram: 'https://instagram.com/wins_packs',
-  tiktok: 'https://tiktok.com/@wins_packs',
-  whatsapp: 'https://wa.me/2290153096537',
-};
+// const SOCIAL_LINKS = {
+//   instagram: 'https://instagram.com/wins_packs',
+//   tiktok: 'https://tiktok.com/@wins_packs',
+//   whatsapp: 'https://wa.me/2290153096537',
+//     whatsapp_group:'https://chat.whatsapp.com/EAaMbiiN1Qj8KE6aKvvVmR?s=cl&p=i&mlu=0&amv=2',
+
+// };
 
 const SocialFeed = () => {
   // Posts simulés avec les images du client
@@ -208,7 +210,7 @@ const SocialFeed = () => {
                   Scanne le QR code ou clique sur le lien
                 </p>
                 <a
-                  href={SOCIAL_LINKS.whatsapp}
+                  href={SOCIAL_LINKS.whatsapp_group}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block mt-1 text-xs text-green-600 dark:text-green-400 font-medium hover:underline"
