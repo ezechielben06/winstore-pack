@@ -597,7 +597,7 @@ const ProductForm = ({
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              capture="environment"
+              // capture="environment"
               className="hidden"
               onChange={handleFileSelect}
             />
