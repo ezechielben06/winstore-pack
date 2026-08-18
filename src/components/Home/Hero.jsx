@@ -1,49 +1,49 @@
-// 📄 src/components/Home/HeroCarousel.jsx - Mobile optimisé
+// 📄 src/components/Home/Hero.jsx - Version avec images
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Instagram, MessageCircle, Music } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 
 const slides = [
   {
     id: 1,
-    image: '/car1.webp',
-    title: 'Révèle ta Confiance',
-    subtitle: 'Des packs pour les ambitieux',
+    image: '/h1.jpeg',
+    title: 'Win\'S PACKS',
+    subtitle: 'Tout en un pour votre quotidien',
     cta: 'Découvrir',
     link: '/femme',
     badge: '✨ Nouvelle collection'
   },
   {
     id: 2,
-    image: '/car2.jpg',
-    title: 'Campus Girl Pack',
-    subtitle: 'Organisation & style',
+    image: '/h2.jpeg',
+    title: 'Win\'S PACKS',
+    subtitle: 'Tout en un pour votre quotidien',
     cta: 'Voir les packs',
     link: '/femme',
-    badge: '🎓 Rentrée 2026'
+    badge: '📦 Packs disponibles'
   },
   {
     id: 3,
-    image: '/car3.png',
-    title: 'Glow Queen Pack',
-    subtitle: 'Prends soin de toi',
+    image: '/h3.jpeg',
+    title: 'Win\'S PACKS',
+    subtitle: 'Des packs pour révéler votre confiance',
     cta: 'Commander',
     link: '/femme',
     badge: '✨ Glow & Élégance'
   },
   {
     id: 4,
-    image: '/car4.jpg',
-    title: 'Pack Sportif Homme',
-    subtitle: 'Style & performance',
+    image: '/h4.jpeg',
+    title: 'Win\'S PACKS',
+    subtitle: 'Tout en un pour votre quotidien',
     cta: 'Découvrir',
     link: '/homme',
     badge: '💪 Nouveauté'
   }
 ];
 
-const HeroCarousel = () => {
+const Hero = () => {
   const { isDark } = useTheme();
   const [current, setCurrent] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
@@ -92,7 +92,7 @@ const HeroCarousel = () => {
   // Progression
   useEffect(() => {
     let animationFrame;
-    const interval = 10000;
+    const interval = 3000;
 
     const updateProgress = () => {
       if (!autoPlayRef.current) {
@@ -154,7 +154,7 @@ const HeroCarousel = () => {
 
   return (
     <section 
-      className="relative min-h-[65vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center overflow-hidden"
+      className="relative min-h-[70vh] xs:min-h-[75vh] sm:min-h-[80vh] flex items-center overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -227,7 +227,7 @@ const HeroCarousel = () => {
         ))}
       </div>
 
-      {/* Contenu - Optimisé mobile */}
+      {/* Contenu */}
       <div className="container mx-auto px-4 relative z-20">
         <div className="max-w-3xl">
           {/* Badge */}
@@ -243,7 +243,7 @@ const HeroCarousel = () => {
           {/* Titre */}
           <h1 
             key={current}
-            className="text-2xl xs:text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black leading-[1.1] text-white animate-slide-up"
+            className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black leading-[1.1] text-white animate-slide-up"
             style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
           >
             {slide.title}
@@ -271,21 +271,10 @@ const HeroCarousel = () => {
               <ArrowRight className="w-3 h-3 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-
-          {/* Indicateur de progression - Masqué sur mobile */}
-          <div className="hidden sm:flex mt-4 md:mt-8 items-center gap-2 text-white/50 text-xs md:text-sm">
-            <span className="font-semibold text-white" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-              {String(current + 1).padStart(2, '0')}
-            </span>
-            <span className="w-6 md:w-12 h-px bg-white/30" />
-            <span style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-              {String(slides.length).padStart(2, '0')}
-            </span>
-          </div>
         </div>
       </div>
     </section>
   );
 };
 
-export default HeroCarousel;
+export default Hero;

@@ -1,4 +1,5 @@
-import { Star, Quote, Instagram, Facebook, MessageCircle } from 'lucide-react';
+// 📄 src/components/Home/Testimonials.jsx - Version améliorée
+import { Star, Quote, Instagram, MessageCircle, Music, Sparkles } from 'lucide-react';
 
 const testimonials = [
   {
@@ -26,103 +27,167 @@ const testimonials = [
     comment: 'Le Pack Sportif Homme est parfait pour mon quotidien. Fraîcheur, soin et style, tout ce qu\'il faut pour un homme actif.',
     rating: 5,
     emoji: '💪',
-    social: 'facebook'
+    social: 'tiktok'
   },
   {
     id: 4,
     name: 'Marie C.',
     role: 'Cadre',
-    comment: 'J\'ai créé mon propre pack et je suis ravie ! La personnalisation est top, et la livraison rapide. Merci Win\'Store !',
+    comment: 'J\'ai créé mon propre pack et je suis ravie ! La personnalisation est top, et la livraison rapide. Merci Win\'S Packs !',
     rating: 5,
     emoji: '👑',
+    social: 'whatsapp'
+  },
+  {
+    id: 5,
+    name: 'Amélie D.',
+    role: 'Beauté & Soin',
+    comment: 'Les produits Win\'S Packs sont d\'une qualité exceptionnelle. Je recommande vivement !',
+    rating: 5,
+    emoji: '🌸',
     social: 'instagram'
+  },
+  {
+    id: 6,
+    name: 'Thomas L.',
+    role: 'Sportif',
+    comment: 'Le Pack Premium Homme m\'a permis de découvrir des produits que je n\'aurais jamais testés. Une vraie révélation !',
+    rating: 5,
+    emoji: '🔥',
+    social: 'tiktok'
   },
 ];
 
 const socialIcons = {
-  instagram: <Instagram className="w-4 h-4" />,
-  facebook: <Facebook className="w-4 h-4" />,
-  whatsapp: <MessageCircle className="w-4 h-4" />
+  instagram: <Instagram className="w-3.5 h-3.5" />,
+  tiktok: <Music className="w-3.5 h-3.5" />,
+  whatsapp: <MessageCircle className="w-3.5 h-3.5" />
+};
+
+const socialLabels = {
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  whatsapp: 'WhatsApp'
+};
+
+const socialColors = {
+  instagram: 'bg-gradient-to-r from-pink-500 to-purple-500',
+  tiktok: 'bg-gradient-to-r from-black to-gray-800',
+  whatsapp: 'bg-gradient-to-r from-green-500 to-green-600'
+};
+
+const socialBg = {
+  instagram: 'bg-pink-50 text-pink-500',
+  tiktok: 'bg-gray-100 text-gray-800',
+  whatsapp: 'bg-green-50 text-green-500'
 };
 
 const Testimonials = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white" id="avis">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white" id="avis">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        {/* En-tête */}
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gold/10 text-gold px-4 py-2 rounded-full text-sm font-semibold mb-4">
             <Quote className="w-4 h-4" />
             Ce que disent nos clients
           </div>
-          <h2 className="text-4xl md:text-5xl font-display font-bold">
+          <h2 className="text-3xl md:text-4xl font-display font-bold">
             Ils ont <span className="text-gold">adoré</span> leurs packs
           </h2>
-          <p className="text-gray-600 mt-3">
-            Rejoins notre communauté sur <span className="text-pink-600 font-semibold">Instagram</span> et <span className="text-blue-600 font-semibold">Facebook</span>
+          <p className="text-gray-600 mt-3 text-sm">
+            Rejoins notre communauté sur{' '}
+            <span className="text-pink-600 font-semibold">Instagram</span>,{' '}
+            <span className="text-gray-900 font-semibold">TikTok</span> et{' '}
+            <span className="text-green-600 font-semibold">WhatsApp</span>
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        {/* Grille de témoignages */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
           {testimonials.map((testimonial) => (
             <div 
               key={testimonial.id}
-              className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100/50"
+              className="bg-white p-5 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100/50 group"
             >
-              <div className="flex items-center gap-1 mb-3">
+              {/* Étoiles */}
+              <div className="flex items-center gap-0.5 mb-2">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-gold text-gold" />
+                  <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />
                 ))}
+                <span className="ml-1 text-xs text-gray-400">5.0</span>
               </div>
               
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">"{testimonial.comment}"</p>
+              {/* Commentaire */}
+              <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-3">"{testimonial.comment}"</p>
               
+              {/* Footer du témoignage */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-feminine-primary to-gold flex items-center justify-center text-white text-xl">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-feminine-primary to-gold flex items-center justify-center text-white text-lg flex-shrink-0">
                     {testimonial.emoji}
                   </div>
                   <div>
                     <p className="font-semibold text-sm text-gray-800">{testimonial.name}</p>
-                    <p className="text-xs text-gray-400">{testimonial.role}</p>
+                    <p className="text-[10px] text-gray-400">{testimonial.role}</p>
                   </div>
                 </div>
-                <div className="text-gray-400">
-                  {testimonial.social === 'instagram' ? '📸' : '👍'}
+                <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full ${socialBg[testimonial.social]}`}>
+                  {socialIcons[testimonial.social]}
+                  {socialLabels[testimonial.social]}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Social buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
+        {/* ✅ Liens réseaux sociaux */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
           <a
-            href="https://instagram.com/winstorepacks"
+            href="https://instagram.com/wins_packs"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-3.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-pink-500/30"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-pink-500/30 text-sm"
           >
-            <Instagram className="w-5 h-5" />
-            Suis-nous sur Instagram
+            <Instagram className="w-4 h-4" />
+            Instagram
           </a>
           <a
-            href="https://facebook.com/winstorepacks"
+            href="https://tiktok.com/@wins_packs"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-blue-600/30"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-black to-gray-800 text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-black/30 text-sm"
           >
-            <Facebook className="w-5 h-5" />
-            Suis-nous sur Facebook
+            <Music className="w-4 h-4" />
+            TikTok
           </a>
           <a
             href="https://wa.me/2290153096537"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-green-500/30"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-green-500/30 text-sm"
           >
-            <MessageCircle className="w-5 h-5" />
-            Contacte-nous sur WhatsApp
+            <MessageCircle className="w-4 h-4" />
+            WhatsApp
           </a>
+        </div>
+
+        {/* ✅ Badge de confiance */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-500">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">⭐</span>
+            4.9/5 sur 120+ avis
+          </div>
+          <div className="w-px h-4 bg-gray-300" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">👥</span>
+            +1000 clients satisfaits
+          </div>
+          <div className="w-px h-4 bg-gray-300" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">🚚</span>
+            Livraison disponible
+          </div>
         </div>
       </div>
     </section>

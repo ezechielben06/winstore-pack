@@ -1,4 +1,4 @@
-// 📄 src/data/products.js - Version complète avec chemins corrigés
+// 📄 src/data/products.js - Version complète avec les packs des images
 
 // ========== PRODUITS FEMME ==========
 export const womenProducts = [
@@ -93,8 +93,6 @@ export const womenProducts = [
     emoji: "✨",
     tags: ["Soin", "Corps"],
   },
-
-  // Gloss & Maquillage
   {
     id: "w10",
     name: "Gloss Vip",
@@ -155,8 +153,6 @@ export const womenProducts = [
     image: "pepite-gloss.jpeg",
     tags: ["Maquillage", "Lèvres"],
   },
-
-  // Accessoires & Tech
   {
     id: "w16",
     name: "Pack air pods",
@@ -277,8 +273,6 @@ export const womenProducts = [
     image: "miroir-sac.jpeg",
     tags: ["Accessoire"],
   },
-
-  // Soins Visage
   {
     id: "w28",
     name: "I Beauty",
@@ -359,8 +353,6 @@ export const womenProducts = [
     image: "combo-sourcils.jpeg",
     tags: ["Maquillage", "Sourcils"],
   },
-
-  // Soins Corps
   {
     id: "w36",
     name: "Gommage corporel",
@@ -411,8 +403,6 @@ export const womenProducts = [
     image: "creme-solaire.jpeg",
     tags: ["Soin", "Protection"],
   },
-
-  // Parfums
   {
     id: "w41",
     name: "Parfum élégant",
@@ -453,8 +443,6 @@ export const womenProducts = [
     image: "set-bon-senteur.jpeg",
     tags: ["Parfum", "Coffret"],
   },
-
-  // Bijoux & Accessoires
   {
     id: "w45",
     name: "Bracelet Pandora",
@@ -552,7 +540,7 @@ export const womenProducts = [
     price: 5180,
     description: "Sac élégant avec porte-monnaie assorti. Idéal pour toutes vos sorties.",
     emoji: "👜",
-    image: "racle-langue.jpeg",
+    image: "sac-hobo.jpg",
     tags: ["Accessoire", "Sac", "Tendance"],
     popularity: "🔥",
     variants: [
@@ -562,7 +550,7 @@ export const womenProducts = [
         value: "Rose bonbon",
         price: 5180,
         image: "sac-rose.jpg",
-        stock: 15
+        stock: 15,
       },
       {
         id: 2,
@@ -570,7 +558,7 @@ export const womenProducts = [
         value: "Rouge passion",
         price: 5180,
         image: "sac-rouge.jpg",
-        stock: 10
+        stock: 10,
       },
       {
         id: 3,
@@ -578,7 +566,7 @@ export const womenProducts = [
         value: "Noir élégant",
         price: 5600,
         image: "sac-noir.jpg",
-        stock: 8
+        stock: 8,
       },
       {
         id: 4,
@@ -586,7 +574,7 @@ export const womenProducts = [
         value: "S (30x17x12 cm)",
         price: 5180,
         image: "sac-s.jpg",
-        stock: 20
+        stock: 20,
       },
       {
         id: 5,
@@ -594,7 +582,7 @@ export const womenProducts = [
         value: "M (35x20x14 cm)",
         price: 5600,
         image: "sac-m.jpg",
-        stock: 12
+        stock: 12,
       },
       {
         id: 6,
@@ -602,16 +590,16 @@ export const womenProducts = [
         value: "L (40x25x16 cm)",
         price: 6200,
         image: "sac-l.jpg",
-        stock: 7
-      }
+        stock: 7,
+      },
     ],
-    color: "from-pink-400 to-rose-400"
+    color: "from-pink-400 to-rose-400",
   },
 ];
 
-// ========== PACKS FEMME ==========
+// ========== PACKS FEMME (UNIQUEMENT ceux des images p1.jpeg, p2.jpeg, p3.jpeg) ==========
 export const womenPacks = [
-  // Campus Girl Packs
+  // Campus Girl Packs (image p1.jpeg)
   {
     id: "p1",
     name: "Campus Girl - Basic",
@@ -621,11 +609,11 @@ export const womenPacks = [
     emoji: "🎓",
     image: "campus-girl-basic.jpeg",
     items: [
-      "Parfum léger 🍭",
-      "Petit carnet ou agenda 📓",
-      "Stylo unique 🧑‍🎨",
+      "Parfum léger",
+      "Petit carnet ou agenda",
+      "Stylo unique",
       "Guide étude + Lingette intime",
-      "Gloss + Crayon ✨",
+      "Gloss + Crayon",
     ],
     popularity: "🔥",
     color: "from-pink-400 to-rose-400",
@@ -669,7 +657,8 @@ export const womenPacks = [
     popularity: "🌟",
     color: "from-purple-500 to-pink-500",
   },
-  // Glow Queen Packs
+
+  // Glow Queen Packs (image p3.jpeg)
   {
     id: "p4",
     name: "Glow Queen - Basic",
@@ -724,7 +713,8 @@ export const womenPacks = [
     popularity: "🌟",
     color: "from-pink-500 to-red-500",
   },
-  // Confidence Packs
+
+  // Confidence Packs (image p2.jpeg)
   {
     id: "p7",
     name: "Confidence - Basic",
@@ -779,62 +769,6 @@ export const womenPacks = [
     ],
     popularity: "🌟",
     color: "from-purple-500 to-pink-500",
-  },
-  // Packs Spéciaux
-  {
-    id: "p10",
-    name: "Self Care Queen Pack",
-    category: "pack",
-    price: 12000,
-    description: "Prends soin de toi comme une reine",
-    emoji: "🧖",
-    image: "self-care-queen.jpeg",
-    items: [
-      "Masque visage",
-      "Gommage corporel",
-      "Huile de soin",
-      "Baume à lèvre",
-      "Crème main",
-      "Savon pétal",
-    ],
-    popularity: "✨",
-    color: "from-teal-400 to-emerald-400",
-  },
-  {
-    id: "p11",
-    name: "Date Night Pack",
-    category: "pack",
-    price: 10000,
-    description: "Prépare-toi pour une soirée inoubliable",
-    emoji: "🌙",
-    image: "date-night.jpeg",
-    items: [
-      "Parfum élégant",
-      "Bijoux assortis",
-      "Gloss brillant",
-      "Anti-cerne",
-      "Fixateur",
-    ],
-    popularity: "💕",
-    color: "from-red-400 to-pink-400",
-  },
-  {
-    id: "p12",
-    name: "Wellness Girl Pack",
-    category: "pack",
-    price: 8000,
-    description: "Bien-être et sérénité au quotidien",
-    emoji: "☮️",
-    image: "wellness-girl.jpeg",
-    items: [
-      "Gel Aloe Vera",
-      "Crème solaire",
-      "Brume relaxante",
-      "Carte motivation",
-      "Mini guide bien-être",
-    ],
-    popularity: "🌿",
-    color: "from-green-400 to-teal-400",
   },
 ];
 
@@ -1061,8 +995,6 @@ export const menProducts = [
     image: "masque-noir.jpeg",
     tags: ["Soin", "Visage"],
   },
-
-  // Bijoux & Accessoires Homme
   {
     id: "m23",
     name: "Bracelet Pandora",
@@ -1145,118 +1077,234 @@ export const menProducts = [
   },
 ];
 
-// ========== PACKS HOMME ==========
+// ========== PACKS HOMME (UNIQUEMENT ceux de l'image p5.jpeg) ==========
 export const menPacks = [
+  // Campus Boy Packs
   {
     id: "mp1",
-    name: "Pack Sportif - Basic",
+    name: "Campus Boy - Basic",
     category: "pack",
     price: 5000,
-    description: "Pour rester frais et performant au quotidien",
-    emoji: "🏃",
-    image: "pack-sportif-basic.jpeg",
+    description: "Pour l'étudiant ambitieux qui veut rester organisé, stylé et productif",
+    emoji: "🎓",
+    image: "campus-boy-basic.jpeg",
     items: [
-      "Déodorant",
-      "Gel Aloe Vera",
-      "Mini ventilateur",
-      "Lingette",
-      "Carte motivation",
+      "Stylo premium",
+      "Petit carnet de notes",
+      "Porte-clés élégant",
+      "Gel hydroalcoolique de poche",
+      "Bracelet minimaliste",
     ],
     popularity: "🔥",
     color: "from-blue-400 to-cyan-400",
   },
   {
     id: "mp2",
-    name: "Pack Sportif - Classique",
+    name: "Campus Boy - Classique",
     category: "pack",
     price: 10000,
-    description: "Confort et style pour l'homme actif",
-    emoji: "💪",
-    image: "pack-sportif-classique.jpeg",
+    description: "Organisation, style et productivité pour l'étudiant ambitieux",
+    emoji: "📚",
+    image: "campus-boy-classique.jpeg",
     items: [
-      "Parfum sport",
-      "Serviette",
-      "Crème solaire",
-      "Gommage corporel",
-      "Casque",
-      "Cadeau surprise",
+      "Carnet + stylo premium",
+      "Bracelet minimaliste",
+      "Petit parfum",
+      "Porte-cartes",
+      "Gourde",
+      "Carte de motivation",
     ],
     popularity: "⭐",
     color: "from-cyan-400 to-indigo-400",
   },
   {
     id: "mp3",
-    name: "Pack Premium Homme",
+    name: "Campus Boy - Premium",
     category: "pack",
     price: 15000,
-    description: "L'excellence au quotidien pour l'homme moderne",
+    description: "Le pack complet pour l'étudiant qui veut tout réussir",
     emoji: "👑",
-    image: "pack-premium-homme.jpeg",
+    image: "campus-boy-premium.jpeg",
     items: [
-      "Parfum premium",
-      "Kit ongle complet",
-      "Crème main",
-      "Huile corporel",
-      "Brosse cheveux",
-      "Set voyage",
-      "Carte mindset",
+      "Mini agenda",
+      "Parfum",
+      "Porte-cartes",
+      "Bracelet premium",
+      "Gourde",
+      "Écouteurs filaires",
+      "Kit d'organisation",
     ],
     popularity: "🌟",
     color: "from-indigo-500 to-purple-500",
   },
+
+  // Gentleman Packs
   {
     id: "mp4",
-    name: "Pack Professionnel",
+    name: "Gentleman - Basic",
     category: "pack",
-    price: 12000,
-    description: "Pour briller au travail avec élégance",
-    emoji: "💼",
-    image: "pack-professionnel.jpeg",
+    price: 5000,
+    description: "Pour l'homme qui aime être élégant et laisser une bonne impression",
+    emoji: "🤵",
+    image: "gentleman-basic.jpeg",
     items: [
-      "Stylo élégant",
-      "Parfum discret",
-      "Crème main",
-      "Trousse",
-      "Carte motivation",
+      "Bracelet homme",
+      "Porte-clés premium",
+      "Petit parfum",
+      "Lingettes parfumées",
     ],
-    popularity: "✨",
+    popularity: "🔥",
     color: "from-gray-600 to-gray-800",
   },
   {
     id: "mp5",
-    name: "Pack Wellness Homme",
+    name: "Gentleman - Classique",
     category: "pack",
-    price: 8000,
-    description: "Bien-être et sérénité au quotidien",
-    emoji: "🧘",
-    image: "pack-wellness-homme.jpeg",
+    price: 10000,
+    description: "Élégance et style pour l'homme qui veut se démarquer",
+    emoji: "👔",
+    image: "gentleman-classique.jpeg",
     items: [
-      "Gel Aloe Vera",
-      "Crème solaire",
-      "Masque visage",
-      "Brume",
-      "Guide bien-être",
+      "Bracelet",
+      "Lunettes stylées",
+      "Parfum",
+      "Porte-cartes",
+      "Montre classique",
     ],
-    popularity: "🌿",
-    color: "from-green-400 to-emerald-400",
+    popularity: "⭐",
+    color: "from-blue-600 to-indigo-600",
   },
   {
     id: "mp6",
-    name: "Pack Voyage Homme",
+    name: "Gentleman - Premium",
+    category: "pack",
+    price: 15000,
+    description: "L'excellence pour l'homme qui veut être inoubliable",
+    emoji: "👑",
+    image: "gentleman-premium.jpeg",
+    items: [
+      "Montre premium",
+      "Bracelet",
+      "Lunettes",
+      "Parfum",
+      "Portefeuille",
+      "Accessoires Gentleman",
+    ],
+    popularity: "🌟",
+    color: "from-indigo-600 to-purple-600",
+  },
+
+  // Confidence Man Packs
+  {
+    id: "mp7",
+    name: "Confidence Man - Basic",
+    category: "pack",
+    price: 5000,
+    description: "Pensé pour renforcer la confiance, le charisme et l'assurance",
+    emoji: "💪",
+    image: "confidence-man-basic.jpeg",
+    items: [
+      "Bracelet motivation",
+      "Mini parfum",
+      "Porte-clés",
+      "Carte motivation",
+    ],
+    popularity: "🔥",
+    color: "from-purple-400 to-pink-400",
+  },
+  {
+    id: "mp8",
+    name: "Confidence Man - Classique",
     category: "pack",
     price: 10000,
-    description: "Tout pour voyager léger et stylé",
-    emoji: "✈️",
-    image: "pack-voyage-homme.jpeg",
+    description: "Confiance, discipline et ambition pour l'homme moderne",
+    emoji: "🔥",
+    image: "confidence-man-classique.jpeg",
     items: [
-      "Set voyage",
-      "Serviette",
-      "Mini ventilateur",
-      "Crème solaire",
-      "Pochette",
+      "Bracelet",
+      "Parfum",
+      "Carnet objectifs",
+      "Porte-cartes",
+      "Gourde",
     ],
-    popularity: "🧳",
-    color: "from-blue-500 to-indigo-500",
+    popularity: "⭐",
+    color: "from-red-400 to-purple-400",
+  },
+  {
+    id: "mp9",
+    name: "Confidence Man - Premium",
+    category: "pack",
+    price: 15000,
+    description: "La confiance est ton meilleur accessoire",
+    emoji: "👑",
+    image: "confidence-man-premium.jpeg",
+    items: [
+      "Montre",
+      "Parfum",
+      "Lunettes",
+      "Carnet",
+      "Bracelet",
+      "Accessoires de soin",
+    ],
+    popularity: "🌟",
+    color: "from-purple-500 to-pink-500",
+  },
+
+  // Self-Care Man Packs
+  {
+    id: "mp10",
+    name: "Self-Care Man - Basic",
+    category: "pack",
+    price: 5000,
+    description: "Pour l'homme qui prend soin de lui",
+    emoji: "🧖",
+    image: "self-care-man-basic.jpeg",
+    items: [
+      "Savon visage",
+      "Mini crème hydratante",
+      "Lingettes visage",
+      "Peigne",
+    ],
+    popularity: "✨",
+    color: "from-green-400 to-emerald-400",
+  },
+  {
+    id: "mp11",
+    name: "Self-Care Man - Classique",
+    category: "pack",
+    price: 10000,
+    description: "Une routine complète pour l'homme qui se respecte",
+    emoji: "💆",
+    image: "self-care-man-classique.jpeg",
+    items: [
+      "Gel coiffant",
+      "Savon visage",
+      "Déodorant",
+      "Peigne",
+      "Mini parfum",
+    ],
+    popularity: "⭐",
+    color: "from-emerald-400 to-teal-400",
+  },
+  {
+    id: "mp12",
+    name: "Self-Care Man - Premium",
+    category: "pack",
+    price: 15000,
+    description: "Le soin ultime pour l'homme qui veut être au top",
+    emoji: "👑",
+    image: "self-care-man-premium.jpeg",
+    items: [
+      "Gel coiffant premium",
+      "Kit barbe",
+      "Parfum",
+      "Déodorant",
+      "Brosse cheveux",
+      "Crème visage",
+      "Trousse",
+    ],
+    popularity: "🌟",
+    color: "from-teal-400 to-emerald-400",
   },
 ];
 

@@ -11,6 +11,7 @@ import ProductDetailsPage from './pages/ProductDetailsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import PrivateRoute from './components/Admin/PrivateRoute';
+import ScrollToTop from './components/Shared/ScrollToTop'; // ✅ IMPORTER
 import Layout from './components/Layout/Layout';
 import WhatsAppFloat from './components/Layout/WhatsAppFloat';
 
@@ -25,19 +26,17 @@ function App() {
               v7_relativeSplatPath: true,
             }}
           >
+            {/* ✅ AJOUTER ICI - avant Layout */}
+            <ScrollToTop />
+            
             <Layout>
               <Routes>
-                {/* Routes publiques */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/femme" element={<WomenShop />} />
                 <Route path="/homme" element={<MenShop />} />
                 <Route path="/creer-pack" element={<CreatePackPage />} />
                 <Route path="/produit/:productId" element={<ProductDetailsPage />} />
-                
-                {/* Route de connexion admin */}
                 <Route path="/admin/login" element={<AdminLogin />} />
-                
-                {/* Route admin protégée */}
                 <Route 
                   path="/admin" 
                   element={
