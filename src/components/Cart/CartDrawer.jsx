@@ -1,4 +1,4 @@
-// 📄 src/components/Cart/CartDrawer.jsx - Version corrigée
+// 📄 src/components/Cart/CartDrawer.jsx - Version avec prix et quantités
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useState, useEffect } from 'react';
@@ -28,56 +28,116 @@ const CartDrawer = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
+  // ✅ Fonction pour obtenir le chemin de l'image
+  const getProductImage = (item) => {
+    if (!item.image) return null;
+    if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
+      return item.image;
+    }
+    if (item.image.startsWith('/')) return item.image;
+    if (item.image.startsWith('images/')) return `/${item.image}`;
+    return `/images/${item.image}`;
+  };
+
   const handleWhatsAppOrder = () => {
     if (cart.length === 0) return;
     setIsCheckingOut(true);
 
     const phoneNumber = '2290153096537';
     
-    let message = '🛍️ *NOUVELLE COMMANDE WIN\'S PACK*%0A%0A';
-    message += '📦 *Détails de la commande :*%0A%0A';
+    // ✅ Message compatible WhatsApp
+    let message = '';
+    message += '🛍️ *NOUVELLE COMMANDE WIN\'S PACK*\n\n';
+    message += '📦 *DÉTAILS DE LA COMMANDE*\n';
+    message += '━━━━━━━━━━━━━━━━━━━━\n\n';
     
     cart.forEach((item, index) => {
       const itemName = item.variant ? `${item.name} (${item.variant.value})` : item.name;
-      message += `${index + 1}. *${itemName}*%0A`;
-      message += `   Quantité: ${item.quantity}%0A`;
-      message += `   Prix: ${(item.price * item.quantity).toLocaleString()} FCFA%0A`;
+      const totalItemPrice = (item.price || 0) * item.quantity;
       
-      // ✅ SI C'EST UN PACK PERSONNALISÉ, AFFICHER LE DÉTAIL DES ARTICLES
-      if (item.isCustom && item.items && item.items.length > 0) {
-        message += `   📦 *Contenu du pack :*%0A`;
+      message += `🔹 *Article ${index + 1}*\n`;
+      message += `   📦 ${itemName}\n`;
+      message += `   🔢 Quantité : ${item.quantity}\n`;
+      message += `   💰 Prix total : ${totalItemPrice.toLocaleString()} FCFA\n`;
+      
+      // ✅ PACK PERSONNALISÉ
+      if (item.isCustom && item.selectedItems && item.selectedItems.length > 0) {
+        message += `   📋 Contenu du pack :\n`;
+        
+        const groupedItems = {};
+        item.selectedItems.forEach(selected => {
+          const key = selected.name;
+          if (!groupedItems[key]) {
+            groupedItems[key] = {
+              name: selected.name,
+              price: selected.price || 0,
+              quantity: 0,
+              emoji: selected.emoji || ''
+            };
+          }
+          groupedItems[key].quantity += 1;
+        });
+        
+        Object.values(groupedItems).forEach(article => {
+          const totalArticlePrice = article.price * article.quantity;
+          message += `      • ${article.emoji || ''} ${article.name}`;
+          if (article.quantity > 1) {
+            message += ` (×${article.quantity})`;
+          }
+          message += ` : ${totalArticlePrice.toLocaleString()} FCFA\n`;
+        });
+      }
+      
+      // ✅ PACK NORMAL (Campus Girl, Glow Queen, etc.)
+      else if (item.items && item.items.length > 0 && !item.isCustom) {
+        message += `   📋 Contenu du pack :\n`;
+        
         // Compter les occurrences de chaque article
         const itemCount = {};
         item.items.forEach(i => {
           itemCount[i] = (itemCount[i] || 0) + 1;
         });
+        
+        // ✅ Prix par article (on divise le prix du pack par le nombre d'articles)
+        const pricePerItem = item.price / item.items.length;
+        
         Object.keys(itemCount).forEach(i => {
-          message += `      • ${i}${itemCount[i] > 1 ? ` (x${itemCount[i]})` : ''}%0A`;
+          const count = itemCount[i];
+          const totalPrice = Math.round(pricePerItem * count);
+          message += `      • ${i}`;
+          if (count > 1) {
+            message += ` (×${count})`;
+          }
+          message += ` : ${totalPrice.toLocaleString()} FCFA\n`;
         });
       }
       
-      // ✅ SI C'EST UN PACK NORMAL AVEC DES ARTICLES
-      if (item.items && item.items.length > 0 && !item.isCustom) {
-        message += `   📦 *Contenu du pack :*%0A`;
-        item.items.slice(0, 5).forEach(i => {
-          message += `      • ${i}%0A`;
-        });
-        if (item.items.length > 5) {
-          message += `      • + ${item.items.length - 5} autres articles%0A`;
-        }
+      // ✅ PRODUIT UNIQUE
+      else {
+        message += `   💰 Prix unitaire : ${(item.price || 0).toLocaleString()} FCFA\n`;
       }
       
-      message += '%0A';
+      message += '\n';
     });
     
-    message += `💰 *Total: ${totalPrice.toLocaleString()} FCFA*%0A%0A`;
-    message += '📍 *Informations de livraison :*%0A';
-    message += 'Nom: %0A';
-    message += 'Adresse: %0A';
-    message += 'Téléphone: %0A%0A';
-    message += '🙏 Merci pour votre confiance ! WIN\'S PACK ✨';
+    message += '━━━━━━━━━━━━━━━━━━━━\n';
+    message += `💰 *TOTAL : ${totalPrice.toLocaleString()} FCFA*\n`;
+    message += `📦 Articles : ${totalItems}\n`;
+    message += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    
+    // ✅ INFORMATIONS DE LIVRAISON
+    message += '📍 *INFORMATIONS DE LIVRAISON*\n';
+    message += '━━━━━━━━━━━━━━━━━━━━\n';
+    message += '👤 Nom : \n';
+    message += '📮 Adresse : \n';
+    message += '📱 Téléphone : \n\n';
+    
+    // ✅ MESSAGE DE REMERCIEMENT
+    message += '🙏 *Merci pour votre confiance !*\n';
+    message += '✨ WIN\'S PACK ✨\n\n';
+    message += '📲 Nous vous contacterons sous 24h';
 
-    const url = `https://wa.me/${phoneNumber}?text=${message}`;
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
     
     setTimeout(() => {
@@ -157,6 +217,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
               const totalItemPrice = itemPrice * item.quantity;
               const isPack = item.category === 'pack';
               const isCustom = item.isCustom;
+              const imageUrl = getProductImage(item);
 
               return (
                 <div
@@ -167,9 +228,23 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       : 'bg-gray-50 dark:bg-[#1a1a2e] border border-gray-100 dark:border-[#2d3748]'
                   }`}
                 >
-                  {/* Icone */}
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-gray-200 dark:bg-[#2a2a4a]">
-                    {item.emoji || (isPack ? '📦' : '✨')}
+                  {/* ✅ Image du produit */}
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-[#2a2a4a]">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = `
+                            <span class="text-2xl">${item.emoji || (isPack ? '📦' : '✨')}</span>
+                          `;
+                        }}
+                      />
+                    ) : (
+                      <span className="text-2xl">{item.emoji || (isPack ? '📦' : '✨')}</span>
+                    )}
                   </div>
 
                   {/* Infos */}
