@@ -1,10 +1,10 @@
-// 📄 src/pages/CreatePackPage.jsx - Design harmonisé
+// 📄 src/pages/CreatePackPage.jsx - Version avec recherche
 import { useState, useMemo } from 'react';
 import { 
   ArrowLeft, Package, Search, 
   Sparkles, Crown, Check, Minus, Plus, 
   Trash2, Gift, Wand2, Lightbulb,
-  ShoppingBag, Filter, ChevronDown
+  ShoppingBag, Filter, ChevronDown, X
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -28,7 +28,6 @@ const CreatePackPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // ✅ Thème
   const theme = isWomen ? 'feminine' : 'masculine';
   const themeColor = isWomen ? 'text-feminine-primary' : 'text-masculine-primary';
   const themeBg = isWomen ? 'bg-feminine-primary' : 'bg-masculine-primary';
@@ -41,19 +40,16 @@ const CreatePackPage = () => {
     ? 'bg-gradient-to-b from-feminine-light/30 to-white' 
     : 'bg-gradient-to-b from-masculine-light/30 to-white';
 
-  // ✅ Produits disponibles
   const availableProducts = useMemo(() => {
     const data = isWomen ? allProducts.women : allProducts.men;
     return data.filter(p => p.category === 'product');
   }, [isWomen]);
 
-  // ✅ Catégories
   const categories = useMemo(() => {
     const allTags = availableProducts.flatMap(p => p.tags || []);
     return ['all', ...new Set(allTags)];
   }, [availableProducts]);
 
-  // ✅ Suggestions
   const suggestions = useMemo(() => {
     const grouped = {};
     availableProducts.forEach(p => {
@@ -68,7 +64,7 @@ const CreatePackPage = () => {
     };
   }, [availableProducts]);
 
-  // ✅ Filtrage
+  // ✅ Filtrer les produits avec recherche
   const filteredProducts = useMemo(() => {
     let results = availableProducts;
     
@@ -132,6 +128,10 @@ const CreatePackPage = () => {
 
   const totalItems = selectedItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
   const createPack = () => {
     if (selectedItems.length < 3) {
       alert('Un pack doit contenir au moins 3 articles !');
@@ -174,7 +174,7 @@ const CreatePackPage = () => {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-[#0d0d1a]' : themeBgGradient}`}>
-      {/* ===== BANNIÈRE ===== */}
+      {/* Bannière */}
       <div className={`relative overflow-hidden ${isDark ? 'bg-[#1a1a2e]' : themeBg} py-4 md:py-6`}>
         <div className="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-32 h-32 md:w-64 md:h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
@@ -207,7 +207,7 @@ const CreatePackPage = () => {
       </div>
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* ===== BARRE DE PROGRESSION ===== */}
+        {/* Barre de progression */}
         <div className="max-w-2xl mx-auto mb-6">
           <div className="flex items-center gap-4">
             <div className="flex-1 h-2 rounded-full bg-gray-200 dark:bg-[#2a2a4a] overflow-hidden">
@@ -244,11 +244,11 @@ const CreatePackPage = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* ===== COLONNE GAUCHE : Sélection ===== */}
+          {/* Colonne gauche : Sélection */}
           <div className="lg:col-span-2">
             <div className={`rounded-2xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-sm border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'} p-4`}>
               {/* Suggestions */}
-              {showSuggestions && selectedItems.length === 0 && (
+              {showSuggestions && selectedItems.length === 0 && !searchTerm && (
                 <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-gold/10 to-${theme}-light/30 border border-gold/20">
                   <div className="flex items-center gap-2 mb-3">
                     <Lightbulb className="w-5 h-5 text-gold" />
@@ -299,12 +299,20 @@ const CreatePackPage = () => {
                       placeholder="Rechercher un produit..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm ${
+                      className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-sm ${
                         isDark 
                           ? 'bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400' 
                           : 'bg-gray-50 border-gray-200 text-gray-800'
                       } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
                     />
+                    {searchTerm && (
+                      <button
+                        onClick={clearSearch}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 dark:hover:bg-[#3a3a5a] rounded-full transition-colors"
+                      >
+                        <X className="w-4 h-4 text-gray-400" />
+                      </button>
+                    )}
                   </div>
                   <button
                     onClick={() => setShowFilters(!showFilters)}
@@ -317,6 +325,12 @@ const CreatePackPage = () => {
                     <Filter className="w-4 h-4" />
                   </button>
                 </div>
+
+                {searchTerm && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {filteredProducts.length} résultat{filteredProducts.length > 1 ? 's' : ''} pour "{searchTerm}"
+                  </p>
+                )}
 
                 {showFilters && (
                   <div className="flex flex-wrap gap-1.5 p-2 rounded-xl bg-gray-50 dark:bg-[#1a1a2e]">
@@ -343,6 +357,14 @@ const CreatePackPage = () => {
                   <div className="text-center py-12">
                     <Search className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
                     <p className="text-gray-500 dark:text-gray-400">Aucun produit trouvé</p>
+                    {searchTerm && (
+                      <button
+                        onClick={clearSearch}
+                        className="mt-3 text-sm text-gold font-medium hover:underline"
+                      >
+                        Voir tous les produits
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -383,7 +405,7 @@ const CreatePackPage = () => {
             </div>
           </div>
 
-          {/* ===== COLONNE DROITE : Récapitulatif ===== */}
+          {/* Colonne droite : Récapitulatif */}
           <div className="lg:col-span-1">
             <div className={`sticky top-24 rounded-2xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-sm border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'} p-4`}>
               <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm mb-3 flex items-center gap-2">
@@ -394,7 +416,6 @@ const CreatePackPage = () => {
                 </span>
               </h3>
 
-              {/* Nom du pack */}
               <input
                 type="text"
                 placeholder="Nom de ton pack (optionnel)"
@@ -407,7 +428,6 @@ const CreatePackPage = () => {
                 } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
               />
 
-              {/* Articles sélectionnés */}
               <div className="max-h-[300px] overflow-y-auto space-y-1.5">
                 {selectedItems.length === 0 ? (
                   <div className="text-center py-8">
@@ -458,7 +478,6 @@ const CreatePackPage = () => {
                 )}
               </div>
 
-              {/* Total */}
               <div className={`border-t ${isDark ? 'border-[#2d3748]' : 'border-gray-200'} pt-3 mt-3`}>
                 <div className="flex justify-between items-center mb-3">
                   <div>
@@ -493,7 +512,7 @@ const CreatePackPage = () => {
         </div>
       </div>
 
-      {/* ✅ Notification de succès */}
+      {/* Notification de succès */}
       {showSuccess && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl animate-bounce-in flex items-center gap-3">
           <Check className="w-5 h-5" />

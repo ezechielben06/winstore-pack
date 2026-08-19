@@ -1,26 +1,60 @@
-// 📄 src/components/Admin/ImageUploader.jsx - Version corrigée
+// 📄 src/components/Admin/ImageUploader.jsx
 import { useState } from 'react';
-import { Upload, X, Image, Check, AlertCircle, Camera } from 'lucide-react';
+import { Upload, X, Check, AlertCircle, Camera } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { supabase } from '../../config/supabase';
 
 const ImageUploader = ({ onImageUpload, currentImage }) => {
   const { isDark } = useTheme();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false); // ✅ setSuccess
-  const [preview, setPreview] = useState(currentImage ? `/images/${currentImage}` : null);
+  const [success, setSuccess] = useState(false);
+  const [preview, setPreview] = useState(currentImage || null);
 
-  const handleFileSelect = (file) => {
+  const uploadToSupabase = async (file) => {
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+
+      console.log('📤 Upload vers Supabase:', fileName);
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type,
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(uploadError.message);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(fileName);
+
+      console.log('✅ URL générée:', publicUrl);
+      return publicUrl;
+    } catch (error) {
+      console.error('Erreur d\'upload:', error);
+      throw error;
+    }
+  };
+
+  const handleFileSelect = async (file) => {
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setError('Veuillez sélectionner une image');
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      setError('Format non supporté. Utilisez JPG, PNG, WEBP ou GIF');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError("L'image ne doit pas dépasser 5MB");
+    if (file.size > 10 * 1024 * 1024) {
+      setError("L'image ne doit pas dépasser 10MB");
       return;
     }
 
@@ -38,30 +72,37 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
     const interval = setInterval(() => {
       progress += 10;
       setUploadProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setUploading(false);
-        setSuccess(true); // ✅ Utiliser setSuccess
-
-        const ext = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
-
-        if (onImageUpload) {
-          onImageUpload(fileName);
-        }
-
-        setTimeout(() => {
-          setSuccess(false);
-        }, 3000);
-      }
     }, 100);
+
+    try {
+      const imageUrl = await uploadToSupabase(file);
+      
+      clearInterval(interval);
+      setUploadProgress(100);
+      setUploading(false);
+      setSuccess(true);
+
+      setPreview(imageUrl);
+
+      if (onImageUpload) {
+        onImageUpload(imageUrl);
+      }
+
+      setTimeout(() => {
+        setSuccess(false);
+      }, 3000);
+
+    } catch (err) {
+      clearInterval(interval);
+      setUploading(false);
+      setError(err.message || 'Erreur lors de l\'upload');
+    }
   };
 
   const handleButtonClick = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment';
     input.multiple = false;
     
     input.onchange = (e) => {
@@ -100,6 +141,10 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
               src={preview}
               alt="Aperçu"
               className="w-full max-h-48 object-contain rounded-lg mx-auto"
+              onError={(e) => {
+                console.warn('⚠️ Erreur chargement image:', preview);
+                e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%23f0f0f0"/%3E%3Ctext x="100" y="110" text-anchor="middle" fill="%23999" font-size="16"%3EImage%3C/text%3E%3C/svg%3E';
+              }}
             />
             <button
               type="button"
@@ -108,9 +153,9 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
             >
               <X className="w-4 h-4" />
             </button>
-            {currentImage && !preview.startsWith('data:') && (
-              <p className="text-xs text-gray-400 mt-1 truncate">
-                📁 {currentImage}
+            {currentImage && currentImage.includes('supabase.co') && (
+              <p className="text-xs text-green-500 mt-1 truncate">
+                ✅ Image sur Supabase Storage
               </p>
             )}
           </div>
@@ -118,10 +163,10 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
           <div className="py-4">
             <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              📸 Prendre une photo
+              📸 Choisir une image
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              ou choisir dans la galerie
+              JPG, PNG, WEBP • Max 10MB
             </p>
           </div>
         )}
@@ -139,7 +184,7 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
           {uploading ? (
             <>
               <span className="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-              Téléchargement...
+              Upload en cours... {uploadProgress}%
             </>
           ) : (
             <>
@@ -157,14 +202,13 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
-            <p className="text-xs text-gray-400 mt-1">{uploadProgress}%</p>
           </div>
         )}
 
         {success && (
-          <div className="mt-3 flex items-center justify-center gap-2 text-green-500 text-sm">
+          <div className="mt-3 flex items-center justify-center gap-2 text-green-500 text-sm animate-fade-in">
             <Check className="w-4 h-4" />
-            Image téléchargée !
+            Image uploadée avec succès !
           </div>
         )}
 
@@ -180,7 +224,13 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
           <span>💡</span>
           <span>
-            Les images sont sauvegardées dans <span className="font-mono bg-gray-200 dark:bg-[#2a2a4a] px-1.5 py-0.5 rounded">public/images/</span>
+            Les images sont stockées sur <span className="font-semibold text-gold">Supabase Storage</span>
+          </span>
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-2">
+          <span>📌</span>
+          <span>
+            L'URL complète est sauvegardée dans la base de données
           </span>
         </p>
       </div>

@@ -1,6 +1,6 @@
-// 📄 src/pages/MenShop.jsx - Version Supabase
-import { useState, useEffect } from 'react';
-import { Sparkles, Package, ArrowRight, Crown, Grid, List } from 'lucide-react';
+// 📄 src/pages/MenShop.jsx - Version avec recherche
+import { useState, useEffect, useMemo } from 'react';
+import { Sparkles, Package, ArrowRight, Crown, Grid, List, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductGrid from '../components/Shop/ProductGrid';
 import ProductCarousel from '../components/Shop/ProductCarousel';
@@ -18,6 +18,8 @@ const MenShop = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -47,15 +49,37 @@ const MenShop = () => {
     loadProducts();
   }, []);
 
-  const allProducts = [...(products.packs || []), ...(products.men || [])];
-  const filtered = allProducts.filter(p => {
-    if (category === 'all') return true;
-    return p.category === category;
-  });
+  const allProducts = useMemo(() => [...(products.packs || []), ...(products.men || [])], [products]);
+
+  // ✅ Filtrer par catégorie et recherche
+  const filteredProducts = useMemo(() => {
+    let results = allProducts;
+    
+    if (category !== 'all') {
+      results = results.filter(p => p.category === category);
+    }
+    
+    if (searchTerm.trim()) {
+      const query = searchTerm.toLowerCase().trim();
+      results = results.filter(p => 
+        p.name.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+        p.id?.toLowerCase().includes(query)
+      );
+    }
+    
+    return results;
+  }, [allProducts, category, searchTerm]);
 
   const popularPacks = (products.packs || []).filter(p => 
     p.popularity === '🌟' || p.popularity === '⭐' || p.popularity === '🔥'
   );
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setShowSearch(false);
+  };
 
   if (loading) {
     return (
@@ -133,6 +157,18 @@ const MenShop = () => {
           </Link>
           
           <div className="flex items-center gap-2 md:gap-3">
+            {/* ✅ Bouton Recherche */}
+            <button
+              onClick={() => setShowSearch(!showSearch)}
+              className={`p-2 rounded-xl border transition-all ${
+                showSearch 
+                  ? 'border-gold text-gold bg-gold/10' 
+                  : 'border-gray-200 dark:border-[#2d3748] text-gray-400 hover:text-gold'
+              }`}
+            >
+              <Search className="w-4 h-4" />
+            </button>
+
             <div className="flex items-center gap-0.5 md:gap-1 bg-gray-100 dark:bg-[#2a2a4a] rounded-lg p-0.5 md:p-1">
               <button
                 onClick={() => setViewMode('grid')}
@@ -160,7 +196,49 @@ const MenShop = () => {
           </div>
         </div>
 
-        {popularPacks.length > 0 && (
+        {/* ✅ Barre de recherche */}
+        {showSearch && (
+          <div className="mb-4 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher un produit, une catégorie..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-sm ${
+                    isDark 
+                      ? 'bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-200 text-gray-800'
+                  } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
+                  autoFocus
+                />
+                {searchTerm && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 dark:hover:bg-[#3a3a5a] rounded-full transition-colors"
+                  >
+                    <X className="w-4 h-4 text-gray-400" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={clearSearch}
+                className="px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
+            {searchTerm && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                {filteredProducts.length} résultat{filteredProducts.length > 1 ? 's' : ''} pour "{searchTerm}"
+              </p>
+            )}
+          </div>
+        )}
+
+        {popularPacks.length > 0 && !searchTerm && (
           <div className="mb-6 md:mb-12">
             <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
               <span className="text-xl md:text-2xl">🔥</span>
@@ -177,30 +255,50 @@ const MenShop = () => {
           </div>
         )}
 
-        <PackSection 
-          packs={products.packs || []} 
-          products={products.men || []} 
-          isWomen={false}
-        />
+        {!searchTerm && (
+          <PackSection 
+            packs={products.packs || []} 
+            products={products.men || []} 
+            isWomen={false}
+          />
+        )}
 
         <div className="mt-6 md:mt-8">
           <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
             <Package className="w-4 h-4 md:w-5 md:h-5 text-masculine-primary dark:text-masculine-primary/80" />
             <h2 className="text-base md:text-xl font-display font-bold text-gray-800 dark:text-white">
-              Tous les articles
+              {searchTerm ? 'Résultats de recherche' : 'Tous les articles'}
             </h2>
             <span className="text-[10px] md:text-sm text-gray-400 dark:text-gray-500">
-              ({allProducts.length})
+              ({filteredProducts.length})
             </span>
           </div>
           
-          <FilterBar 
-            category={category}
-            setCategory={setCategory}
-            isWomen={false}
-          />
+          {!searchTerm && (
+            <FilterBar 
+              category={category}
+              setCategory={setCategory}
+              isWomen={false}
+            />
+          )}
           
-          <ProductGrid products={filtered} isWomen={false} />
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <Search className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+              <p className="text-gray-500 dark:text-gray-400">Aucun produit trouvé</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                Essayez de modifier votre recherche
+              </p>
+              <button
+                onClick={clearSearch}
+                className="mt-3 text-sm text-gold font-medium hover:underline"
+              >
+                Voir tous les produits
+              </button>
+            </div>
+          ) : (
+            <ProductGrid products={filteredProducts} isWomen={false} />
+          )}
         </div>
 
         <div className={`mt-6 md:mt-12 p-4 md:p-6 rounded-xl md:rounded-2xl text-center border ${

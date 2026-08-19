@@ -1,4 +1,4 @@
-// 📄 src/components/Admin/ProductForm.jsx - Version avec ImageUploader
+// 📄 src/components/Admin/ProductForm.jsx
 import { useState, useEffect, useRef } from "react";
 import {
   Save,
@@ -8,13 +8,10 @@ import {
   ChevronDown,
   ChevronUp,
   Wand2,
-  Plus,
-  Trash2,
-  Palette,
-  Image as ImageIcon,
+  Check,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-import ImageUploader from "./ImageUploader"; // ✅ Importer ImageUploader
+import ImageUploader from "./ImageUploader";
 
 const ProductForm = ({
   isOpen,
@@ -29,7 +26,6 @@ const ProductForm = ({
 
   const [expandedSections, setExpandedSections] = useState({
     basic: true,
-    variants: false,
     pricing: false,
     media: false,
     advanced: false,
@@ -61,18 +57,8 @@ const ProductForm = ({
     popularity: "",
     items: "",
     color: "from-pink-400 to-rose-400",
-    variants: [],
   });
 
-  const [variantForm, setVariantForm] = useState({
-    name: "",
-    value: "",
-    price: "",
-    image: "",
-    stock: "",
-  });
-
-  // ✅ Mettre à jour les refs lorsque formData change
   useEffect(() => {
     Object.keys(inputRefs).forEach((key) => {
       if (inputRefs[key]?.current && formData[key] !== undefined) {
@@ -81,45 +67,12 @@ const ProductForm = ({
     });
   }, [formData]);
 
-  const updateFromRefs = () => {
-    const newData = { ...formData };
-    Object.keys(inputRefs).forEach((key) => {
-      if (inputRefs[key]?.current) {
-        newData[key] = inputRefs[key].current.value;
-      }
-    });
-    setFormData(newData);
-    return newData;
-  };
-
-  // ✅ Callback pour l'upload d'image
-  const handleImageUpload = (fileName) => {
-    // ✅ Mettre à jour formData avec le nom du fichier
-    setFormData((prev) => ({ ...prev, image: fileName }));
-    
-    // ✅ Mettre à jour la ref
+  const handleImageUpload = (imageUrl) => {
+    console.log('📸 Image reçue dans ProductForm:', imageUrl);
+    setFormData((prev) => ({ ...prev, image: imageUrl }));
     if (inputRefs.image?.current) {
-      inputRefs.image.current.value = fileName;
+      inputRefs.image.current.value = imageUrl;
     }
-  };
-
-  const addVariant = () => {
-    if (!variantForm.name || !variantForm.value) {
-      alert("Veuillez remplir le nom et la valeur de la variante");
-      return;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      variants: [...prev.variants, { ...variantForm, id: Date.now() }],
-    }));
-    setVariantForm({ name: "", value: "", price: "", image: "", stock: "" });
-  };
-
-  const removeVariant = (id) => {
-    setFormData((prev) => ({
-      ...prev,
-      variants: prev.variants.filter((v) => v.id !== id),
-    }));
   };
 
   const generateNextId = (category, type) => {
@@ -163,7 +116,6 @@ const ProductForm = ({
         popularity: editingProduct.popularity || "",
         items: editingProduct.items ? editingProduct.items.join("\n") : "",
         color: editingProduct.color || "from-pink-400 to-rose-400",
-        variants: editingProduct.variants || [],
       };
       setFormData(data);
 
@@ -188,7 +140,6 @@ const ProductForm = ({
         popularity: "",
         items: "",
         color: "from-pink-400 to-rose-400",
-        variants: [],
       };
       setFormData(data);
 
@@ -222,6 +173,9 @@ const ProductForm = ({
 
     setFormData(currentData);
 
+    console.log('📦 Données du formulaire:', currentData);
+    console.log('📸 Image dans le formulaire:', currentData.image);
+
     if (!currentData.id) {
       alert("L'ID est requis");
       return;
@@ -242,7 +196,7 @@ const ProductForm = ({
       id: currentData.id,
       name: currentData.name,
       category: currentData.category,
-      description: currentData.description,
+      description: currentData.description || "",
       emoji: currentData.emoji || "✨",
       image: currentData.image || "",
       tags: currentData.tags
@@ -253,7 +207,6 @@ const ProductForm = ({
         : [],
       popularity: currentData.popularity || "",
       color: currentData.color || "from-pink-400 to-rose-400",
-      variants: currentData.variants || [],
     };
 
     if (currentData.price) {
@@ -266,6 +219,7 @@ const ProductForm = ({
       newProduct.items = currentData.items.split("\n").filter((i) => i.trim());
     }
 
+    console.log('✅ Produit à sauvegarder:', newProduct);
     onSave(newProduct);
   };
 
@@ -390,7 +344,6 @@ const ProductForm = ({
 
         {/* CORPS */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {/* Section: Informations de base */}
           <Section title="Informations" icon="📝" section="basic">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -536,194 +489,24 @@ const ProductForm = ({
             <Input label="Emoji" name="emoji" placeholder="✨" />
           </Section>
 
-          {/* ✅ Section: Image avec ImageUploader */}
           <Section title="Image du produit" icon="🖼️" section="media">
             <ImageUploader
               onImageUpload={handleImageUpload}
               currentImage={formData.image}
             />
             
+            {formData.image && formData.image.includes('supabase.co') && (
+              <div className="flex items-center gap-2 text-xs text-green-500 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-500/20">
+                <Check className="w-3.5 h-3.5" />
+                <span className="truncate">✅ Image sur Supabase Storage</span>
+              </div>
+            )}
+            
             <Input
               label="Tags (séparés par des virgules)"
               name="tags"
               placeholder="Soin, Visage"
             />
-          </Section>
-
-          {/* Section: Variantes */}
-          <Section
-            title="Variantes (Couleurs, Tailles...)"
-            icon="🎨"
-            section="variants"
-          >
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-0.5">
-                    Type
-                  </label>
-                  <select
-                    value={variantForm.name}
-                    onChange={(e) =>
-                      setVariantForm((prev) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
-                      darkMode
-                        ? "bg-[#2a2a4a] border-[#2d3748] text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-800"
-                    } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
-                  >
-                    <option value="">Type...</option>
-                    <option value="couleur">🎨 Couleur</option>
-                    <option value="taille">📏 Taille</option>
-                    <option value="motif">✨ Motif</option>
-                    <option value="matiere">🧵 Matière</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-0.5">
-                    Valeur
-                  </label>
-                  <input
-                    type="text"
-                    value={variantForm.value}
-                    onChange={(e) =>
-                      setVariantForm((prev) => ({
-                        ...prev,
-                        value: e.target.value,
-                      }))
-                    }
-                    placeholder="Rose bonbon"
-                    className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
-                      darkMode
-                        ? "bg-[#2a2a4a] border-[#2d3748] text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-800"
-                    } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="block text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-0.5">
-                    Prix (optionnel)
-                  </label>
-                  <input
-                    type="number"
-                    value={variantForm.price}
-                    onChange={(e) =>
-                      setVariantForm((prev) => ({
-                        ...prev,
-                        price: e.target.value,
-                      }))
-                    }
-                    placeholder="5000"
-                    className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
-                      darkMode
-                        ? "bg-[#2a2a4a] border-[#2d3748] text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-800"
-                    } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-0.5">
-                    Stock
-                  </label>
-                  <input
-                    type="number"
-                    value={variantForm.stock}
-                    onChange={(e) =>
-                      setVariantForm((prev) => ({
-                        ...prev,
-                        stock: e.target.value,
-                      }))
-                    }
-                    placeholder="10"
-                    className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
-                      darkMode
-                        ? "bg-[#2a2a4a] border-[#2d3748] text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-800"
-                    } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-0.5">
-                    Image de la variante
-                  </label>
-                  <input
-                    type="text"
-                    value={variantForm.image}
-                    onChange={(e) =>
-                      setVariantForm((prev) => ({
-                        ...prev,
-                        image: e.target.value,
-                      }))
-                    }
-                    placeholder="rose.jpg"
-                    className={`w-full px-2 py-1.5 rounded-lg border text-xs ${
-                      darkMode
-                        ? "bg-[#2a2a4a] border-[#2d3748] text-white"
-                        : "bg-gray-50 border-gray-200 text-gray-800"
-                    } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
-                  />
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={addVariant}
-                className="w-full py-2 rounded-xl border-2 border-dashed border-gold/50 text-gold text-sm font-medium hover:bg-gold/5 transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Ajouter une variante
-              </button>
-            </div>
-
-            {formData.variants.length > 0 && (
-              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {formData.variants.map((variant) => (
-                  <div
-                    key={variant.id}
-                    className={`flex items-center gap-2 p-2 rounded-lg ${darkMode ? "bg-[#141425]" : "bg-gray-50"} border ${darkMode ? "border-[#2d3748]" : "border-gray-200"}`}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-[#2a2a4a] flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {variant.image ? (
-                        <img
-                          src={`/images/${variant.image}`}
-                          alt={variant.value}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.parentElement.innerHTML = `<span class="text-lg">📷</span>`;
-                          }}
-                        />
-                      ) : (
-                        <ImageIcon className="w-4 h-4 text-gray-400" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
-                        {variant.value}
-                      </p>
-                      <p className="text-[9px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-                        <span>{variant.name}</span>
-                        {variant.price && <span>• {variant.price} FCFA</span>}
-                        {variant.stock && <span>• Stock: {variant.stock}</span>}
-                        {variant.image && <span className="text-gold">🖼️</span>}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(variant.id)}
-                      className="p-1 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </Section>
 
           <Section title="Prix" icon="💰" section="pricing">
