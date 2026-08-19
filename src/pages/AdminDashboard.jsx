@@ -1,4 +1,4 @@
-// 📄 src/pages/AdminDashboard.jsx - Version corrigée
+// 📄 src/pages/AdminDashboard.jsx - Version finale
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -32,7 +32,6 @@ const AdminDashboard = () => {
   const [syncStatus, setSyncStatus] = useState("idle");
   const [isOnline, setIsOnline] = useState(true);
 
-  // ✅ Charger les produits depuis Supabase
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoading(true);
@@ -64,15 +63,13 @@ const AdminDashboard = () => {
           }));
           setProducts(formatted);
           setIsOnline(true);
-          console.log(`✅ ${formatted.length} produits chargés depuis Supabase`);
         } else {
-          console.warn("⚠️ Supabase vide, utilisation des données locales");
           const all = [...allProducts.women, ...allProducts.men];
           setProducts(all);
           setIsOnline(false);
         }
       } catch (error) {
-        console.error("❌ Erreur de chargement:", error);
+        console.error("Erreur de chargement:", error);
         const all = [...allProducts.women, ...allProducts.men];
         setProducts(all);
         setIsOnline(false);
@@ -84,45 +81,52 @@ const AdminDashboard = () => {
     loadProducts();
   }, []);
 
-  // ✅ Ajouter un produit
   const handleAddProduct = async (newProduct) => {
     try {
       setSyncStatus("syncing");
 
-      console.log('📦 Nouveau produit:', newProduct);
-      console.log('📸 Image:', newProduct.image);
+      const imageToSave = newProduct.image || "";
 
-      const updated = [...products, newProduct];
-      setProducts(updated);
+      const { data, error } = await supabase
+        .from("products")
+        .insert([
+          {
+            id: newProduct.id,
+            name: newProduct.name,
+            category: newProduct.category,
+            description: newProduct.description || "",
+            emoji: newProduct.emoji || "✨",
+            image: imageToSave,
+            tags: newProduct.tags || [],
+            price: newProduct.price || null,
+            price_range: newProduct.priceRange || null,
+            items: newProduct.items || [],
+            variants: newProduct.variants || [],
+            popularity: newProduct.popularity || "",
+            color: newProduct.color || "from-pink-400 to-rose-400",
+          },
+        ])
+        .select();
 
-      const { error } = await supabase.from("products").insert([
-        {
-          id: newProduct.id,
-          name: newProduct.name,
-          category: newProduct.category,
-          description: newProduct.description || "",
-          emoji: newProduct.emoji || "✨",
-          image: newProduct.image || "",
-          tags: newProduct.tags || [],
-          price: newProduct.price || null,
-          price_range: newProduct.priceRange || null,
-          items: newProduct.items || [],
-          variants: newProduct.variants || [],
-          popularity: newProduct.popularity || "",
-          color: newProduct.color || "from-pink-400 to-rose-400",
-        },
-      ]);
+      if (error) throw error;
 
-      if (error) {
-        console.error('❌ Erreur Supabase:', error);
-        throw error;
+      if (data && data.length > 0) {
+        const formatted = data.map((p) => ({
+          ...p,
+          priceRange: p.price_range || p.priceRange || "",
+          tags: p.tags || [],
+          items: p.items || [],
+          variants: p.variants || [],
+          image: p.image || "",
+        }));
+        setProducts([...products, ...formatted]);
       }
 
       setSyncStatus("success");
       setIsOnline(true);
       setTimeout(() => setSyncStatus("idle"), 3000);
     } catch (error) {
-      console.error("❌ Erreur de sauvegarde:", error);
+      console.error("Erreur de sauvegarde:", error);
       setSyncStatus("error");
       setIsOnline(false);
       setTimeout(() => setSyncStatus("idle"), 3000);
@@ -132,48 +136,59 @@ const AdminDashboard = () => {
     setEditingProduct(null);
   };
 
-  // ✅ Modifier un produit
   const handleEditProduct = async (updatedProduct) => {
     try {
       setSyncStatus("syncing");
 
-      console.log('📝 Produit mis à jour:', updatedProduct.id);
-      console.log('📸 Image:', updatedProduct.image);
+      const cleanId = updatedProduct.id.trim();
+      const imageToSave = updatedProduct.image || "";
 
-      const updated = products.map((p) =>
-        p.id === updatedProduct.id ? updatedProduct : p
-      );
-      setProducts(updated);
+      const updateData = {
+        name: updatedProduct.name,
+        category: updatedProduct.category,
+        description: updatedProduct.description || "",
+        emoji: updatedProduct.emoji || "✨",
+        image: imageToSave,
+        tags: updatedProduct.tags || [],
+        price: updatedProduct.price || null,
+        price_range: updatedProduct.priceRange || null,
+        items: updatedProduct.items || [],
+        variants: updatedProduct.variants || [],
+        popularity: updatedProduct.popularity || "",
+        color: updatedProduct.color || "from-pink-400 to-rose-400",
+        updated_at: new Date().toISOString(),
+      };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("products")
-        .update({
-          name: updatedProduct.name,
-          category: updatedProduct.category,
-          description: updatedProduct.description || "",
-          emoji: updatedProduct.emoji || "✨",
-          image: updatedProduct.image || "",
-          tags: updatedProduct.tags || [],
-          price: updatedProduct.price || null,
-          price_range: updatedProduct.priceRange || null,
-          items: updatedProduct.items || [],
-          variants: updatedProduct.variants || [],
-          popularity: updatedProduct.popularity || "",
-          color: updatedProduct.color || "from-pink-400 to-rose-400",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", updatedProduct.id);
+        .update(updateData)
+        .eq("id", cleanId)
+        .select();
 
-      if (error) {
-        console.error('❌ Erreur Supabase:', error);
-        throw error;
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const formatted = data.map((p) => ({
+          ...p,
+          priceRange: p.price_range || p.priceRange || "",
+          tags: p.tags || [],
+          items: p.items || [],
+          variants: p.variants || [],
+          image: p.image || "",
+        }));
+
+        const updated = products.map((p) => {
+          const found = formatted.find((f) => f.id === p.id);
+          return found ? { ...p, ...found } : p;
+        });
+        setProducts(updated);
       }
 
       setSyncStatus("success");
       setIsOnline(true);
       setTimeout(() => setSyncStatus("idle"), 3000);
     } catch (error) {
-      console.error("❌ Erreur de modification:", error);
+      console.error("Erreur de modification:", error);
       setSyncStatus("error");
       setIsOnline(false);
       setTimeout(() => setSyncStatus("idle"), 3000);
@@ -183,7 +198,6 @@ const AdminDashboard = () => {
     setEditingProduct(null);
   };
 
-  // ✅ Supprimer un produit
   const handleDeleteProduct = async (id) => {
     if (!window.confirm("Supprimer ce produit ?")) return;
 
@@ -203,14 +217,13 @@ const AdminDashboard = () => {
       setIsOnline(true);
       setTimeout(() => setSyncStatus("idle"), 3000);
     } catch (error) {
-      console.error("❌ Erreur de suppression:", error);
+      console.error("Erreur de suppression:", error);
       setSyncStatus("error");
       setIsOnline(false);
       setTimeout(() => setSyncStatus("idle"), 3000);
     }
   };
 
-  // ✅ Synchroniser depuis Supabase
   const handleSync = async () => {
     setSyncStatus("syncing");
 
@@ -242,19 +255,17 @@ const AdminDashboard = () => {
         setProducts(formatted);
         setIsOnline(true);
         setSyncStatus("success");
-        console.log(`✅ ${formatted.length} produits synchronisés`);
       } else {
         setSyncStatus("error");
       }
     } catch (error) {
-      console.error("❌ Erreur de synchronisation:", error);
+      console.error("Erreur de synchronisation:", error);
       setSyncStatus("error");
     }
 
     setTimeout(() => setSyncStatus("idle"), 3000);
   };
 
-  // ✅ Exporter les données
   const handleExport = () => {
     downloadProductsFile(products);
   };
@@ -293,22 +304,14 @@ const AdminDashboard = () => {
     return "-";
   };
 
-  // ✅ Fonction corrigée - Évite l'erreur "undefined"
   const getProductImage = (product) => {
-    // ✅ Vérifier que product existe
     if (!product) return null;
-    
-    // ✅ Vérifier que l'image existe et n'est pas vide
-    if (!product.image || product.image === '') return null;
-    
-    // ✅ Si c'est une URL complète (Supabase, Cloudinary, etc.)
-    if (product.image.startsWith('http://') || product.image.startsWith('https://')) {
+    if (!product.image || product.image === "") return null;
+    if (product.image.startsWith("http://") || product.image.startsWith("https://")) {
       return product.image;
     }
-    
-    // ✅ Si c'est une image locale
-    if (product.image.startsWith('/')) return product.image;
-    if (product.image.startsWith('images/')) return `/${product.image}`;
+    if (product.image.startsWith("/")) return product.image;
+    if (product.image.startsWith("images/")) return `/${product.image}`;
     return `/images/${product.image}`;
   };
 
@@ -327,7 +330,6 @@ const AdminDashboard = () => {
 
   return (
     <div className={`min-h-screen pb-20 ${isDark ? "bg-[#0d0d1a]" : "bg-gray-50"}`}>
-      {/* HEADER */}
       <div
         className={`sticky top-0 z-20 ${
           isDark ? "bg-[#1a1a2e]" : "bg-white"
@@ -403,10 +405,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* RECHERCHE */}
-      <div
-        className="px-4 py-3 sticky top-[61px] z-10 bg-gray-50/95 dark:bg-[#0d0d1a]/95 backdrop-blur-sm border-b border-gray-100 dark:border-[#2d3748]"
-      >
+      <div className="px-4 py-3 sticky top-[61px] z-10 bg-gray-50/95 dark:bg-[#0d0d1a]/95 backdrop-blur-sm border-b border-gray-100 dark:border-[#2d3748]">
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -486,7 +485,6 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* LISTE DES PRODUITS */}
       <div className="px-4 py-3">
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
@@ -524,7 +522,6 @@ const AdminDashboard = () => {
                         alt={product.name}
                         className="w-full h-full object-contain"
                         onError={(e) => {
-                          console.warn('⚠️ Erreur chargement image:', imageUrl);
                           e.target.style.display = "none";
                         }}
                       />
@@ -608,7 +605,6 @@ const AdminDashboard = () => {
                         alt={product.name}
                         className="w-full h-full object-contain"
                         onError={(e) => {
-                          console.warn('⚠️ Erreur chargement image:', imageUrl);
                           e.target.style.display = "none";
                         }}
                       />
@@ -652,7 +648,6 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* BOUTON AJOUTER */}
       <button
         onClick={openAddModal}
         className="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-gold text-gray-900 shadow-xl shadow-gold/30 flex items-center justify-center hover:scale-110 transition-all active:scale-95"
@@ -660,7 +655,6 @@ const AdminDashboard = () => {
         <Plus className="w-6 h-6" />
       </button>
 
-      {/* MODAL */}
       <ProductForm
         isOpen={isModalOpen}
         onClose={() => {
