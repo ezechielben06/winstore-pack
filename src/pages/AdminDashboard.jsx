@@ -1,4 +1,4 @@
-// 📄 src/pages/AdminDashboard.jsx - Version avec Supabase
+// 📄 src/pages/AdminDashboard.jsx - Version complète avec Supabase
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
-  const [syncStatus, setSyncStatus] = useState('idle'); // idle | syncing | success | error
+  const [syncStatus, setSyncStatus] = useState('idle');
   const [isOnline, setIsOnline] = useState(true);
 
   // ✅ Charger les produits depuis Supabase
@@ -45,26 +45,24 @@ const AdminDashboard = () => {
       
       try {
         // ✅ Vérifier si des produits existent dans Supabase
-        const { data: existing, error: checkError } = await supabase
+        const { count, error: countError } = await supabase
           .from('products')
-          .select('count', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
         
         // ✅ Si la table est vide, initialiser avec les produits locaux
-        if (checkError || existing === null) {
+        if (count === 0 || countError) {
           console.log('📦 Initialisation des produits dans Supabase...');
           
-          // Récupérer les produits locaux
           const localProducts = [...allProducts.women, ...allProducts.men];
           
-          // Formater pour Supabase
           const formatted = localProducts.map(p => ({
             ...p,
+            price_range: p.priceRange || null,
             tags: p.tags || [],
             items: p.items || [],
             variants: p.variants || [],
           }));
           
-          // Insérer par lots
           const batchSize = 50;
           for (let i = 0; i < formatted.length; i += batchSize) {
             const batch = formatted.slice(i, i + batchSize);
@@ -72,7 +70,10 @@ const AdminDashboard = () => {
               .from('products')
               .insert(batch);
             
-            if (error) throw error;
+            if (error) {
+              console.error('❌ Erreur d\'insertion:', error);
+              throw error;
+            }
           }
           
           console.log(`✅ ${formatted.length} produits initialisés`);
@@ -89,6 +90,7 @@ const AdminDashboard = () => {
         if (data && data.length > 0) {
           const formatted = data.map(p => ({
             ...p,
+            priceRange: p.price_range || p.priceRange || '',
             tags: p.tags || [],
             items: p.items || [],
             variants: p.variants || [],
@@ -104,7 +106,6 @@ const AdminDashboard = () => {
         
       } catch (error) {
         console.error('❌ Erreur de chargement:', error);
-        // Fallback sur les données locales
         const all = [...allProducts.women, ...allProducts.men];
         setProducts(all);
         setIsOnline(false);
@@ -121,15 +122,14 @@ const AdminDashboard = () => {
     try {
       setSyncStatus('syncing');
       
-      // Ajouter localement
       const updated = [...products, newProduct];
       setProducts(updated);
       
-      // Ajouter dans Supabase
       const { error } = await supabase
         .from('products')
         .insert([{
           ...newProduct,
+          price_range: newProduct.priceRange || null,
           tags: newProduct.tags || [],
           items: newProduct.items || [],
           variants: newProduct.variants || [],
@@ -157,15 +157,14 @@ const AdminDashboard = () => {
     try {
       setSyncStatus('syncing');
       
-      // Modifier localement
       const updated = products.map(p => p.id === updatedProduct.id ? updatedProduct : p);
       setProducts(updated);
       
-      // Modifier dans Supabase
       const { error } = await supabase
         .from('products')
         .update({
           ...updatedProduct,
+          price_range: updatedProduct.priceRange || null,
           tags: updatedProduct.tags || [],
           items: updatedProduct.items || [],
           variants: updatedProduct.variants || [],
@@ -197,10 +196,8 @@ const AdminDashboard = () => {
     try {
       setSyncStatus('syncing');
       
-      // Supprimer localement
       setProducts(products.filter(p => p.id !== id));
       
-      // Supprimer dans Supabase
       const { error } = await supabase
         .from('products')
         .delete()
@@ -235,6 +232,7 @@ const AdminDashboard = () => {
       if (data && data.length > 0) {
         const formatted = data.map(p => ({
           ...p,
+          priceRange: p.price_range || p.priceRange || '',
           tags: p.tags || [],
           items: p.items || [],
           variants: p.variants || [],
