@@ -34,7 +34,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
     const phoneNumber = '2290153096537';
     
-    // ✅ Message corrigé : WIN'S PACK au lieu de WIN'STORE PACKS
     let message = '🛍️ *NOUVELLE COMMANDE WIN\'S PACK*%0A%0A';
     message += '📦 *Détails de la commande :*%0A%0A';
     
@@ -42,7 +41,33 @@ const CartDrawer = ({ isOpen, onClose }) => {
       const itemName = item.variant ? `${item.name} (${item.variant.value})` : item.name;
       message += `${index + 1}. *${itemName}*%0A`;
       message += `   Quantité: ${item.quantity}%0A`;
-      message += `   Prix: ${(item.price * item.quantity).toLocaleString()} FCFA%0A%0A`;
+      message += `   Prix: ${(item.price * item.quantity).toLocaleString()} FCFA%0A`;
+      
+      // ✅ SI C'EST UN PACK PERSONNALISÉ, AFFICHER LE DÉTAIL DES ARTICLES
+      if (item.isCustom && item.items && item.items.length > 0) {
+        message += `   📦 *Contenu du pack :*%0A`;
+        // Compter les occurrences de chaque article
+        const itemCount = {};
+        item.items.forEach(i => {
+          itemCount[i] = (itemCount[i] || 0) + 1;
+        });
+        Object.keys(itemCount).forEach(i => {
+          message += `      • ${i}${itemCount[i] > 1 ? ` (x${itemCount[i]})` : ''}%0A`;
+        });
+      }
+      
+      // ✅ SI C'EST UN PACK NORMAL AVEC DES ARTICLES
+      if (item.items && item.items.length > 0 && !item.isCustom) {
+        message += `   📦 *Contenu du pack :*%0A`;
+        item.items.slice(0, 5).forEach(i => {
+          message += `      • ${i}%0A`;
+        });
+        if (item.items.length > 5) {
+          message += `      • + ${item.items.length - 5} autres articles%0A`;
+        }
+      }
+      
+      message += '%0A';
     });
     
     message += `💰 *Total: ${totalPrice.toLocaleString()} FCFA*%0A%0A`;
@@ -50,7 +75,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
     message += 'Nom: %0A';
     message += 'Adresse: %0A';
     message += 'Téléphone: %0A%0A';
-    // ✅ Correction ici aussi
     message += '🙏 Merci pour votre confiance ! WIN\'S PACK ✨';
 
     const url = `https://wa.me/${phoneNumber}?text=${message}`;
@@ -132,6 +156,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
               const itemPrice = item.price || 0;
               const totalItemPrice = itemPrice * item.quantity;
               const isPack = item.category === 'pack';
+              const isCustom = item.isCustom;
 
               return (
                 <div
@@ -151,10 +176,20 @@ const CartDrawer = ({ isOpen, onClose }) => {
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm truncate text-gray-800 dark:text-white">
                       {item.name}
+                      {isCustom && (
+                        <span className="ml-1 text-[8px] font-bold text-gold bg-gold/20 px-1.5 py-0.5 rounded-full">
+                          PERSONNALISÉ
+                        </span>
+                      )}
                     </h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {itemPrice.toLocaleString()} FCFA
                     </p>
+                    {isCustom && item.items && (
+                      <p className="text-[8px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                        {item.items.length} articles
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}

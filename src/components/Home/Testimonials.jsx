@@ -1,12 +1,14 @@
-// 📄 src/components/Home/Testimonials.jsx - Version améliorée
-import { Star, Quote, Instagram, MessageCircle, Music, Sparkles } from 'lucide-react';
+// 📄 src/components/Home/Testimonials.jsx - Version avec packs
+import { Star, Quote, Instagram, MessageCircle, Music } from 'lucide-react';
 import { SOCIAL_LINKS } from '../../config/constants';
 
 const testimonials = [
+  // ===== PACKS FEMME =====
   {
     id: 1,
     name: 'Sarah K.',
     role: 'Étudiante',
+    pack: 'Campus Girl Pack',
     comment: 'Le Campus Girl Pack m\'a changé la vie ! Organisation, style et confiance, tout est réuni. Je le recommande à toutes mes amies.',
     rating: 5,
     emoji: '🎓',
@@ -16,6 +18,7 @@ const testimonials = [
     id: 2,
     name: 'Laura M.',
     role: 'Influenceuse',
+    pack: 'Glow Queen Pack',
     comment: 'Glow Queen Pack est mon coup de cœur ! Ma peau n\'a jamais été aussi lumineuse. Les produits sont de qualité et le packaging est magnifique.',
     rating: 5,
     emoji: '✨',
@@ -23,39 +26,55 @@ const testimonials = [
   },
   {
     id: 3,
-    name: 'Kevin D.',
-    role: 'Sportif',
-    comment: 'Le Pack Sportif Homme est parfait pour mon quotidien. Fraîcheur, soin et style, tout ce qu\'il faut pour un homme actif.',
-    rating: 5,
-    emoji: '💪',
-    social: 'tiktok'
-  },
-  {
-    id: 4,
     name: 'Marie C.',
     role: 'Cadre',
+    pack: 'Confidence Pack',
     comment: 'J\'ai créé mon propre pack et je suis ravie ! La personnalisation est top, et la livraison rapide. Merci Win\'S Packs !',
     rating: 5,
-    emoji: '👑',
+    emoji: '💪',
     social: 'whatsapp'
+  },
+
+  // ===== PACKS HOMME =====
+  {
+    id: 4,
+    name: 'Kevin D.',
+    role: 'Sportif',
+    pack: 'Campus Boy Pack',
+    comment: 'Le Campus Boy Pack est parfait pour mon quotidien. Fraîcheur, soin et style, tout ce qu\'il faut pour un étudiant actif.',
+    rating: 5,
+    emoji: '🎓',
+    social: 'tiktok'
   },
   {
     id: 5,
-    name: 'Amélie D.',
-    role: 'Beauté & Soin',
-    comment: 'Les produits Win\'S Packs sont d\'une qualité exceptionnelle. Je recommande vivement !',
+    name: 'Thomas L.',
+    role: 'Entrepreneur',
+    pack: 'Gentleman Pack',
+    comment: 'Le Gentleman Pack m\'a permis de découvrir des produits que je n\'aurais jamais testés. Une vraie révélation !',
     rating: 5,
-    emoji: '🌸',
-    social: 'instagram'
+    emoji: '👔',
+    social: 'tiktok'
   },
   {
     id: 6,
-    name: 'Thomas L.',
-    role: 'Sportif',
-    comment: 'Le Pack Premium Homme m\'a permis de découvrir des produits que je n\'aurais jamais testés. Une vraie révélation !',
+    name: 'Amélie D.',
+    role: 'Beauté & Soin',
+    pack: 'Self-Care Man Pack',
+    comment: 'Le Self-Care Man Pack est parfait pour prendre soin de soi. Mon mari adore !',
     rating: 5,
-    emoji: '🔥',
-    social: 'tiktok'
+    emoji: '🧖',
+    social: 'instagram'
+  },
+  {
+    id: 7,
+    name: 'Jean M.',
+    role: 'Sportif',
+    pack: 'Confidence Man Pack',
+    comment: 'Le Confidence Man Pack m\'a redonné confiance en moi. Je le recommande à tous mes amis.',
+    rating: 5,
+    emoji: '💪',
+    social: 'whatsapp'
   },
 ];
 
@@ -69,12 +88,6 @@ const socialLabels = {
   instagram: 'Instagram',
   tiktok: 'TikTok',
   whatsapp: 'WhatsApp'
-};
-
-const socialColors = {
-  instagram: 'bg-gradient-to-r from-pink-500 to-purple-500',
-  tiktok: 'bg-gradient-to-r from-black to-gray-800',
-  whatsapp: 'bg-gradient-to-r from-green-500 to-green-600'
 };
 
 const socialBg = {
@@ -119,6 +132,12 @@ const Testimonials = () => {
                 <span className="ml-1 text-xs text-gray-400">5.0</span>
               </div>
               
+              {/* Pack */}
+              <div className="text-xs font-medium text-gold mb-1.5 flex items-center gap-1.5">
+                <span>{testimonial.emoji}</span>
+                {testimonial.pack}
+              </div>
+
               {/* Commentaire */}
               <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-3">"{testimonial.comment}"</p>
               
@@ -163,7 +182,7 @@ const Testimonials = () => {
             TikTok
           </a>
           <a
-            href="https://wa.me/2290153096537"
+            href={SOCIAL_LINKS.whatsapp}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-lg shadow-green-500/30 text-sm"

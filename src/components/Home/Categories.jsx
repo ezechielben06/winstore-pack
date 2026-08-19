@@ -1,9 +1,10 @@
-// 📄 src/components/Home/Categories.jsx - Version améliorée
+// 📄 src/components/Home/Categories.jsx - Version sans images
 import { Link } from 'react-router-dom';
-import { ArrowRight, Gift, Crown, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowRight, Gift } from 'lucide-react';
 
 const Categories = () => {
   const categories = [
+    // ===== PACKS FEMME =====
     {
       name: 'Campus Girl Pack',
       emoji: '🎓',
@@ -31,24 +32,46 @@ const Categories = () => {
       items: '3 packs disponibles',
       link: '/femme',
     },
+
+    // ===== PACKS HOMME =====
     {
-      name: 'Pack Sportif Homme',
-      emoji: '🏃',
-      description: 'Performance & style',
+      name: 'Campus Boy Pack',
+      emoji: '🎓',
+      description: 'Organisation & productivité',
       color: 'from-cyan-400 to-blue-500',
       bg: 'bg-cyan-50',
-      items: '2 packs disponibles',
+      items: '3 packs disponibles',
       link: '/homme',
     },
     {
-      name: 'Pack Premium Homme',
-      emoji: '👑',
-      description: 'L\'excellence au quotidien',
+      name: 'Gentleman Pack',
+      emoji: '👔',
+      description: 'Élégance & distinction',
       color: 'from-indigo-400 to-purple-500',
       bg: 'bg-indigo-50',
-      items: 'Pack exclusif',
+      items: '3 packs disponibles',
       link: '/homme',
     },
+    {
+      name: 'Confidence Man Pack',
+      emoji: '💪',
+      description: 'Confiance & ambition',
+      color: 'from-purple-400 to-pink-500',
+      bg: 'bg-purple-50',
+      items: '3 packs disponibles',
+      link: '/homme',
+    },
+    {
+      name: 'Self-Care Man Pack',
+      emoji: '🧖',
+      description: 'Soin & bien-être',
+      color: 'from-green-400 to-emerald-500',
+      bg: 'bg-green-50',
+      items: '3 packs disponibles',
+      link: '/homme',
+    },
+
+    // ===== CRÉER SON PACK =====
     {
       name: 'Create Your Own Pack',
       emoji: '🎨',
@@ -83,10 +106,7 @@ const Categories = () => {
               to={cat.link}
               className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 hover:border-gold/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
             >
-              {/* Image de fond */}
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 opacity-10"
-                style={{ backgroundImage: `url(${cat.image})` }}
-              />
+              <div className={`absolute inset-0 opacity-0 ${cat.bg}`} />
               <div className="relative p-5">
                 <div className="flex items-start gap-4">
                   <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${cat.color} text-3xl group-hover:scale-110 transition-transform duration-300 shadow-lg flex-shrink-0`}>
