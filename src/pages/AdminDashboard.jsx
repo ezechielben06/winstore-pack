@@ -1,4 +1,4 @@
-// 📄 src/pages/AdminDashboard.jsx
+// 📄 src/pages/AdminDashboard.jsx - Version corrigée
 import { useState, useEffect } from "react";
 import {
   Plus,
@@ -293,11 +293,20 @@ const AdminDashboard = () => {
     return "-";
   };
 
+  // ✅ Fonction corrigée - Évite l'erreur "undefined"
   const getProductImage = (product) => {
-    if (!product.image) return null;
+    // ✅ Vérifier que product existe
+    if (!product) return null;
+    
+    // ✅ Vérifier que l'image existe et n'est pas vide
+    if (!product.image || product.image === '') return null;
+    
+    // ✅ Si c'est une URL complète (Supabase, Cloudinary, etc.)
     if (product.image.startsWith('http://') || product.image.startsWith('https://')) {
       return product.image;
     }
+    
+    // ✅ Si c'est une image locale
     if (product.image.startsWith('/')) return product.image;
     if (product.image.startsWith('images/')) return `/${product.image}`;
     return `/images/${product.image}`;
