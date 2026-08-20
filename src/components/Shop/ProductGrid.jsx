@@ -1,7 +1,29 @@
-// 📄 src/components/Shop/ProductGrid.jsx - Version corrigée
+// 📄 src/components/Shop/ProductGrid.jsx - Avec squelette
 import ProductCard from './ProductCard';
 
-const ProductGrid = ({ products, isWomen }) => {
+// ✅ Composant Squelette
+const ProductCardSkeleton = () => (
+  <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-[#2d3748] bg-white dark:bg-[#1a1a2e] animate-pulse">
+    <div className="aspect-square bg-gray-200 dark:bg-[#2a2a4a]" />
+    <div className="p-2.5 space-y-2">
+      <div className="h-3 bg-gray-200 dark:bg-[#2a2a4a] rounded w-3/4" />
+      <div className="h-2 bg-gray-200 dark:bg-[#2a2a4a] rounded w-1/2" />
+      <div className="h-2 bg-gray-200 dark:bg-[#2a2a4a] rounded w-2/3" />
+    </div>
+  </div>
+);
+
+const ProductGrid = ({ products, isWomen, loading }) => {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 gap-1.5">
+        {[...Array(6)].map((_, i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
   if (products.length === 0) {
     return (
       <div className="text-center py-8">
@@ -18,7 +40,6 @@ const ProductGrid = ({ products, isWomen }) => {
 
   return (
     <div className="w-full">
-      {/* Packs */}
       {packs.length > 0 && (
         <div className="mb-3">
           <div className="flex items-center gap-1 mb-1.5">
@@ -32,7 +53,6 @@ const ProductGrid = ({ products, isWomen }) => {
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {packs.map((product) => (
-              // ✅ ICI : on utilise un div, pas un Link
               <div key={product.id}>
                 <ProductCard product={product} isWomen={isWomen} />
               </div>
@@ -41,7 +61,6 @@ const ProductGrid = ({ products, isWomen }) => {
         </div>
       )}
 
-      {/* Produits */}
       {items.length > 0 && (
         <div>
           <div className="flex items-center gap-1 mb-1.5">
@@ -55,7 +74,6 @@ const ProductGrid = ({ products, isWomen }) => {
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {items.map((product) => (
-              // ✅ ICI : on utilise un div, pas un Link
               <div key={product.id}>
                 <ProductCard product={product} isWomen={isWomen} />
               </div>

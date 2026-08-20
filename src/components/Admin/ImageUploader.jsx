@@ -1,4 +1,4 @@
-// 📄 src/components/Admin/ImageUploader.jsx
+// 📄 src/components/Admin/ImageUploader.jsx - Avec compression
 import { useState } from 'react';
 import { Upload, X, Check, AlertCircle, Camera } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -12,23 +12,66 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState(currentImage || null);
 
+  // ✅ Compression d'image
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 600;
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = height * (MAX_WIDTH / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = width * (MAX_HEIGHT / height);
+              height = MAX_HEIGHT;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            resolve(compressedFile);
+          }, 'image/jpeg', 0.75);
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
   const uploadToSupabase = async (file) => {
     try {
       const ext = file.name.split('.').pop().toLowerCase();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
-
-      console.log('📤 Upload vers Supabase:', fileName);
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('products')
         .upload(fileName, file, {
-          cacheControl: '3600',
+          cacheControl: '31536000',
           upsert: false,
-          contentType: file.type,
+          contentType: 'image/jpeg',
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
         throw new Error(uploadError.message);
       }
 
@@ -36,7 +79,6 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
         .from('products')
         .getPublicUrl(fileName);
 
-      console.log('✅ URL générée:', publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('Erreur d\'upload:', error);
@@ -62,20 +104,23 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
     setError(null);
     setSuccess(false);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target.result);
-    };
-    reader.readAsDataURL(file);
-
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setUploadProgress(progress);
-    }, 100);
-
     try {
-      const imageUrl = await uploadToSupabase(file);
+      // ✅ Compression de l'image
+      const compressedFile = await compressImage(file);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target.result);
+      };
+      reader.readAsDataURL(compressedFile);
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        setUploadProgress(progress);
+      }, 100);
+
+      const imageUrl = await uploadToSupabase(compressedFile);
       
       clearInterval(interval);
       setUploadProgress(100);
@@ -91,9 +136,7 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
       setTimeout(() => {
         setSuccess(false);
       }, 3000);
-
     } catch (err) {
-      clearInterval(interval);
       setUploading(false);
       setError(err.message || 'Erreur lors de l\'upload');
     }
@@ -142,7 +185,6 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
               alt="Aperçu"
               className="w-full max-h-48 object-contain rounded-lg mx-auto"
               onError={(e) => {
-                console.warn('⚠️ Erreur chargement image:', preview);
                 e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect width="200" height="200" fill="%23f0f0f0"/%3E%3Ctext x="100" y="110" text-anchor="middle" fill="%23999" font-size="16"%3EImage%3C/text%3E%3C/svg%3E';
               }}
             />
@@ -166,7 +208,7 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
               📸 Choisir une image
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              JPG, PNG, WEBP • Max 10MB
+              JPG, PNG, WEBP • Max 10MB • Compression automatique
             </p>
           </div>
         )}
@@ -224,13 +266,7 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
           <span>💡</span>
           <span>
-            Les images sont stockées sur <span className="font-semibold text-gold">Supabase Storage</span>
-          </span>
-        </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-2">
-          <span>📌</span>
-          <span>
-            L'URL complète est sauvegardée dans la base de données
+            Les images sont compressées automatiquement pour un chargement plus rapide
           </span>
         </p>
       </div>
@@ -238,4 +274,4 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
   );
 };
 
-export default ImageUploader;
+export default ImageUploader; 

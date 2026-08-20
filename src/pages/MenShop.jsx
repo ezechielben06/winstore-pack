@@ -1,4 +1,4 @@
-// 📄 src/pages/MenShop.jsx - Version avec recherche
+// 📄 src/pages/MenShop.jsx - Version avec loading
 import { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Package, ArrowRight, Crown, Grid, List, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -51,7 +51,6 @@ const MenShop = () => {
 
   const allProducts = useMemo(() => [...(products.packs || []), ...(products.men || [])], [products]);
 
-  // ✅ Filtrer par catégorie et recherche
   const filteredProducts = useMemo(() => {
     let results = allProducts;
     
@@ -204,7 +203,7 @@ const MenShop = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher un produit, une catégorie..."
+                  placeholder="Rechercher un produit..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-sm ${
@@ -297,7 +296,7 @@ const MenShop = () => {
               </button>
             </div>
           ) : (
-            <ProductGrid products={filteredProducts} isWomen={false} />
+            <ProductGrid products={filteredProducts} isWomen={false} loading={loading} />
           )}
         </div>
 

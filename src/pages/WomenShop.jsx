@@ -1,4 +1,4 @@
-// 📄 src/pages/WomenShop.jsx - Version avec recherche
+// 📄 src/pages/WomenShop.jsx - Version avec loading
 import { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Package, ArrowRight, Grid, List, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -52,16 +52,13 @@ const WomenShop = () => {
 
   const allProducts = useMemo(() => [...(products.packs || []), ...(products.women || [])], [products]);
 
-  // ✅ Filtrer par catégorie et recherche
   const filteredProducts = useMemo(() => {
     let results = allProducts;
     
-    // Filtre par catégorie
     if (category !== 'all') {
       results = results.filter(p => p.category === category);
     }
     
-    // Filtre par recherche
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase().trim();
       results = results.filter(p => 
@@ -79,22 +76,10 @@ const WomenShop = () => {
     p.popularity === '🌟' || p.popularity === '⭐'
   );
 
-  // ✅ Réinitialiser la recherche
   const clearSearch = () => {
     setSearchTerm('');
     setShowSearch(false);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="mt-3 text-gray-500 dark:text-gray-400">Chargement...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={`min-h-screen ${
@@ -161,7 +146,6 @@ const WomenShop = () => {
           </Link>
           
           <div className="flex items-center gap-2 md:gap-3">
-            {/* ✅ Bouton Recherche */}
             <button
               onClick={() => setShowSearch(!showSearch)}
               className={`p-2 rounded-xl border transition-all ${
@@ -200,7 +184,6 @@ const WomenShop = () => {
           </div>
         </div>
 
-        {/* ✅ Barre de recherche */}
         {showSearch && (
           <div className="mb-4 animate-fade-in">
             <div className="flex items-center gap-2">
@@ -208,7 +191,7 @@ const WomenShop = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher un produit, une catégorie..."
+                  placeholder="Rechercher un produit..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-sm ${
@@ -301,7 +284,7 @@ const WomenShop = () => {
               </button>
             </div>
           ) : (
-            <ProductGrid products={filteredProducts} isWomen />
+            <ProductGrid products={filteredProducts} isWomen loading={loading} />
           )}
         </div>
 
