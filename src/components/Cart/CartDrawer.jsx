@@ -1,4 +1,4 @@
-// 📄 src/components/Cart/CartDrawer.jsx - Version avec prix et quantités
+// 📄 src/components/Cart/CartDrawer.jsx - Version finale
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useState, useEffect } from 'react';
@@ -7,7 +7,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  // ✅ Fermer avec Echap
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && isOpen) onClose();
@@ -16,7 +15,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  // ✅ Bloquer le scroll
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -28,7 +26,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  // ✅ Fonction pour obtenir le chemin de l'image
   const getProductImage = (item) => {
     if (!item.image) return null;
     if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
@@ -45,7 +42,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
     const phoneNumber = '2290153096537';
     
-    // ✅ Message compatible WhatsApp
     let message = '';
     message += '🛍️ *NOUVELLE COMMANDE WIN\'S PACK*\n\n';
     message += '📦 *DÉTAILS DE LA COMMANDE*\n';
@@ -62,13 +58,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
       
       // ✅ PACK PERSONNALISÉ
       if (item.isCustom && item.selectedItems && item.selectedItems.length > 0) {
-        message += `   📋 Contenu du pack :\n`;
+        message += `   📋 *Contenu du pack :*\n`;
         
         const groupedItems = {};
         item.selectedItems.forEach(selected => {
-          const key = selected.name;
+          const key = selected.id || selected.name;
           if (!groupedItems[key]) {
             groupedItems[key] = {
+              id: selected.id,
               name: selected.name,
               price: selected.price || 0,
               quantity: 0,
@@ -84,31 +81,27 @@ const CartDrawer = ({ isOpen, onClose }) => {
           if (article.quantity > 1) {
             message += ` (×${article.quantity})`;
           }
-          message += ` : ${totalArticlePrice.toLocaleString()} FCFA\n`;
+          message += ` : ${totalArticlePrice.toLocaleString()} FCFA`;
+          if (article.quantity === 1) {
+            message += ` (${article.price.toLocaleString()} FCFA/unité)`;
+          }
+          message += '\n';
         });
       }
       
-      // ✅ PACK NORMAL (Campus Girl, Glow Queen, etc.)
+      // ✅ PACK NORMAL
       else if (item.items && item.items.length > 0 && !item.isCustom) {
         message += `   📋 Contenu du pack :\n`;
-        
-        // Compter les occurrences de chaque article
         const itemCount = {};
         item.items.forEach(i => {
           itemCount[i] = (itemCount[i] || 0) + 1;
         });
-        
-        // ✅ Prix par article (on divise le prix du pack par le nombre d'articles)
-        const pricePerItem = item.price / item.items.length;
-        
         Object.keys(itemCount).forEach(i => {
-          const count = itemCount[i];
-          const totalPrice = Math.round(pricePerItem * count);
           message += `      • ${i}`;
-          if (count > 1) {
-            message += ` (×${count})`;
+          if (itemCount[i] > 1) {
+            message += ` (×${itemCount[i]})`;
           }
-          message += ` : ${totalPrice.toLocaleString()} FCFA\n`;
+          message += '\n';
         });
       }
       
@@ -125,14 +118,12 @@ const CartDrawer = ({ isOpen, onClose }) => {
     message += `📦 Articles : ${totalItems}\n`;
     message += '━━━━━━━━━━━━━━━━━━━━\n\n';
     
-    // ✅ INFORMATIONS DE LIVRAISON
     message += '📍 *INFORMATIONS DE LIVRAISON*\n';
     message += '━━━━━━━━━━━━━━━━━━━━\n';
     message += '👤 Nom : \n';
     message += '📮 Adresse : \n';
     message += '📱 Téléphone : \n\n';
     
-    // ✅ MESSAGE DE REMERCIEMENT
     message += '🙏 *Merci pour votre confiance !*\n';
     message += '✨ WIN\'S PACK ✨\n\n';
     message += '📲 Nous vous contacterons sous 24h';
@@ -147,7 +138,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -155,13 +145,11 @@ const CartDrawer = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
 
-      {/* Drawer */}
       <div
         className={`fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-[#1a1a2e] z-50 shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* ===== HEADER ===== */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#2d3748]">
           <div>
             <h2 className="text-xl font-display font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -195,7 +183,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* ===== CONTENU ===== */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[55vh]">
           {cart.length === 0 ? (
             <div className="text-center py-12">
@@ -228,7 +215,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       : 'bg-gray-50 dark:bg-[#1a1a2e] border border-gray-100 dark:border-[#2d3748]'
                   }`}
                 >
-                  {/* ✅ Image du produit */}
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-[#2a2a4a]">
                     {imageUrl ? (
                       <img
@@ -247,7 +233,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     )}
                   </div>
 
-                  {/* Infos */}
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm truncate text-gray-800 dark:text-white">
                       {item.name}
@@ -260,9 +245,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {itemPrice.toLocaleString()} FCFA
                     </p>
-                    {isCustom && item.items && (
+                    {isCustom && item.selectedItems && (
                       <p className="text-[8px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">
-                        {item.items.length} articles
+                        {item.selectedItems.length} articles sélectionnés
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-1">
@@ -284,7 +269,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     </div>
                   </div>
 
-                  {/* Prix total & Suppression */}
                   <div className="text-right flex-shrink-0">
                     <p className="font-bold text-sm text-gray-800 dark:text-white">
                       {totalItemPrice.toLocaleString()} FCFA
@@ -302,10 +286,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* ===== FOOTER ===== */}
         {cart.length > 0 && (
           <div className="border-t border-gray-100 dark:border-[#2d3748] p-4 bg-gray-50 dark:bg-[#141425]">
-            {/* Total */}
             <div className="flex justify-between items-center mb-4">
               <span className="text-gray-600 dark:text-gray-400">Total</span>
               <span className="text-2xl font-display font-bold text-gold">
@@ -313,7 +295,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
               </span>
             </div>
 
-            {/* Bouton Commander */}
             <button
               onClick={handleWhatsAppOrder}
               disabled={isCheckingOut}
@@ -332,7 +313,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
               )}
             </button>
 
-            {/* Infos */}
             <div className="flex items-center justify-center gap-3 mt-3 text-[10px] text-gray-400 dark:text-gray-500">
               <span>📦 Livraison disponible</span>
               <span className="w-px h-3 bg-gray-300 dark:bg-gray-600" />

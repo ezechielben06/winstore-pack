@@ -1,4 +1,4 @@
-// 📄 src/pages/CreatePackPage.jsx - Version avec recherche
+// 📄 src/pages/CreatePackPage.jsx - Version corrigée
 import { useState, useMemo } from 'react';
 import { 
   ArrowLeft, Package, Search, 
@@ -29,10 +29,7 @@ const CreatePackPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const theme = isWomen ? 'feminine' : 'masculine';
-  const themeColor = isWomen ? 'text-feminine-primary' : 'text-masculine-primary';
   const themeBg = isWomen ? 'bg-feminine-primary' : 'bg-masculine-primary';
-  const themeLight = isWomen ? 'bg-feminine-light' : 'bg-masculine-light';
-  const themeBorder = isWomen ? 'border-feminine-primary/20' : 'border-masculine-primary/20';
   const themeGradient = isWomen 
     ? 'from-feminine-primary to-feminine-secondary' 
     : 'from-masculine-primary to-masculine-secondary';
@@ -64,7 +61,6 @@ const CreatePackPage = () => {
     };
   }, [availableProducts]);
 
-  // ✅ Filtrer les produits avec recherche
   const filteredProducts = useMemo(() => {
     let results = availableProducts;
     
@@ -84,8 +80,22 @@ const CreatePackPage = () => {
     return results;
   }, [availableProducts, searchTerm, selectedCategory]);
 
+  // ✅ Fonction pour obtenir le prix d'un produit
+  const getProductPrice = (product) => {
+    return product.price || parseInt(product.priceRange?.split('-')[0]) || 0;
+  };
+
+  // ✅ Ajouter un produit avec son prix
   const addItem = (product) => {
-    if (selectedItems.find(item => item.id === product.id)) {
+    const price = getProductPrice(product);
+    const productWithPrice = {
+      ...product,
+      price: price
+    };
+
+    // Vérifier si le produit existe déjà
+    const existing = selectedItems.find(item => item.id === product.id);
+    if (existing) {
       setSelectedItems(prev => 
         prev.map(item => 
           item.id === product.id 
@@ -95,7 +105,7 @@ const CreatePackPage = () => {
       );
       return;
     }
-    setSelectedItems([...selectedItems, { ...product, quantity: 1 }]);
+    setSelectedItems([...selectedItems, { ...productWithPrice, quantity: 1 }]);
     if (selectedItems.length === 0) {
       setShowSuggestions(false);
     }
@@ -122,7 +132,7 @@ const CreatePackPage = () => {
   };
 
   const totalPrice = selectedItems.reduce((sum, item) => {
-    const price = item.price || parseInt(item.priceRange?.split('-')[0]) || 0;
+    const price = item.price || 0;
     return sum + (price * (item.quantity || 1));
   }, 0);
 
@@ -132,6 +142,7 @@ const CreatePackPage = () => {
     setSearchTerm('');
   };
 
+  // ✅ Créer le pack avec les détails des articles
   const createPack = () => {
     if (selectedItems.length < 3) {
       alert('Un pack doit contenir au moins 3 articles !');
@@ -147,6 +158,14 @@ const CreatePackPage = () => {
       items: selectedItems.flatMap(item => 
         Array(item.quantity || 1).fill(item.name)
       ),
+      // ✅ SAUVEGARDER LES DÉTAILS DES ARTICLES AVEC LEURS PRIX
+      selectedItems: selectedItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price || 0,
+        quantity: item.quantity || 1,
+        emoji: item.emoji || ''
+      })),
       emoji: '🎨',
       isCustom: true,
       popularity: '✨',
@@ -166,10 +185,6 @@ const CreatePackPage = () => {
     setSearchTerm('');
     setSelectedCategory('all');
     setShowSuggestions(true);
-  };
-
-  const getProductPrice = (product) => {
-    return product.price || parseInt(product.priceRange?.split('-')[0]) || 0;
   };
 
   return (
@@ -436,7 +451,7 @@ const CreatePackPage = () => {
                   </div>
                 ) : (
                   selectedItems.map((item) => {
-                    const price = getProductPrice(item);
+                    const price = item.price || 0;
                     const quantity = item.quantity || 1;
                     const total = price * quantity;
 
