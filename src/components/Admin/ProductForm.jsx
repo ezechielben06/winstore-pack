@@ -1,4 +1,4 @@
-// 📄 src/components/Admin/ProductForm.jsx
+// 📄 src/components/Admin/ProductForm.jsx - Version avec VariantManager
 import { useState, useEffect, useRef } from "react";
 import {
   Save,
@@ -9,9 +9,11 @@ import {
   ChevronUp,
   Wand2,
   Check,
+  Palette,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import ImageUploader from "./ImageUploader";
+import VariantManager from "./VariantManager";
 
 const ProductForm = ({
   isOpen,
@@ -28,6 +30,7 @@ const ProductForm = ({
     basic: true,
     pricing: false,
     media: false,
+    variants: true,
     advanced: false,
   });
 
@@ -57,6 +60,7 @@ const ProductForm = ({
     popularity: "",
     items: "",
     color: "from-pink-400 to-rose-400",
+    variants: [],
   });
 
   useEffect(() => {
@@ -68,11 +72,14 @@ const ProductForm = ({
   }, [formData]);
 
   const handleImageUpload = (imageUrl) => {
-    console.log('📸 Image reçue dans ProductForm:', imageUrl);
     setFormData((prev) => ({ ...prev, image: imageUrl }));
     if (inputRefs.image?.current) {
       inputRefs.image.current.value = imageUrl;
     }
+  };
+
+  const handleVariantsChange = (variants) => {
+    setFormData((prev) => ({ ...prev, variants }));
   };
 
   const generateNextId = (category, type) => {
@@ -116,6 +123,7 @@ const ProductForm = ({
         popularity: editingProduct.popularity || "",
         items: editingProduct.items ? editingProduct.items.join("\n") : "",
         color: editingProduct.color || "from-pink-400 to-rose-400",
+        variants: editingProduct.variants || [],
       };
       setFormData(data);
 
@@ -140,6 +148,7 @@ const ProductForm = ({
         popularity: "",
         items: "",
         color: "from-pink-400 to-rose-400",
+        variants: [],
       };
       setFormData(data);
 
@@ -173,9 +182,6 @@ const ProductForm = ({
 
     setFormData(currentData);
 
-    console.log('📦 Données du formulaire:', currentData);
-    console.log('📸 Image dans le formulaire:', currentData.image);
-
     if (!currentData.id) {
       alert("L'ID est requis");
       return;
@@ -207,6 +213,7 @@ const ProductForm = ({
         : [],
       popularity: currentData.popularity || "",
       color: currentData.color || "from-pink-400 to-rose-400",
+      variants: currentData.variants || [],
     };
 
     if (currentData.price) {
@@ -219,7 +226,6 @@ const ProductForm = ({
       newProduct.items = currentData.items.split("\n").filter((i) => i.trim());
     }
 
-    console.log('✅ Produit à sauvegarder:', newProduct);
     onSave(newProduct);
   };
 
@@ -344,6 +350,7 @@ const ProductForm = ({
 
         {/* CORPS */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Section: Informations de base */}
           <Section title="Informations" icon="📝" section="basic">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -489,6 +496,22 @@ const ProductForm = ({
             <Input label="Emoji" name="emoji" placeholder="✨" />
           </Section>
 
+          {/* Section: Variantes */}
+          <Section title="Variantes" icon="🎨" section="variants">
+            <div className="mb-2 flex items-center gap-2">
+              <Palette className="w-4 h-4 text-gold" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {formData.variants?.length || 0} variante(s)
+              </span>
+            </div>
+            <VariantManager
+              variants={formData.variants || []}
+              onVariantsChange={handleVariantsChange}
+              isDark={darkMode}
+            />
+          </Section>
+
+          {/* Section: Image */}
           <Section title="Image du produit" icon="🖼️" section="media">
             <ImageUploader
               onImageUpload={handleImageUpload}
@@ -509,6 +532,7 @@ const ProductForm = ({
             />
           </Section>
 
+          {/* Section: Prix */}
           <Section title="Prix" icon="💰" section="pricing">
             <div className="grid grid-cols-2 gap-3">
               <Input
@@ -525,6 +549,7 @@ const ProductForm = ({
             </div>
           </Section>
 
+          {/* Section: Options avancées */}
           <Section title="Options avancées" icon="⚙️" section="advanced">
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">

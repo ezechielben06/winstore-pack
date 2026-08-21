@@ -1,11 +1,10 @@
-// 📄 src/pages/ProductDetailsPage.jsx - Version Supabase
+// 📄 src/pages/ProductDetailsPage.jsx - Version avec variantes visuelles
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, ShoppingBag, Heart, Share2, Star, 
   Crown, Package, Sparkles, Check, Minus, Plus,
-  Truck, Shield, Clock, Gift, ChevronRight,
-  Palette
+  Truck, Shield, Clock, Gift, ChevronRight
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
@@ -26,17 +25,14 @@ const ProductDetailsPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [loading, setLoading] = useState(true);
-  
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(null);
+  const [currentImage, setCurrentImage] = useState(null);
 
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
       
       try {
-        // ✅ Chercher dans Supabase
         const { data, error } = await supabase
           .from('products')
           .select('*')
@@ -46,12 +42,18 @@ const ProductDetailsPage = () => {
         if (data) {
           setProduct(data);
           
+          // ✅ Initialiser la première variante
           if (data.variants && data.variants.length > 0) {
-            setSelectedVariant(data.variants[0]);
-            const colors = data.variants.filter(v => v.name === 'couleur' || v.name === 'color');
-            const sizes = data.variants.filter(v => v.name === 'taille' || v.name === 'size');
-            if (colors.length > 0) setSelectedColor(colors[0]);
-            if (sizes.length > 0) setSelectedSize(sizes[0]);
+            const firstVariant = data.variants[0];
+            setSelectedVariant(firstVariant);
+            // ✅ Si la variante a une image, l'utiliser
+            if (firstVariant.image) {
+              setCurrentImage(firstVariant.image);
+            } else if (data.image) {
+              setCurrentImage(data.image);
+            }
+          } else if (data.image) {
+            setCurrentImage(data.image);
           }
           
           // ✅ Produits similaires
@@ -70,6 +72,17 @@ const ProductDetailsPage = () => {
           const found = all.find(p => p.id === productId);
           if (found) {
             setProduct(found);
+            if (found.variants && found.variants.length > 0) {
+              const firstVariant = found.variants[0];
+              setSelectedVariant(firstVariant);
+              if (firstVariant.image) {
+                setCurrentImage(firstVariant.image);
+              } else if (found.image) {
+                setCurrentImage(found.image);
+              }
+            } else if (found.image) {
+              setCurrentImage(found.image);
+            }
             const similar = all.filter(p => p.id !== found.id).slice(0, 4);
             setRelatedProducts(similar);
           } else {
@@ -82,6 +95,17 @@ const ProductDetailsPage = () => {
         const found = all.find(p => p.id === productId);
         if (found) {
           setProduct(found);
+          if (found.variants && found.variants.length > 0) {
+            const firstVariant = found.variants[0];
+            setSelectedVariant(firstVariant);
+            if (firstVariant.image) {
+              setCurrentImage(firstVariant.image);
+            } else if (found.image) {
+              setCurrentImage(found.image);
+            }
+          } else if (found.image) {
+            setCurrentImage(found.image);
+          }
           const similar = all.filter(p => p.id !== found.id).slice(0, 4);
           setRelatedProducts(similar);
         } else {
@@ -94,6 +118,17 @@ const ProductDetailsPage = () => {
     
     loadProduct();
   }, [productId, navigate]);
+
+  // ✅ Gérer la sélection d'une variante
+  const handleVariantSelect = (variant) => {
+    setSelectedVariant(variant);
+    // ✅ Mettre à jour l'image avec celle de la variante
+    if (variant.image) {
+      setCurrentImage(variant.image);
+    } else if (product?.image) {
+      setCurrentImage(product.image);
+    }
+  };
 
   const handleAddToCart = () => {
     const productToAdd = {
@@ -114,11 +149,6 @@ const ProductDetailsPage = () => {
     return `/images/${image}`;
   };
 
-  const getVariantImage = (variant) => {
-    if (!variant?.image) return null;
-    return getImagePath(variant.image);
-  };
-
   const getCurrentPrice = () => {
     if (selectedVariant && selectedVariant.price) {
       return selectedVariant.price;
@@ -126,11 +156,48 @@ const ProductDetailsPage = () => {
     return product?.price || parseInt(product?.priceRange?.split('-')[0]) || 0;
   };
 
-  const getCurrentImage = () => {
-    if (selectedVariant && selectedVariant.image) {
-      return getVariantImage(selectedVariant);
-    }
-    return getImagePath(product?.image);
+  // ✅ Grouper les variantes par type
+  const getVariantGroups = () => {
+    if (!product?.variants || product.variants.length === 0) return {};
+    const groups = {};
+    product.variants.forEach(v => {
+      const type = v.name || 'couleur';
+      if (!groups[type]) groups[type] = [];
+      groups[type].push(v);
+    });
+    return groups;
+  };
+
+  const variantGroups = getVariantGroups();
+
+  const getTypeLabel = (type) => {
+    const labels = {
+      'couleur': 'Couleur',
+      'color': 'Couleur',
+      'taille': 'Taille',
+      'size': 'Taille',
+      'motif': 'Motif',
+      'pattern': 'Motif',
+      'matiere': 'Matière',
+      'material': 'Matière',
+      'parfum': 'Parfum'
+    };
+    return labels[type] || type;
+  };
+
+  const getTypeIcon = (type) => {
+    const icons = {
+      'couleur': '🎨',
+      'color': '🎨',
+      'taille': '📏',
+      'size': '📏',
+      'motif': '✨',
+      'pattern': '✨',
+      'matiere': '🧵',
+      'material': '🧵',
+      'parfum': '🌸'
+    };
+    return icons[type] || '📌';
   };
 
   if (loading) {
@@ -150,38 +217,10 @@ const ProductDetailsPage = () => {
   const isWomen = allProducts.women.some(p => p.id === product.id);
   const theme = isWomen ? 'feminine' : 'masculine';
   const themeBg = isWomen ? 'bg-feminine-primary' : 'bg-masculine-primary';
-
   const price = getCurrentPrice();
   const priceMax = product.priceRange ? parseInt(product.priceRange.split('-')[1]) : price;
-  const currentImage = getCurrentImage();
-
-  const variantGroups = {};
-  if (product.variants && product.variants.length > 0) {
-    product.variants.forEach(v => {
-      if (!variantGroups[v.name]) variantGroups[v.name] = [];
-      variantGroups[v.name].push(v);
-    });
-  }
-
-  const getVariantIcon = (name) => {
-    const icons = {
-      'couleur': '🎨', 'color': '🎨',
-      'taille': '📏', 'size': '📏',
-      'motif': '✨', 'pattern': '✨',
-      'matiere': '🧵', 'material': '🧵'
-    };
-    return icons[name] || '📌';
-  };
-
-  const getVariantLabel = (name) => {
-    const labels = {
-      'couleur': 'Couleur', 'color': 'Couleur',
-      'taille': 'Taille', 'size': 'Taille',
-      'motif': 'Motif', 'pattern': 'Motif',
-      'matiere': 'Matière', 'material': 'Matière'
-    };
-    return labels[name] || name;
-  };
+  const hasVariants = product.variants && product.variants.length > 0;
+  const displayImage = currentImage || product.image;
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-[#0d0d1a]' : 'bg-gray-50'}`}>
@@ -220,82 +259,135 @@ const ProductDetailsPage = () => {
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Image */}
-          <div className={`relative rounded-2xl overflow-hidden ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-sm border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
-            <ProductImage
-              src={currentImage}
-              alt={product.name}
-              className="w-full aspect-square"
-              emoji={product.emoji || '✨'}
-              isPack={isPack}
-              fit="contain"
-            />
-            
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
-              {isPack && (
-                <span className="bg-gradient-to-r from-gold to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                  <Crown className="w-3.5 h-3.5" />
-                  PACK EXCLUSIF
-                </span>
-              )}
-              {product.popularity && (
-                <span className="bg-gold/90 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-                  {product.popularity} Populaire
-                </span>
-              )}
-              {!isPack && (
-                <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                  PRODUIT
-                </span>
-              )}
-            </div>
-
-            <div className="absolute top-4 right-4 flex flex-col gap-2">
-              <button 
-                onClick={() => setIsLiked(!isLiked)}
-                className="w-10 h-10 rounded-full bg-white/90 dark:bg-[#1a1a2e]/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform"
-              >
-                <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-              </button>
-              <button 
-                onClick={() => {
-                  const text = `✨ "${product.name}" - WIN'S PACK`;
-                  if (navigator.share) {
-                    navigator.share({ title: product.name, text, url: window.location.href });
-                  } else {
-                    window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, '_blank');
-                  }
-                }}
-                className="w-10 h-10 rounded-full bg-white/90 dark:bg-[#1a1a2e]/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform"
-              >
-                <Share2 className="w-5 h-5 text-gray-400 hover:text-gold" />
-              </button>
-            </div>
-
-            <div className="absolute bottom-4 left-4 right-4 px-3 py-2 rounded-xl bg-white/95 dark:bg-[#1a1a2e]/95 backdrop-blur-sm shadow-lg border border-gray-100 dark:border-[#2d3748]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-end gap-2">
-                  <span className="text-xl font-display font-bold text-gray-900 dark:text-white">
-                    {price.toLocaleString()} FCFA
+          {/* ✅ Image avec affichage des variantes */}
+          <div>
+            <div className={`relative rounded-2xl overflow-hidden ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-sm border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
+              <ProductImage
+                src={getImagePath(displayImage)}
+                alt={product.name}
+                className="w-full aspect-square"
+                emoji={product.emoji || '✨'}
+                isPack={isPack}
+                fit="contain"
+              />
+              
+              <div className="absolute top-4 left-4 flex flex-col gap-2">
+                {isPack && (
+                  <span className="bg-gradient-to-r from-gold to-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                    <Crown className="w-3.5 h-3.5" />
+                    PACK EXCLUSIF
                   </span>
-                  {product.priceRange && (
-                    <span className="text-sm text-gray-400 line-through">
-                      {priceMax.toLocaleString()} FCFA
-                    </span>
-                  )}
-                  {product.priceRange && (
-                    <span className="text-sm font-semibold text-green-500">
-                      -{Math.round(((priceMax - price) / priceMax) * 100)}%
-                    </span>
-                  )}
-                </div>
-                {isPack && product.items && (
-                  <span className="text-xs font-medium bg-gold/20 px-2 py-1 rounded-full text-gold">
-                    {product.items.length} articles
+                )}
+                {product.popularity && (
+                  <span className="bg-gold/90 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                    {product.popularity} Populaire
+                  </span>
+                )}
+                {!isPack && (
+                  <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                    PRODUIT
                   </span>
                 )}
               </div>
+
+              <div className="absolute top-4 right-4 flex flex-col gap-2">
+                <button 
+                  onClick={() => setIsLiked(!isLiked)}
+                  className="w-10 h-10 rounded-full bg-white/90 dark:bg-[#1a1a2e]/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                >
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                </button>
+                <button 
+                  onClick={() => {
+                    const text = `✨ "${product.name}" - WIN'S PACK`;
+                    if (navigator.share) {
+                      navigator.share({ title: product.name, text, url: window.location.href });
+                    } else {
+                      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`, '_blank');
+                    }
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/90 dark:bg-[#1a1a2e]/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                >
+                  <Share2 className="w-5 h-5 text-gray-400 hover:text-gold" />
+                </button>
+              </div>
+
+              <div className="absolute bottom-4 left-4 right-4 px-3 py-2 rounded-xl bg-white/95 dark:bg-[#1a1a2e]/95 backdrop-blur-sm shadow-lg border border-gray-100 dark:border-[#2d3748]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-end gap-2">
+                    <span className="text-xl font-display font-bold text-gray-900 dark:text-white">
+                      {price.toLocaleString()} FCFA
+                    </span>
+                    {product.priceRange && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {priceMax.toLocaleString()} FCFA
+                      </span>
+                    )}
+                    {product.priceRange && (
+                      <span className="text-sm font-semibold text-green-500">
+                        -{Math.round(((priceMax - price) / priceMax) * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  {isPack && product.items && (
+                    <span className="text-xs font-medium bg-gold/20 px-2 py-1 rounded-full text-gold">
+                      {product.items.length} articles
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* ✅ Miniatures des variantes */}
+            {hasVariants && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                {/* Image principale */}
+                <button
+                  onClick={() => {
+                    setCurrentImage(product.image);
+                    setSelectedVariant(null);
+                  }}
+                  className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
+                    !selectedVariant || !selectedVariant.image
+                      ? 'border-gold shadow-md'
+                      : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <img
+                    src={getImagePath(product.image)}
+                    alt="Principal"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="text-[6px] text-center text-gray-500 dark:text-gray-400 truncate">
+                    Principal
+                  </div>
+                </button>
+                
+                {/* Variantes avec image */}
+                {product.variants
+                  .filter(v => v.image)
+                  .map((variant) => (
+                    <button
+                      key={variant.id}
+                      onClick={() => handleVariantSelect(variant)}
+                      className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
+                        selectedVariant?.id === variant.id
+                          ? 'border-gold shadow-md'
+                          : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      <img
+                        src={getImagePath(variant.image)}
+                        alt={variant.value}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="text-[6px] text-center text-gray-500 dark:text-gray-400 truncate px-0.5">
+                        {variant.value}
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Infos */}
@@ -339,59 +431,70 @@ const ProductDetailsPage = () => {
               <span className="text-sm text-gray-400 dark:text-gray-500">(120 avis)</span>
             </div>
 
-            {Object.keys(variantGroups).length > 0 && (
+            {/* ✅ Sélecteur de variantes visuel */}
+            {hasVariants && Object.keys(variantGroups).length > 0 && (
               <div className={`p-4 rounded-xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-gray-50'} border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-gold" />
+                  <span className="text-gold">🎯</span>
                   Choisissez votre variante
                 </h3>
                 
-                {Object.keys(variantGroups).map((groupName) => {
-                  const variants = variantGroups[groupName];
-                  const isColor = groupName === 'couleur' || groupName === 'color';
+                {Object.keys(variantGroups).map((type) => {
+                  const variants = variantGroups[type];
+                  const isColor = type === 'couleur' || type === 'color';
                   
                   return (
-                    <div key={groupName} className="mb-3 last:mb-0">
+                    <div key={type} className="mb-3 last:mb-0">
                       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
-                        {getVariantIcon(groupName)} {getVariantLabel(groupName)}
+                        {getTypeIcon(type)} {getTypeLabel(type)}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {variants.map((variant) => {
                           const isSelected = selectedVariant?.id === variant.id;
-                          const isColorSelected = isColor && selectedColor?.id === variant.id;
                           
                           return (
                             <button
                               key={variant.id}
-                              onClick={() => {
-                                setSelectedVariant(variant);
-                                if (isColor) setSelectedColor(variant);
-                              }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                isSelected || isColorSelected
-                                  ? 'bg-gold text-gray-900 shadow-md'
+                              onClick={() => handleVariantSelect(variant)}
+                              className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                isSelected
+                                  ? 'bg-gold text-gray-900 shadow-md scale-105'
                                   : isDark
                                     ? 'bg-[#2a2a4a] text-gray-300 hover:bg-[#3a3a5a]'
                                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                               }`}
                             >
                               {isColor && (
-                                <span className="inline-block w-3 h-3 rounded-full mr-1.5 align-middle" 
-                                  style={{ 
-                                    background: variant.color || variant.value.toLowerCase() 
-                                  }} 
+                                <span
+                                  className="inline-block w-4 h-4 rounded-full border-2 border-white/50 shadow-sm flex-shrink-0"
+                                  style={{ background: variant.color || variant.value.toLowerCase() }}
                                 />
                               )}
-                              {variant.value}
-                              {variant.price && variant.price !== price && (
-                                <span className="ml-1 text-[8px] opacity-70">
+                              {variant.image && !isColor && (
+                                <img
+                                  src={getImagePath(variant.image)}
+                                  alt={variant.value}
+                                  className="w-5 h-5 rounded object-cover flex-shrink-0"
+                                />
+                              )}
+                              <span>{variant.value}</span>
+                              {variant.price && variant.price > 0 && (
+                                <span className="text-[8px] opacity-70 ml-0.5">
                                   (+{variant.price.toLocaleString()} FCFA)
                                 </span>
                               )}
-                              {variant.stock !== undefined && variant.stock < 5 && (
-                                <span className="ml-1 text-[8px] text-red-400">
+                              {variant.stock !== undefined && variant.stock < 5 && variant.stock > 0 && (
+                                <span className="text-[8px] text-amber-500 ml-0.5">
                                   (stock: {variant.stock})
                                 </span>
+                              )}
+                              {variant.stock === 0 && (
+                                <span className="text-[8px] text-red-500 ml-0.5">
+                                  (rupture)
+                                </span>
+                              )}
+                              {isSelected && (
+                                <Check className="w-3 h-3 text-gray-900" />
                               )}
                             </button>
                           );
@@ -444,6 +547,7 @@ const ProductDetailsPage = () => {
                 onClick={() => {
                   const phoneNumber = '2290153096537';
                   const variantText = selectedVariant ? ` (${selectedVariant.value})` : '';
+                  const variantPrice = selectedVariant?.price ? ` (${selectedVariant.price.toLocaleString()} FCFA)` : '';
                   const message = `Bonjour WIN'S PACK ! 👋 Je souhaite commander "${product.name}${variantText}" (${quantity}x ${price.toLocaleString()} FCFA)`;
                   window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
                 }}

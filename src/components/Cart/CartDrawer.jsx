@@ -1,4 +1,4 @@
-// 📄 src/components/Cart/CartDrawer.jsx - Version finale
+// 📄 src/components/Cart/CartDrawer.jsx - Version avec variantes
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useState, useEffect } from 'react';
@@ -7,6 +7,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
+  // ✅ Fermer avec Echap
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && isOpen) onClose();
@@ -15,6 +16,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
+  // ✅ Bloquer le scroll
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -26,6 +28,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
+  // ✅ Fonction pour obtenir le chemin de l'image
   const getProductImage = (item) => {
     if (!item.image) return null;
     if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
@@ -34,6 +37,25 @@ const CartDrawer = ({ isOpen, onClose }) => {
     if (item.image.startsWith('/')) return item.image;
     if (item.image.startsWith('images/')) return `/${item.image}`;
     return `/images/${item.image}`;
+  };
+
+  // ✅ Fonction pour obtenir le nom complet avec la variante
+  const getItemDisplayName = (item) => {
+    let name = item.name;
+    if (item.variant) {
+      name += ` (${item.variant.value})`;
+    }
+    return name;
+  };
+
+  // ✅ Fonction pour obtenir les détails de la variante
+  const getVariantDetails = (item) => {
+    if (!item.variant) return null;
+    return {
+      value: item.variant.value,
+      price: item.variant.price || null,
+      image: item.variant.image || null
+    };
   };
 
   const handleWhatsAppOrder = () => {
@@ -48,11 +70,21 @@ const CartDrawer = ({ isOpen, onClose }) => {
     message += '━━━━━━━━━━━━━━━━━━━━\n\n';
     
     cart.forEach((item, index) => {
-      const itemName = item.variant ? `${item.name} (${item.variant.value})` : item.name;
+      const itemName = getItemDisplayName(item);
       const totalItemPrice = (item.price || 0) * item.quantity;
+      const variantDetails = getVariantDetails(item);
       
       message += `🔹 *Article ${index + 1}*\n`;
       message += `   📦 ${itemName}\n`;
+      
+      // ✅ Afficher la variante si elle existe
+      if (variantDetails) {
+        message += `   🎨 Variante : ${variantDetails.value}\n`;
+        if (variantDetails.price && variantDetails.price !== item.price) {
+          message += `   💰 Prix variante : ${variantDetails.price.toLocaleString()} FCFA\n`;
+        }
+      }
+      
       message += `   🔢 Quantité : ${item.quantity}\n`;
       message += `   💰 Prix total : ${totalItemPrice.toLocaleString()} FCFA\n`;
       
@@ -69,7 +101,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
               name: selected.name,
               price: selected.price || 0,
               quantity: 0,
-              emoji: selected.emoji || ''
+              emoji: selected.emoji || '',
+              variant: selected.variant || null
             };
           }
           groupedItems[key].quantity += 1;
@@ -77,12 +110,19 @@ const CartDrawer = ({ isOpen, onClose }) => {
         
         Object.values(groupedItems).forEach(article => {
           const totalArticlePrice = article.price * article.quantity;
-          message += `      • ${article.emoji || ''} ${article.name}`;
+          let articleName = article.name;
+          
+          // ✅ Afficher la variante si elle existe
+          if (article.variant) {
+            articleName += ` (${article.variant.value})`;
+          }
+          
+          message += `      • ${article.emoji || ''} ${articleName}`;
           if (article.quantity > 1) {
             message += ` (×${article.quantity})`;
           }
           message += ` : ${totalArticlePrice.toLocaleString()} FCFA`;
-          if (article.quantity === 1) {
+          if (article.quantity === 1 && article.price > 0) {
             message += ` (${article.price.toLocaleString()} FCFA/unité)`;
           }
           message += '\n';
@@ -138,6 +178,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
   return (
     <>
+      {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -145,11 +186,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
 
+      {/* Drawer */}
       <div
         className={`fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-[#1a1a2e] z-50 shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
+        {/* HEADER */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#2d3748]">
           <div>
             <h2 className="text-xl font-display font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -183,6 +226,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
           </div>
         </div>
 
+        {/* CONTENU */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[55vh]">
           {cart.length === 0 ? (
             <div className="text-center py-12">
@@ -205,6 +249,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
               const isPack = item.category === 'pack';
               const isCustom = item.isCustom;
               const imageUrl = getProductImage(item);
+              const variantDetails = getVariantDetails(item);
+              const displayName = getItemDisplayName(item);
 
               return (
                 <div
@@ -215,6 +261,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       : 'bg-gray-50 dark:bg-[#1a1a2e] border border-gray-100 dark:border-[#2d3748]'
                   }`}
                 >
+                  {/* Image */}
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-[#2a2a4a]">
                     {imageUrl ? (
                       <img
@@ -233,12 +280,18 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     )}
                   </div>
 
+                  {/* Infos */}
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm truncate text-gray-800 dark:text-white">
-                      {item.name}
+                      {displayName}
                       {isCustom && (
                         <span className="ml-1 text-[8px] font-bold text-gold bg-gold/20 px-1.5 py-0.5 rounded-full">
                           PERSONNALISÉ
+                        </span>
+                      )}
+                      {variantDetails && (
+                        <span className="ml-1 text-[8px] text-gray-400 bg-gray-100 dark:bg-[#2a2a4a] px-1.5 py-0.5 rounded-full">
+                          {variantDetails.value}
                         </span>
                       )}
                     </h4>
@@ -269,6 +322,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     </div>
                   </div>
 
+                  {/* Prix total & Suppression */}
                   <div className="text-right flex-shrink-0">
                     <p className="font-bold text-sm text-gray-800 dark:text-white">
                       {totalItemPrice.toLocaleString()} FCFA
@@ -286,6 +340,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
           )}
         </div>
 
+        {/* FOOTER */}
         {cart.length > 0 && (
           <div className="border-t border-gray-100 dark:border-[#2d3748] p-4 bg-gray-50 dark:bg-[#141425]">
             <div className="flex justify-between items-center mb-4">
