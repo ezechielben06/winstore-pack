@@ -1,9 +1,9 @@
-// 📄 src/components/Shop/ProductCard.jsx - Version corrigée
+// 📄 src/components/Shop/ProductCard.jsx - Version avec variantes
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingBag, Heart, Share2, Package, Sparkles, Check, 
-  Crown, Gift, ChevronDown, ChevronUp, Eye 
+  Crown, Gift, Eye, Palette
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,6 +19,7 @@ const ProductCard = ({ product, isWomen }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   const isPack = product.category === 'pack';
+  const hasVariants = product.variants && product.variants.length > 0;
   
   const colors = isWomen ? {
     primary: '#E91E8C',
@@ -30,7 +31,6 @@ const ProductCard = ({ product, isWomen }) => {
     primaryDark: '#0D1445',
   };
 
-  // ✅ Fonction UNIVERSELLE pour obtenir le chemin de l'image
   const getImagePath = (image) => {
     if (!image) return null;
     if (image.startsWith('http://') || image.startsWith('https://')) {
@@ -45,20 +45,52 @@ const ProductCard = ({ product, isWomen }) => {
     return `/images/${image}`;
   };
 
-  // ✅ Obtenir l'image du produit (priorité à la première variante)
   const getProductImage = () => {
-    // Si le produit a une image
-    if (product.image) {
-      return getImagePath(product.image);
-    }
-    // Si le produit a des variantes avec des images
-    if (product.variants && product.variants.length > 0) {
+    // ✅ Si le produit a des variantes avec des images, prendre la première
+    if (hasVariants) {
       const variantWithImage = product.variants.find(v => v.image);
       if (variantWithImage) {
         return getImagePath(variantWithImage.image);
       }
     }
+    if (product.image) {
+      return getImagePath(product.image);
+    }
     return null;
+  };
+
+  // ✅ Afficher les variantes miniatures
+  const getVariantPreview = () => {
+    if (!hasVariants) return null;
+    const previewVariants = product.variants.slice(0, 4);
+    return (
+      <div className="flex items-center gap-0.5 mt-1">
+        <Palette className="w-2.5 h-2.5 text-gold" />
+        <span className="text-[7px] text-gray-400">
+          {previewVariants.map((v, i) => (
+            <span key={v.id} className="inline-block mr-0.5">
+              {v.image ? (
+                <img 
+                  src={getImagePath(v.image)} 
+                  alt={v.value}
+                  className="w-3 h-3 rounded-full object-cover border border-white/50 inline"
+                />
+              ) : v.name === 'couleur' ? (
+                <span 
+                  className="inline-block w-3 h-3 rounded-full border border-white/50"
+                  style={{ background: v.color || v.value.toLowerCase() }}
+                />
+              ) : (
+                <span className="text-[6px] text-gray-400">{v.value}</span>
+              )}
+            </span>
+          ))}
+          {product.variants.length > 4 && (
+            <span className="text-[6px] text-gray-400">+{product.variants.length - 4}</span>
+          )}
+        </span>
+      </div>
+    );
   };
 
   const handleAddToCart = (e) => {
@@ -108,6 +140,32 @@ const ProductCard = ({ product, isWomen }) => {
   };
 
   const getPrice = () => {
+    // ✅ Vérifier si une variante a un prix différent
+    if (hasVariants) {
+      const variantPrices = product.variants.map(v => v.price).filter(p => p);
+      if (variantPrices.length > 0) {
+        const minPrice = Math.min(...variantPrices);
+        const maxPrice = Math.max(...variantPrices);
+        if (minPrice !== maxPrice) {
+          return `${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()}`;
+        }
+        return minPrice.toLocaleString();
+      }
+    }
+    if (product.price) return product.price.toLocaleString();
+    if (product.priceRange) return product.priceRange;
+    return '0';
+  };
+
+  const getPriceDisplay = () => {
+    const price = getPrice();
+    return typeof price === 'string' ? price : `${price} FCFA`;
+  };
+
+  const hasDiscount = product.priceRange && getPriceMax() > getPriceMin();
+  const imageUrl = getProductImage();
+
+  const getPriceMin = () => {
     if (product.price) return product.price;
     if (product.priceRange) return parseInt(product.priceRange.split('-')[0]);
     return 0;
@@ -117,11 +175,6 @@ const ProductCard = ({ product, isWomen }) => {
     if (product.priceRange) return parseInt(product.priceRange.split('-')[1]);
     return product.price || 0;
   };
-
-  const hasDiscount = product.priceRange && getPriceMax() > getPrice();
-  const discountPercent = hasDiscount ? Math.round(((getPriceMax() - getPrice()) / getPriceMax()) * 100) : 0;
-
-  const imageUrl = getProductImage();
 
   return (
     <Link 
@@ -173,24 +226,39 @@ const ProductCard = ({ product, isWomen }) => {
           {isPack ? 'PACK' : 'PRODUIT'}
         </div>
 
+        {/* ✅ Badge Variantes */}
+        {hasVariants && (
+          <div 
+            className="absolute top-2 right-2 px-2 py-0.5 text-[7px] font-bold z-10 flex items-center gap-1"
+            style={{
+              background: 'rgba(212,175,55,0.9)',
+              color: '#1A1A1A',
+              borderRadius: '4px',
+            }}
+          >
+            <Palette size={8} />
+            {product.variants.length}
+          </div>
+        )}
+
         {/* Badge de réduction */}
         {hasDiscount && (
           <div 
-            className="absolute top-2 right-2 px-2 py-1 text-[8px] font-bold shadow-lg z-10"
+            className="absolute top-2 right-14 px-2 py-1 text-[8px] font-bold shadow-lg z-10"
             style={{
               background: '#EF4444',
               color: '#FFFFFF',
               borderRadius: '6px',
             }}
           >
-            -{discountPercent}%
+            -{Math.round(((getPriceMax() - getPriceMin()) / getPriceMax()) * 100)}%
           </div>
         )}
 
         {/* Popularité */}
         {product.popularity && (
           <div 
-            className="absolute top-2 right-14 px-1.5 py-0.5 text-[7px] font-bold z-10"
+            className="absolute top-2 right-24 px-1.5 py-0.5 text-[7px] font-bold z-10"
             style={{
               background: 'rgba(212,175,55,0.9)',
               color: '#1A1A1A',
@@ -214,7 +282,7 @@ const ProductCard = ({ product, isWomen }) => {
         >
           <div className="flex items-center gap-1.5">
             <span className={`text-xs font-bold truncate ${isPack ? 'text-gray-900' : 'text-gray-900'}`}>
-              {getPrice().toLocaleString()} FCFA
+              {getPriceDisplay()}
             </span>
             {hasDiscount && (
               <span className="text-[8px] text-gray-400 line-through">
@@ -301,6 +369,9 @@ const ProductCard = ({ product, isWomen }) => {
           </h3>
         </div>
         
+        {/* ✅ Variantes miniatures */}
+        {getVariantPreview()}
+
         {product.description && (
           <p className="text-[7px] text-gray-400 dark:text-gray-500 line-clamp-1 leading-tight mt-0.5">
             {product.description}

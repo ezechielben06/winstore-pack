@@ -1,4 +1,4 @@
-// 📄 src/components/Cart/CartDrawer.jsx - Version avec variantes
+// 📄 src/components/Cart/CartDrawer.jsx - Version corrigée
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useState, useEffect } from 'react';
@@ -56,6 +56,11 @@ const CartDrawer = ({ isOpen, onClose }) => {
       price: item.variant.price || null,
       image: item.variant.image || null
     };
+  };
+
+  // ✅ Obtenir l'identifiant unique de l'article
+  const getItemId = (item) => {
+    return item.cartId || item.id;
   };
 
   const handleWhatsAppOrder = () => {
@@ -251,10 +256,11 @@ const CartDrawer = ({ isOpen, onClose }) => {
               const imageUrl = getProductImage(item);
               const variantDetails = getVariantDetails(item);
               const displayName = getItemDisplayName(item);
+              const itemId = getItemId(item);
 
               return (
                 <div
-                  key={item.id}
+                  key={itemId}
                   className={`flex items-center gap-3 p-3 rounded-xl ${
                     isPack 
                       ? 'bg-gold/5 border border-gold/20' 
@@ -305,7 +311,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     )}
                     <div className="flex items-center gap-2 mt-1">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(itemId, item.quantity - 1)}
                         className="w-6 h-6 rounded-full bg-white dark:bg-[#2a2a4a] border border-gray-200 dark:border-[#2d3748] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#3a3a5a] transition-colors"
                       >
                         <Minus className="w-3 h-3 text-gray-600 dark:text-gray-400" />
@@ -314,7 +320,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(itemId, item.quantity + 1)}
                         className="w-6 h-6 rounded-full bg-white dark:bg-[#2a2a4a] border border-gray-200 dark:border-[#2d3748] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#3a3a5a] transition-colors"
                       >
                         <Plus className="w-3 h-3 text-gray-600 dark:text-gray-400" />
@@ -328,7 +334,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       {totalItemPrice.toLocaleString()} FCFA
                     </p>
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(itemId)}
                       className="text-red-400 hover:text-red-600 transition-colors text-sm"
                     >
                       <Trash2 className="w-4 h-4" />

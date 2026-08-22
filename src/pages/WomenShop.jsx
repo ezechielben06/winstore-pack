@@ -1,4 +1,4 @@
-// 📄 src/pages/WomenShop.jsx - Version avec loading
+// 📄 src/pages/WomenShop.jsx - Version corrigée
 import { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Package, ArrowRight, Grid, List, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -80,6 +80,18 @@ const WomenShop = () => {
     setSearchTerm('');
     setShowSearch(false);
   };
+
+  // ✅ Chargement
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="mt-3 text-gray-500 dark:text-gray-400">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${
@@ -284,7 +296,12 @@ const WomenShop = () => {
               </button>
             </div>
           ) : (
-            <ProductGrid products={filteredProducts} isWomen loading={loading} />
+            // ✅ Passer loading à ProductGrid
+            <ProductGrid 
+              products={filteredProducts} 
+              isWomen={true} 
+              loading={loading} 
+            />
           )}
         </div>
 

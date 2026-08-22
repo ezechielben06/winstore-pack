@@ -1,4 +1,4 @@
-// 📄 src/components/Shop/ProductGrid.jsx - Avec squelette
+// 📄 src/components/Shop/ProductGrid.jsx - Version avec loading
 import ProductCard from './ProductCard';
 
 // ✅ Composant Squelette
@@ -14,6 +14,7 @@ const ProductCardSkeleton = () => (
 );
 
 const ProductGrid = ({ products, isWomen, loading }) => {
+  // ✅ Si chargement, afficher les squelettes
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-1.5">
@@ -40,6 +41,7 @@ const ProductGrid = ({ products, isWomen, loading }) => {
 
   return (
     <div className="w-full">
+      {/* Packs */}
       {packs.length > 0 && (
         <div className="mb-3">
           <div className="flex items-center gap-1 mb-1.5">
@@ -61,6 +63,7 @@ const ProductGrid = ({ products, isWomen, loading }) => {
         </div>
       )}
 
+      {/* Produits */}
       {items.length > 0 && (
         <div>
           <div className="flex items-center gap-1 mb-1.5">

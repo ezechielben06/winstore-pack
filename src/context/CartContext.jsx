@@ -1,4 +1,4 @@
-// 📄 src/context/CartContext.jsx - Version finale
+// 📄 src/context/CartContext.jsx - Version avec variantes
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
@@ -16,6 +16,10 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const getProductPrice = (product) => {
+    // ✅ Si le produit a une variante sélectionnée avec un prix
+    if (product.variant && product.variant.price) {
+      return product.variant.price;
+    }
     if (product.price) return product.price;
     if (product.priceRange) {
       const parts = product.priceRange.split('-');
@@ -30,36 +34,54 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product, quantity = 1) => {
     const price = getProductPrice(product);
     
+    // ✅ Générer un ID unique pour chaque combinaison produit + variante
+    const variantId = product.variant ? product.variant.id : null;
+    const cartId = variantId ? `${product.id}-${variantId}` : product.id;
+    
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
+      const existing = prev.find(item => {
+        if (variantId && item.variant) {
+          return item.id === product.id && item.variant.id === variantId;
+        }
+        return item.id === product.id && !item.variant;
+      });
+      
       if (existing) {
         return prev.map(item =>
-          item.id === product.id
+          (variantId && item.variant && item.id === product.id && item.variant.id === variantId) ||
+          (!variantId && item.id === product.id && !item.variant)
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
+      
       return [...prev, { 
         ...product,
+        id: product.id,
+        cartId: cartId,
         quantity, 
         price: price
       }];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCart(prev => prev.filter(item => item.id !== id));
+  const removeFromCart = (cartId) => {
+    setCart(prev => prev.filter(item => item.cartId !== cartId && item.id !== cartId));
   };
 
-  const updateQuantity = (id, quantity) => {
+  const updateQuantity = (cartId, quantity) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(cartId);
       return;
     }
     setCart(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
+      prev.map(item => {
+        const itemId = item.cartId || item.id;
+        if (itemId === cartId || item.id === cartId) {
+          return { ...item, quantity };
+        }
+        return item;
+      })
     );
   };
 

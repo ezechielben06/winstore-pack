@@ -1,4 +1,4 @@
-// 📄 src/pages/MenShop.jsx - Version avec loading
+// 📄 src/pages/MenShop.jsx - Version corrigée
 import { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Package, ArrowRight, Crown, Grid, List, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -80,6 +80,7 @@ const MenShop = () => {
     setShowSearch(false);
   };
 
+  // ✅ Affichage du chargement
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -156,7 +157,6 @@ const MenShop = () => {
           </Link>
           
           <div className="flex items-center gap-2 md:gap-3">
-            {/* ✅ Bouton Recherche */}
             <button
               onClick={() => setShowSearch(!showSearch)}
               className={`p-2 rounded-xl border transition-all ${
@@ -195,7 +195,6 @@ const MenShop = () => {
           </div>
         </div>
 
-        {/* ✅ Barre de recherche */}
         {showSearch && (
           <div className="mb-4 animate-fade-in">
             <div className="flex items-center gap-2">
@@ -296,7 +295,12 @@ const MenShop = () => {
               </button>
             </div>
           ) : (
-            <ProductGrid products={filteredProducts} isWomen={false} loading={loading} />
+            // ✅ Passer loading à ProductGrid
+            <ProductGrid 
+              products={filteredProducts} 
+              isWomen={false} 
+              loading={loading} 
+            />
           )}
         </div>
 

@@ -1,10 +1,11 @@
-// 📄 src/pages/CreatePackPage.jsx - Version corrigée
+// 📄 src/pages/CreatePackPage.jsx - Version avec variantes
 import { useState, useMemo } from 'react';
 import { 
   ArrowLeft, Package, Search, 
   Sparkles, Crown, Check, Minus, Plus, 
   Trash2, Gift, Wand2, Lightbulb,
-  ShoppingBag, Filter, ChevronDown, X
+  ShoppingBag, Filter, ChevronDown, X,
+  Palette, Image as ImageIcon
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -27,6 +28,9 @@ const CreatePackPage = () => {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [showVariantSelector, setShowVariantSelector] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
 
   const theme = isWomen ? 'feminine' : 'masculine';
   const themeBg = isWomen ? 'bg-feminine-primary' : 'bg-masculine-primary';
@@ -80,48 +84,77 @@ const CreatePackPage = () => {
     return results;
   }, [availableProducts, searchTerm, selectedCategory]);
 
-  // ✅ Fonction pour obtenir le prix d'un produit
-  const getProductPrice = (product) => {
+  const getProductPrice = (product, variant = null) => {
+    if (variant && variant.price) return variant.price;
     return product.price || parseInt(product.priceRange?.split('-')[0]) || 0;
   };
 
-  // ✅ Ajouter un produit avec son prix
-  const addItem = (product) => {
-    const price = getProductPrice(product);
-    const productWithPrice = {
+  // ✅ Ajouter un produit avec sa variante
+  const addItem = (product, variant = null) => {
+    const price = getProductPrice(product, variant);
+    const productWithVariant = {
       ...product,
-      price: price
+      price: price,
+      selectedVariant: variant || null,
+      variantId: variant ? variant.id : null
     };
 
-    // Vérifier si le produit existe déjà
-    const existing = selectedItems.find(item => item.id === product.id);
+    // Vérifier si le produit existe déjà (même id et même variante)
+    const existing = selectedItems.find(item => 
+      item.id === product.id && 
+      item.variantId === (variant ? variant.id : null)
+    );
+    
     if (existing) {
       setSelectedItems(prev => 
         prev.map(item => 
-          item.id === product.id 
+          item.id === product.id && item.variantId === (variant ? variant.id : null)
             ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item
         )
       );
       return;
     }
-    setSelectedItems([...selectedItems, { ...productWithPrice, quantity: 1 }]);
+    setSelectedItems([...selectedItems, { ...productWithVariant, quantity: 1 }]);
     if (selectedItems.length === 0) {
       setShowSuggestions(false);
     }
   };
 
-  const removeItem = (productId) => {
-    setSelectedItems(selectedItems.filter(item => item.id !== productId));
+  // ✅ Ouvrir le sélecteur de variantes
+  const openVariantSelector = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      setCurrentProduct(product);
+      setSelectedVariant(product.variants[0]);
+      setShowVariantSelector(true);
+    } else {
+      addItem(product);
+    }
+  };
+
+  // ✅ Valider la sélection de la variante
+  const confirmVariant = () => {
+    if (currentProduct && selectedVariant) {
+      addItem(currentProduct, selectedVariant);
+      setShowVariantSelector(false);
+      setCurrentProduct(null);
+      setSelectedVariant(null);
+    }
+  };
+
+  const removeItem = (itemId, variantId = null) => {
+    setSelectedItems(selectedItems.filter(item => 
+      !(item.id === itemId && item.variantId === variantId)
+    ));
     if (selectedItems.length === 1) {
       setShowSuggestions(true);
     }
   };
 
-  const updateQuantity = (productId, delta) => {
+  const updateQuantity = (itemId, variantId, delta) => {
     setSelectedItems(prev => 
       prev.map(item => {
-        if (item.id === productId) {
+        if (item.id === itemId && item.variantId === variantId) {
           const newQuantity = (item.quantity || 1) + delta;
           if (newQuantity <= 0) return null;
           return { ...item, quantity: newQuantity };
@@ -142,7 +175,7 @@ const CreatePackPage = () => {
     setSearchTerm('');
   };
 
-  // ✅ Créer le pack avec les détails des articles
+  // ✅ Créer le pack avec les variantes
   const createPack = () => {
     if (selectedItems.length < 3) {
       alert('Un pack doit contenir au moins 3 articles !');
@@ -156,15 +189,16 @@ const CreatePackPage = () => {
       price: totalPrice,
       description: `Pack composé de ${totalItems} articles`,
       items: selectedItems.flatMap(item => 
-        Array(item.quantity || 1).fill(item.name)
+        Array(item.quantity || 1).fill(item.selectedVariant ? `${item.name} (${item.selectedVariant.value})` : item.name)
       ),
-      // ✅ SAUVEGARDER LES DÉTAILS DES ARTICLES AVEC LEURS PRIX
       selectedItems: selectedItems.map(item => ({
         id: item.id,
         name: item.name,
         price: item.price || 0,
         quantity: item.quantity || 1,
-        emoji: item.emoji || ''
+        emoji: item.emoji || '',
+        variant: item.selectedVariant || null,
+        variantId: item.variantId || null
       })),
       emoji: '🎨',
       isCustom: true,
@@ -185,6 +219,101 @@ const CreatePackPage = () => {
     setSearchTerm('');
     setSelectedCategory('all');
     setShowSuggestions(true);
+    setShowVariantSelector(false);
+    setCurrentProduct(null);
+    setSelectedVariant(null);
+  };
+
+  // ✅ Rendu du sélecteur de variantes
+  const renderVariantSelector = () => {
+    if (!showVariantSelector || !currentProduct) return null;
+
+    const variants = currentProduct.variants || [];
+    const isColor = (name) => name === 'couleur' || name === 'color';
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div className={`w-full max-w-md rounded-2xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-2xl border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'} p-6`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-bold text-gray-800 dark:text-white flex items-center gap-2">
+              <Palette className="w-5 h-5 text-gold" />
+              Choisis ta variante
+            </h3>
+            <button
+              onClick={() => setShowVariantSelector(false)}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-[#2a2a4a] rounded-full transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            {currentProduct.name}
+          </p>
+
+          <div className="space-y-3 max-h-64 overflow-y-auto">
+            {variants.map((variant) => {
+              const isSelected = selectedVariant?.id === variant.id;
+              const isColorType = isColor(variant.name);
+
+              return (
+                <button
+                  key={variant.id}
+                  onClick={() => setSelectedVariant(variant)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+                    isSelected
+                      ? 'border-gold bg-gold/5'
+                      : 'border-gray-200 dark:border-[#2d3748] hover:border-gold/50'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-[#2a2a4a] flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {variant.image ? (
+                      <img src={variant.image} alt={variant.value} className="w-full h-full object-cover" />
+                    ) : isColorType ? (
+                      <div 
+                        className="w-8 h-8 rounded-full border-2 border-white shadow"
+                        style={{ background: variant.color || variant.value.toLowerCase() }}
+                      />
+                    ) : (
+                      <ImageIcon className="w-5 h-5 text-gray-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-sm text-gray-800 dark:text-white">
+                      {variant.value}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {variant.price ? `${variant.price.toLocaleString()} FCFA` : 'Prix standard'}
+                      {variant.stock !== undefined && variant.stock < 5 && variant.stock > 0 && (
+                        <span className="ml-2 text-amber-500">Stock: {variant.stock}</span>
+                      )}
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <Check className="w-5 h-5 text-gold flex-shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-3 mt-4">
+            <button
+              onClick={confirmVariant}
+              className="flex-1 bg-gold text-gray-900 py-2.5 rounded-xl font-semibold hover:bg-gold/80 transition-colors"
+            >
+              Sélectionner
+            </button>
+            <button
+              onClick={() => setShowVariantSelector(false)}
+              className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#2d3748] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2a2a4a] transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -293,7 +422,7 @@ const CreatePackPage = () => {
                       {suggestions.popular.map(p => (
                         <button
                           key={p.id}
-                          onClick={() => addItem(p)}
+                          onClick={() => openVariantSelector(p)}
                           className="px-3 py-1 rounded-full text-xs bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20 transition-colors"
                         >
                           {p.emoji} {p.name}
@@ -385,12 +514,13 @@ const CreatePackPage = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {filteredProducts.map((product) => {
                       const isSelected = selectedItems.some(item => item.id === product.id);
+                      const hasVariants = product.variants && product.variants.length > 0;
                       const price = getProductPrice(product);
 
                       return (
                         <button
                           key={product.id}
-                          onClick={() => addItem(product)}
+                          onClick={() => openVariantSelector(product)}
                           className={`p-3 rounded-xl border-2 transition-all text-left ${
                             isSelected 
                               ? `border-gold bg-gold/5 ${isDark ? 'bg-gold/10' : ''}`
@@ -404,6 +534,12 @@ const CreatePackPage = () => {
                               <p className="text-[10px] text-gray-500 dark:text-gray-400">
                                 {price.toLocaleString()} FCFA
                               </p>
+                              {hasVariants && (
+                                <p className="text-[8px] text-gold flex items-center gap-1 mt-0.5">
+                                  <Palette className="w-2.5 h-2.5" />
+                                  {product.variants.length} variantes
+                                </p>
+                              )}
                             </div>
                           </div>
                           {isSelected && (
@@ -454,35 +590,43 @@ const CreatePackPage = () => {
                     const price = item.price || 0;
                     const quantity = item.quantity || 1;
                     const total = price * quantity;
+                    const hasVariant = item.selectedVariant !== null;
 
                     return (
-                      <div key={item.id} className={`flex items-center gap-2 p-2 rounded-xl ${
+                      <div key={`${item.id}-${item.variantId || 'default'}`} className={`flex items-center gap-2 p-2 rounded-xl ${
                         isDark ? 'bg-[#1a1a2e]' : 'bg-gray-50'
                       }`}>
                         <span className="text-xl">{item.emoji || '✨'}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-xs truncate">{item.name}</p>
+                          <p className="font-medium text-xs truncate">
+                            {item.name}
+                            {hasVariant && (
+                              <span className="text-[8px] text-gold ml-1">
+                                ({item.selectedVariant.value})
+                              </span>
+                            )}
+                          </p>
                           <p className="text-[10px] text-gray-500 dark:text-gray-400">
                             {total.toLocaleString()} FCFA
                           </p>
                         </div>
                         <div className="flex items-center gap-0.5">
                           <button
-                            onClick={() => updateQuantity(item.id, -1)}
+                            onClick={() => updateQuantity(item.id, item.variantId, -1)}
                             className="w-5 h-5 rounded-full bg-gray-200 dark:bg-[#2a2a4a] flex items-center justify-center hover:bg-gray-300 transition-colors"
                           >
                             <Minus className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                           </button>
                           <span className="w-5 text-center text-xs font-medium">{quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.id, 1)}
+                            onClick={() => updateQuantity(item.id, item.variantId, 1)}
                             className="w-5 h-5 rounded-full bg-gray-200 dark:bg-[#2a2a4a] flex items-center justify-center hover:bg-gray-300 transition-colors"
                           >
                             <Plus className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                           </button>
                         </div>
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.id, item.variantId)}
                           className="p-1 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full text-red-400 hover:text-red-600 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -526,6 +670,9 @@ const CreatePackPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ Sélecteur de variantes */}
+      {renderVariantSelector()}
 
       {/* Notification de succès */}
       {showSuccess && (
