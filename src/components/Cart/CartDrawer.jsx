@@ -28,8 +28,20 @@ const CartDrawer = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  // ✅ Fonction pour obtenir le chemin de l'image
+  // ✅ Fonction pour obtenir l'image du produit ou de la variante
   const getProductImage = (item) => {
+    // ✅ PRIORITÉ À L'IMAGE DE LA VARIANTE
+    if (item.variant && item.variant.image) {
+      const image = item.variant.image;
+      if (image.startsWith('http://') || image.startsWith('https://')) {
+        return image;
+      }
+      if (image.startsWith('/')) return image;
+      if (image.startsWith('images/')) return `/${image}`;
+      return `/images/${image}`;
+    }
+    
+    // ✅ Sinon utiliser l'image du produit
     if (!item.image) return null;
     if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
       return item.image;
@@ -253,6 +265,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
               const totalItemPrice = itemPrice * item.quantity;
               const isPack = item.category === 'pack';
               const isCustom = item.isCustom;
+              // ✅ Utiliser la nouvelle fonction getProductImage
               const imageUrl = getProductImage(item);
               const variantDetails = getVariantDetails(item);
               const displayName = getItemDisplayName(item);
@@ -267,7 +280,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       : 'bg-gray-50 dark:bg-[#1a1a2e] border border-gray-100 dark:border-[#2d3748]'
                   }`}
                 >
-                  {/* Image */}
+                  {/* ✅ Image avec priorité à la variante */}
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-[#2a2a4a]">
                     {imageUrl ? (
                       <img

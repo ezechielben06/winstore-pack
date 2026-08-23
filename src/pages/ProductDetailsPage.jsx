@@ -1,4 +1,4 @@
-// 📄 src/pages/ProductDetailsPage.jsx - Version avec variantes visuelles
+// 📄 src/pages/ProductDetailsPage.jsx - Version corrigée
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -42,11 +42,9 @@ const ProductDetailsPage = () => {
         if (data) {
           setProduct(data);
           
-          // ✅ Initialiser la première variante
           if (data.variants && data.variants.length > 0) {
             const firstVariant = data.variants[0];
             setSelectedVariant(firstVariant);
-            // ✅ Si la variante a une image, l'utiliser
             if (firstVariant.image) {
               setCurrentImage(firstVariant.image);
             } else if (data.image) {
@@ -56,7 +54,6 @@ const ProductDetailsPage = () => {
             setCurrentImage(data.image);
           }
           
-          // ✅ Produits similaires
           const { data: similar } = await supabase
             .from('products')
             .select('*')
@@ -67,7 +64,6 @@ const ProductDetailsPage = () => {
             setRelatedProducts(similar);
           }
         } else {
-          // Fallback local
           const all = [...allProducts.women, ...allProducts.men];
           const found = all.find(p => p.id === productId);
           if (found) {
@@ -119,10 +115,8 @@ const ProductDetailsPage = () => {
     loadProduct();
   }, [productId, navigate]);
 
-  // ✅ Gérer la sélection d'une variante
   const handleVariantSelect = (variant) => {
     setSelectedVariant(variant);
-    // ✅ Mettre à jour l'image avec celle de la variante
     if (variant.image) {
       setCurrentImage(variant.image);
     } else if (product?.image) {
@@ -130,12 +124,17 @@ const ProductDetailsPage = () => {
     }
   };
 
+  // ✅ CORRECTION : Ajouter au panier avec la variante sélectionnée
   const handleAddToCart = () => {
+    // ✅ Créer une copie du produit avec la variante sélectionnée
     const productToAdd = {
       ...product,
-      quantity,
-      variant: selectedVariant || null
+      quantity: quantity,
+      variant: selectedVariant || null,
+      // ✅ S'assurer que le prix est celui de la variante ou du produit
+      price: selectedVariant?.price || product?.price || 0
     };
+    
     addToCart(productToAdd);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -156,7 +155,6 @@ const ProductDetailsPage = () => {
     return product?.price || parseInt(product?.priceRange?.split('-')[0]) || 0;
   };
 
-  // ✅ Grouper les variantes par type
   const getVariantGroups = () => {
     if (!product?.variants || product.variants.length === 0) return {};
     const groups = {};
@@ -259,7 +257,7 @@ const ProductDetailsPage = () => {
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div className="grid md:grid-cols-2 gap-8">
-          {/* ✅ Image avec affichage des variantes */}
+          {/* Image avec affichage des variantes */}
           <div>
             <div className={`relative rounded-2xl overflow-hidden ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'} shadow-sm border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
               <ProductImage
@@ -338,10 +336,9 @@ const ProductDetailsPage = () => {
               </div>
             </div>
 
-            {/* ✅ Miniatures des variantes */}
+            {/* Miniatures des variantes */}
             {hasVariants && (
               <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
-                {/* Image principale */}
                 <button
                   onClick={() => {
                     setCurrentImage(product.image);
@@ -363,7 +360,6 @@ const ProductDetailsPage = () => {
                   </div>
                 </button>
                 
-                {/* Variantes avec image */}
                 {product.variants
                   .filter(v => v.image)
                   .map((variant) => (
@@ -431,7 +427,7 @@ const ProductDetailsPage = () => {
               <span className="text-sm text-gray-400 dark:text-gray-500">(120 avis)</span>
             </div>
 
-            {/* ✅ Sélecteur de variantes visuel */}
+            {/* Sélecteur de variantes visuel */}
             {hasVariants && Object.keys(variantGroups).length > 0 && (
               <div className={`p-4 rounded-xl ${isDark ? 'bg-[#1a1a2e]' : 'bg-gray-50'} border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'}`}>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
@@ -547,7 +543,6 @@ const ProductDetailsPage = () => {
                 onClick={() => {
                   const phoneNumber = '2290153096537';
                   const variantText = selectedVariant ? ` (${selectedVariant.value})` : '';
-                  const variantPrice = selectedVariant?.price ? ` (${selectedVariant.price.toLocaleString()} FCFA)` : '';
                   const message = `Bonjour WIN'S PACK ! 👋 Je souhaite commander "${product.name}${variantText}" (${quantity}x ${price.toLocaleString()} FCFA)`;
                   window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
                 }}

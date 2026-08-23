@@ -1,4 +1,4 @@
-// 📄 src/context/CartContext.jsx - Version avec variantes
+// 📄 src/context/CartContext.jsx - Version corrigée
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
@@ -16,7 +16,6 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const getProductPrice = (product) => {
-    // ✅ Si le produit a une variante sélectionnée avec un prix
     if (product.variant && product.variant.price) {
       return product.variant.price;
     }
@@ -39,25 +38,30 @@ export const CartProvider = ({ children }) => {
     const cartId = variantId ? `${product.id}-${variantId}` : product.id;
     
     setCart(prev => {
+      // ✅ Vérifier si le même produit AVEC LA MÊME VARIANTE existe déjà
       const existing = prev.find(item => {
         if (variantId && item.variant) {
+          // Si l'article a une variante, comparer produit + variante
           return item.id === product.id && item.variant.id === variantId;
         }
+        // Si l'article n'a pas de variante, comparer juste l'id
         return item.id === product.id && !item.variant;
       });
       
       if (existing) {
-        return prev.map(item =>
-          (variantId && item.variant && item.id === product.id && item.variant.id === variantId) ||
-          (!variantId && item.id === product.id && !item.variant)
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
+        // ✅ Si le même produit + même variante existe, augmenter la quantité
+        return prev.map(item => {
+          const itemVariantId = item.variant ? item.variant.id : null;
+          if (item.id === product.id && itemVariantId === variantId) {
+            return { ...item, quantity: item.quantity + quantity };
+          }
+          return item;
+        });
       }
       
+      // ✅ Ajouter un nouvel article avec un cartId unique
       return [...prev, { 
         ...product,
-        id: product.id,
         cartId: cartId,
         quantity, 
         price: price
@@ -66,7 +70,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = (cartId) => {
-    setCart(prev => prev.filter(item => item.cartId !== cartId && item.id !== cartId));
+    setCart(prev => prev.filter(item => {
+      const itemId = item.cartId || item.id;
+      return itemId !== cartId;
+    }));
   };
 
   const updateQuantity = (cartId, quantity) => {
@@ -77,7 +84,7 @@ export const CartProvider = ({ children }) => {
     setCart(prev =>
       prev.map(item => {
         const itemId = item.cartId || item.id;
-        if (itemId === cartId || item.id === cartId) {
+        if (itemId === cartId) {
           return { ...item, quantity };
         }
         return item;
