@@ -124,18 +124,17 @@ const ProductDetailsPage = () => {
     }
   };
 
-  // ✅ CORRECTION : Ajouter au panier avec la variante sélectionnée
+  // ✅ CORRECTION : Ajouter au panier avec la quantité
   const handleAddToCart = () => {
     // ✅ Créer une copie du produit avec la variante sélectionnée
     const productToAdd = {
       ...product,
-      quantity: quantity,
       variant: selectedVariant || null,
-      // ✅ S'assurer que le prix est celui de la variante ou du produit
       price: selectedVariant?.price || product?.price || 0
     };
     
-    addToCart(productToAdd);
+    // ✅ PASSER LA QUANTITÉ EN SECOND PARAMÈTRE
+    addToCart(productToAdd, quantity);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
