@@ -1,42 +1,70 @@
-// 📄 src/context/AuthContext.jsx - Nouveau fichier
+// 📄 src/context/AuthContext.jsx
+// ✅ Supabase Auth (remplace localStorage)
 import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../config/supabase';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ✅ Vérifier si l'utilisateur est déjà authentifié (localStorage)
+  // ✅ Charge la session au démarrage
   useEffect(() => {
-    const auth = localStorage.getItem('adminAuth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
+    let mounted = true;
+
+    // Session actuelle
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
+    });
+
+    // Écoute les changements (login, logout, refresh token)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = (password) => {
-    // ✅ Mot de passe défini dans les variables d'environnement
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
-    
-    if (password === adminPassword) {
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuth', 'true');
-      return true;
-    }
-    return false;
+  // ✅ Connexion email + mot de passe
+  const login = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) return { success: false, error: error.message };
+    return { success: true, user: data.user };
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('adminAuth');
+  // ✅ Déconnexion
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

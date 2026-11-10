@@ -1,71 +1,374 @@
+/* ✅ @import DOIT être en premier, avant toute autre règle */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Dancing+Script:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Dancing+Script:wght@400;700&display=swap');
-
+/* ============================================================
+   RESET GLOBAL (une seule fois)
+   ============================================================ */
 @layer base {
   :root {
-    --color-feminine-primary: #E91E8C;
-    --color-feminine-secondary: #F5A0C7;
-    --color-feminine-light: #FFF0F6;
-    --color-feminine-accent: #FCE4EC;
-    --color-feminine-dark: #880E4F;
-    --color-feminine-gradient: linear-gradient(135deg, #E91E8C, #F5A0C7);
-    
-    --color-masculine-primary: #1A237E;
-    --color-masculine-secondary: #3949AB;
-    --color-masculine-light: #E8EAF6;
-    --color-masculine-accent: #C5CAE9;
-    --color-masculine-dark: #0D1445;
-    --color-masculine-gradient: linear-gradient(135deg, #1A237E, #3949AB);
-    
-    --color-gold: #D4AF37;
-    --color-gold-light: #F5E6A3;
-    --color-gold-gradient: linear-gradient(135deg, #D4AF37, #F5E6A3);
-    
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
-    --shadow-xl: 0 16px 60px rgba(0,0,0,0.16);
-    --shadow-glow: 0 0 40px rgba(233,30,140,0.15);
+    /* Couleurs féminines */
+    --color-feminine-primary: #e91e8c;
+    --color-feminine-secondary: #f5a0c7;
+    --color-feminine-light: #fff0f6;
+    --color-feminine-accent: #fce4ec;
+    --color-feminine-dark: #880e4f;
+    --color-feminine-gradient: linear-gradient(135deg, #e91e8c, #f5a0c7);
+
+    /* Couleurs masculines */
+    --color-masculine-primary: #1a237e;
+    --color-masculine-secondary: #3949ab;
+    --color-masculine-light: #e8eaf6;
+    --color-masculine-accent: #c5cae9;
+    --color-masculine-dark: #0d1445;
+    --color-masculine-gradient: linear-gradient(135deg, #1a237e, #3949ab);
+
+    /* Or */
+    --color-gold: #d4af37;
+    --color-gold-light: #f5e6a3;
+    --color-gold-gradient: linear-gradient(135deg, #d4af37, #f5e6a3);
+
+    /* Ombres */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 16px 60px rgba(0, 0, 0, 0.16);
+    --shadow-glow: 0 0 40px rgba(233, 30, 140, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Inter", sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  ::selection {
+    background: #e91e8c;
+    color: #ffffff;
   }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: #FAFAFA;
-  color: #1A1A1A;
-  overflow-x: hidden;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-/* Animations */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #e91e8c, #d4af37);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #880e4f, #b8960f);
+}
+
+/* ============================================================
+   UTILITAIRES CUSTOM
+   ============================================================ */
+@layer utilities {
+  /* Conteneur qui ne déborde pas */
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Texte tronqué */
+  .truncate {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100%;
+  }
+
+  .line-clamp-1 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .break-words {
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Gradient text */
+  .text-gradient-feminine {
+    background: linear-gradient(135deg, #e91e8c, #f5a0c7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-masculine {
+    background: linear-gradient(135deg, #1a237e, #3949ab);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #d4af37, #f5e6a3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card hover */
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Shimmer loading */
+  .shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* ============================================================
+   KEYFRAMES (utilisés dans le CSS custom ET les composants)
+   ============================================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Animation pour le ThemeToggle */
+@keyframes particleFloat {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.5);
+    opacity: 1;
+  }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes rotateSun {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ============================================================
+   ANIMATIONS UTILITAIRES (classes .animate-*)
+   ============================================================ */
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -78,96 +381,37 @@ body {
   animation: fade-in 0.8s ease-out forwards;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.animate-fade-in-down {
+  animation: fade-in-down 0.6s ease-out forwards;
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #E91E8C, #D4AF37);
-  border-radius: 5px;
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s ease-out forwards;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #880E4F, #B8960F);
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
 }
 
-/* Glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards;
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
 }
 
-/* Gradient text */
-.text-gradient-feminine {
-  background: linear-gradient(135deg, #E91E8C, #F5A0C7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
-.text-gradient-masculine {
-  background: linear-gradient(135deg, #1A237E, #3949AB);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-gold {
-  background: linear-gradient(135deg, #D4AF37, #F5E6A3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Cards */
-.card-hover {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card-hover:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: var(--shadow-xl);
-}
-
-/* Buttons */
-.btn-primary {
-  @apply px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg;
-}
-
-/* Selection */
-::selection {
-  background: #E91E8C;
-  color: white;
-}
-
-/* Loading shimmer */
-.shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-/* 📄 src/index.css - Ajouter à la fin */
-
-/* ===== MODE SOMBRE CORRIGÉ ===== */
+/* ============================================================
+   MODE SOMBRE - Variables
+   ============================================================ */
 .dark {
   --bg-primary: #0d0d1a;
   --bg-secondary: #14142b;
@@ -175,52 +419,52 @@ body {
   --bg-card-hover: #22224a;
   --bg-input: #25254a;
   --bg-elevated: #2a2a4a;
-  
+
   --text-primary: #f0f0ff;
   --text-secondary: #c8c8e0;
   --text-muted: #8888aa;
   --text-inverse: #0d0d1a;
-  
+
   --border-light: #2a2a4a;
   --border-medium: #3a3a5a;
   --border-heavy: #4a4a6a;
-  
+
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
   --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.6);
 }
 
-/* ===== FONDS ===== */
 .dark body {
   background: var(--bg-primary);
   color: var(--text-primary);
 }
 
+/* ============================================================
+   MODE SOMBRE - Fonds (sans !important, sauf exceptions ciblées)
+   ============================================================ */
 .dark .bg-white {
   background: var(--bg-card) !important;
 }
-
 .dark .bg-gray-50,
 .dark .bg-gray-100,
 .dark .bg-gray-200 {
   background: var(--bg-secondary) !important;
 }
-
 .dark .bg-gray-50\/50 {
+  background: var(--bg-secondary) !important;
+}
+.dark .bg-gray-50\/30 {
   background: var(--bg-secondary) !important;
 }
 
 .dark .bg-gradient-to-b {
   background: var(--bg-primary) !important;
 }
-
 .dark .bg-gradient-to-br {
   background: var(--bg-primary) !important;
 }
-
 .dark .bg-gradient-to-r {
   background: var(--bg-secondary) !important;
 }
-
 .dark .bg-gradient-to-t {
   background: var(--bg-secondary) !important;
 }
@@ -232,15 +476,17 @@ body {
   backdrop-filter: blur(12px);
 }
 
-.dark .bg-gray-50\/30 {
-  background: var(--bg-secondary) !important;
+.dark .bg-white\/30 {
+  background: rgba(26, 26, 53, 0.5) !important;
 }
 
-/* ===== TEXTES ===== */
-.dark .text-gray-600,
-.dark .text-gray-700,
+/* ============================================================
+   MODE SOMBRE - Textes
+   ============================================================ */
+.dark .text-gray-900,
 .dark .text-gray-800,
-.dark .text-gray-900 {
+.dark .text-gray-700,
+.dark .text-gray-600 {
   color: var(--text-secondary) !important;
 }
 
@@ -253,12 +499,13 @@ body {
 .dark .text-white {
   color: var(--text-primary) !important;
 }
-
 .dark .text-black {
   color: var(--text-primary) !important;
 }
 
-/* ===== BORDURES ===== */
+/* ============================================================
+   MODE SOMBRE - Bordures
+   ============================================================ */
 .dark .border-gray-100,
 .dark .border-gray-200,
 .dark .border-gray-300 {
@@ -268,11 +515,9 @@ body {
 .dark .border-white\/20 {
   border-color: var(--border-light) !important;
 }
-
 .dark .border-gray-100\/50 {
   border-color: var(--border-light) !important;
 }
-
 .dark .border {
   border-color: var(--border-light) !important;
 }
@@ -281,7 +526,9 @@ body {
   border-color: var(--border-light) !important;
 }
 
-/* ===== OMBRES ===== */
+/* ============================================================
+   MODE SOMBRE - Ombres
+   ============================================================ */
 .dark .shadow-sm,
 .dark .shadow-md,
 .dark .shadow-lg,
@@ -294,7 +541,9 @@ body {
   box-shadow: var(--shadow-hover) !important;
 }
 
-/* ===== INPUTS & FORMULAIRES ===== */
+/* ============================================================
+   MODE SOMBRE - Inputs
+   ============================================================ */
 .dark input,
 .dark select,
 .dark textarea {
@@ -311,171 +560,128 @@ body {
 .dark input:focus,
 .dark select:focus,
 .dark textarea:focus {
-  border-color: #D4AF37 !important;
+  border-color: #d4af37 !important;
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15) !important;
 }
 
-/* ===== HEADER ===== */
+/* ============================================================
+   MODE SOMBRE - Header / Footer
+   ============================================================ */
 .dark header.bg-white {
   background: var(--bg-secondary) !important;
   border-bottom-color: var(--border-light) !important;
 }
-
 .dark header .border-gray-100 {
   border-color: var(--border-light) !important;
 }
-
 .dark header .border-b {
   border-color: var(--border-light) !important;
 }
 
-/* ===== FOOTER ===== */
 .dark footer.bg-gray-900 {
   background: var(--bg-primary) !important;
 }
-
 .dark footer .border-gray-800 {
   border-color: var(--border-light) !important;
 }
-
 .dark footer .bg-gray-800 {
   background: var(--bg-card) !important;
 }
-
 .dark footer .hover\:bg-gold:hover {
-  background: #D4AF37 !important;
+  background: #d4af37 !important;
 }
 
-/* ===== CARTES & CONTAINERS ===== */
-.dark .bg-white\/30 {
-  background: rgba(26, 26, 53, 0.5) !important;
-}
-
-.dark .bg-gray-100\/10 {
-  background: var(--bg-secondary) !important;
-}
-
+/* ============================================================
+   MODE SOMBRE - Backdrops
+   ============================================================ */
 .dark .backdrop-blur-sm {
   background: rgba(20, 20, 43, 0.8) !important;
   backdrop-filter: blur(12px);
 }
-
 .dark .backdrop-blur-md {
   background: rgba(20, 20, 43, 0.9) !important;
   backdrop-filter: blur(16px);
 }
-
-/* ===== BOUTONS ===== */
-.dark .bg-gray-100 {
-  background: var(--bg-input) !important;
-}
-
-.dark .hover\:bg-gray-50:hover {
-  background: var(--bg-card-hover) !important;
-}
-
-.dark .hover\:bg-gray-100:hover {
-  background: var(--bg-card-hover) !important;
-}
-
-.dark .hover\:bg-gray-200:hover {
-  background: var(--bg-input) !important;
-}
-
-/* ===== LIENS ===== */
-.dark a:not(.text-feminine-primary):not(.text-masculine-primary):not(.text-gold) {
-  color: var(--text-secondary);
-}
-
-.dark a:hover:not(.text-feminine-primary):not(.text-masculine-primary):not(.text-gold) {
-  color: var(--text-primary);
-}
-
-/* ===== SCROLLBAR ===== */
-.dark ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: var(--bg-input);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-medium);
-}
-
-/* ===== SECTIONS SPÉCIFIQUES ===== */
-/* Hero section */
-.dark .bg-gradient-to-br.from-feminine-light\/60 {
-  background: var(--bg-primary) !important;
-}
-
-.dark .bg-gradient-to-br.from-white {
-  background: var(--bg-primary) !important;
-}
-
-.dark .bg-gradient-to-br.to-masculine-light\/40 {
-  background: var(--bg-primary) !important;
-}
-
-/* Shop entrances */
-.dark .bg-gradient-to-b.from-white {
-  background: var(--bg-primary) !important;
-}
-
-.dark .bg-gradient-to-b.from-gray-50 {
-  background: var(--bg-secondary) !important;
-}
-
-.dark .bg-gradient-to-b.to-white {
-  background: var(--bg-primary) !important;
-}
-
-/* Testimonials */
-.dark .bg-gradient-to-b.from-gray-50 {
-  background: var(--bg-secondary) !important;
-}
-
-.dark .bg-gradient-to-b.to-white {
-  background: var(--bg-primary) !important;
-}
-
-/* Newsletter */
-.dark .bg-gradient-to-br.from-feminine-light {
-  background: var(--bg-primary) !important;
-}
-
-.dark .bg-gradient-to-br.to-masculine-light {
-  background: var(--bg-primary) !important;
-}
-
-/* ===== PRODUCT CARDS ===== */
-.dark .hover\:border-gold\/30:hover {
-  border-color: rgba(212, 175, 55, 0.3) !important;
-}
-
-.dark .bg-feminine-light {
-  background: rgba(233, 30, 140, 0.15) !important;
-}
-
-.dark .bg-masculine-light {
-  background: rgba(26, 35, 126, 0.15) !important;
-}
-
-/* ===== MODALS & DRAWERS ===== */
 .dark .bg-black\/50 {
   background: rgba(0, 0, 0, 0.7) !important;
 }
 
-.dark .bg-gray-50 {
-  background: var(--bg-secondary) !important;
+/* ============================================================
+   MODE SOMBRE - Boutons / Hovers
+   ============================================================ */
+.dark .hover\:bg-gray-50:hover {
+  background: var(--bg-card-hover) !important;
+}
+.dark .hover\:bg-gray-100:hover {
+  background: var(--bg-card-hover) !important;
+}
+.dark .hover\:bg-gray-200:hover {
+  background: var(--bg-input) !important;
 }
 
-/* ===== BADGES ===== */
+/* ============================================================
+   MODE SOMBRE - Liens
+   ============================================================ */
+.dark
+  a:not(.text-feminine-primary):not(.text-masculine-primary):not(.text-gold) {
+  color: var(--text-secondary);
+}
+.dark
+  a:hover:not(.text-feminine-primary):not(.text-masculine-primary):not(
+    .text-gold
+  ) {
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   MODE SOMBRE - Scrollbar
+   ============================================================ */
+.dark ::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--bg-input);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--border-medium);
+}
+
+/* ============================================================
+   MODE SOMBRE - Sections spécifiques
+   ============================================================ */
+.dark .bg-gradient-to-br.from-feminine-light\/60 {
+  background: var(--bg-primary) !important;
+}
+.dark .bg-gradient-to-br.from-white {
+  background: var(--bg-primary) !important;
+}
+.dark .bg-gradient-to-br.to-masculine-light\/40 {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-b.from-white {
+  background: var(--bg-primary) !important;
+}
+.dark .bg-gradient-to-b.from-gray-50 {
+  background: var(--bg-secondary) !important;
+}
+.dark .bg-gradient-to-b.to-white {
+  background: var(--bg-primary) !important;
+}
+
+.dark .bg-gradient-to-br.from-feminine-light {
+  background: var(--bg-primary) !important;
+}
+.dark .bg-gradient-to-br.to-masculine-light {
+  background: var(--bg-primary) !important;
+}
+
+/* ============================================================
+   MODE SOMBRE - Badges
+   ============================================================ */
 .dark .bg-blue-50 {
   background: rgba(59, 130, 246, 0.15) !important;
 }
-
 .dark .text-blue-500 {
   color: #60a5fa !important;
 }
@@ -483,264 +689,62 @@ body {
 .dark .bg-pink-50 {
   background: rgba(236, 72, 153, 0.15) !important;
 }
-
 .dark .text-pink-500 {
   color: #f472b6 !important;
 }
 
-/* ===== SEPARATEURS ===== */
-.dark .w-px.bg-gray-200 {
-  background: var(--border-light) !important;
-}
-
-.dark .h-px.bg-gray-200 {
-  background: var(--border-light) !important;
-}
-
-/* ===== BOUTON FERMER ===== */
-.dark .hover\:bg-gray-100:hover {
-  background: var(--bg-input) !important;
-}
-
-/* ===== PACK BUILDER ===== */
-.dark .bg-gray-50 {
-  background: var(--bg-secondary) !important;
-}
-
-.dark .border-gray-200 {
-  border-color: var(--border-light) !important;
-}
-
-.dark .hover\:border-gold:hover {
-  border-color: #D4AF37 !important;
-}
-
-/* ===== TOASTS ===== */
 .dark .bg-green-50 {
   background: rgba(34, 197, 94, 0.15) !important;
 }
-
 .dark .bg-red-50 {
   background: rgba(239, 68, 68, 0.15) !important;
-}
-
-.dark .bg-blue-50 {
-  background: rgba(59, 130, 246, 0.15) !important;
 }
 
 .dark .text-green-800 {
   color: #4ade80 !important;
 }
-
 .dark .text-red-800 {
   color: #f87171 !important;
 }
-
 .dark .text-blue-800 {
   color: #60a5fa !important;
 }
 
-/* ===== ANIMATIONS ===== */
+/* ============================================================
+   MODE SOMBRE - Séparateurs
+   ============================================================ */
+.dark .w-px.bg-gray-200 {
+  background: var(--border-light) !important;
+}
+.dark .h-px.bg-gray-200 {
+  background: var(--border-light) !important;
+}
+
+/* ============================================================
+   MODE SOMBRE - Pack Builder
+   ============================================================ */
+.dark .hover\:border-gold:hover {
+  border-color: #d4af37 !important;
+}
+.dark .hover\:border-gold\/30:hover {
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+.dark .bg-feminine-light {
+  background: rgba(233, 30, 140, 0.15) !important;
+}
+.dark .bg-masculine-light {
+  background: rgba(26, 35, 126, 0.15) !important;
+}
+
+/* ============================================================
+   MODE SOMBRE - Divers
+   ============================================================ */
 .dark .animate-pulse {
   opacity: 0.6;
 }
 
-/* ===== SÉLECTION ===== */
 .dark ::selection {
-  background: #D4AF37;
+  background: #d4af37;
   color: #0d0d1a;
-}
-
-/* 📄 src/index.css - Ajouter à la fin */
-
-/* ===== ANIMATIONS POUR THEME TOGGLE ===== */
-
-/* Particules flottantes */
-@keyframes particleFloat {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: translateY(-10px) scale(1.5);
-    opacity: 1;
-  }
-}
-
-/* Effet ripple au clic */
-@keyframes rippleEffect {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Animation de rotation du cercle */
-@keyframes rotateSun {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Animation de brillance */
-@keyframes glowPulse {
-  0%, 100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-/* 📄 src/index.css - Ajouter pour éviter les débordements */
-
-/* ✅ Éviter les débordements sur mobile */
-* {
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-}
-
-/* ✅ Gestion des textes qui débordent */
-.break-words {
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ✅ Éviter les débordements des cartes */
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-/* ✅ Images qui ne débordent pas */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* ✅ Conteneurs qui ne débordent pas */
-.container {
-  max-width: 100%;
-  overflow: hidden;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-/* 📄 src/index.css - Ajouter au début du fichier */
-
-/* ✅ Reset mobile - Évite les débordements */
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-}
-
-/* ✅ Conteneurs qui ne débordent pas */
-.container {
-  width: 100%;
-  max-width: 100%;
-  padding-left: 12px;
-  padding-right: 12px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ✅ Éviter les débordements des images */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* ✅ Grilles mobiles */
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-/* ✅ Forcer le débordement caché */
-.overflow-hidden {
-  overflow: hidden !important;
-}
-
-/* ✅ Texte qui ne déborde pas */
-.truncate {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  max-width: 100%;
-}
-
-.line-clamp-1 {
-  display: -webkit-box !important;
-  -webkit-line-clamp: 1 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
-}
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-}
-.container {
-  width: 100%;
-  max-width: 100%;
-  padding-left: 12px;
-  padding-right: 12px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-.truncate {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  max-width: 100%;
-}
-
-.line-clamp-1 {
-  display: -webkit-box !important;
-  -webkit-line-clamp: 1 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
 }

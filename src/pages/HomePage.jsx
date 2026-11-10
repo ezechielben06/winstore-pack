@@ -1,5 +1,6 @@
 // 📄 src/pages/HomePage.jsx
 import Hero from '../components/Home/Hero';
+import AnnouncementBanner from '../components/Home/AnnouncementBanner'; 
 import ShopEntrance from '../components/Home/ShopEntrance';
 import Categories from '../components/Home/Categories';
 import Testimonials from '../components/Home/Testimonials';
@@ -10,6 +11,7 @@ const HomePage = () => {
   return (
     <div>
       <Hero />
+      <AnnouncementBanner />
       <ShopEntrance />
       <Categories />
       <Testimonials />

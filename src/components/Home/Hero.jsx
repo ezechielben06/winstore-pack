@@ -1,204 +1,177 @@
-// 📄 src/components/Home/Hero.jsx - Version avec images
-import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Instagram, MessageCircle, Music } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
+// 📄 src/components/Home/Hero.jsx
+// ✅ Un seul mécanisme d'auto-play (progression + changement de slide synchronisés)
+import { useState, useEffect, useRef } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useTheme } from "../../context/ThemeContext";
+
+const SLIDE_DURATION = 10000; // 10s par slide
 
 const slides = [
   {
     id: 1,
-    image: '/h1.jpeg',
-    title: 'Win\'S PACKS',
-    subtitle: 'Tout en un pour votre quotidien',
-    cta: 'Découvrir',
-    link: '/femme',
-    badge: '✨ Nouvelle collection'
+    image: "/h1.jpeg",
+    title: "Win'S PACKS",
+    subtitle: "Tout en un pour votre quotidien",
+    cta: "Découvrir",
+    link: "/femme",
+    badge: "✨ Nouvelle collection",
   },
   {
     id: 2,
-    image: '/h2.jpeg',
-    title: 'Win\'S PACKS',
-    subtitle: 'Tout en un pour votre quotidien',
-    cta: 'Voir les packs',
-    link: '/femme',
-    badge: '📦 Packs disponibles'
+    image: "/h2.jpeg",
+    title: "Win'S PACKS",
+    subtitle: "Tout en un pour votre quotidien",
+    cta: "Voir les packs",
+    link: "/femme",
+    badge: "📦 Packs disponibles",
   },
   {
     id: 3,
-    image: '/h3.jpeg',
-    title: 'Win\'S PACKS',
-    subtitle: 'Des packs pour révéler votre confiance',
-    cta: 'Commander',
-    link: '/femme',
-    badge: '✨ Glow & Élégance'
+    image: "/h3.jpeg",
+    title: "Win'S PACKS",
+    subtitle: "Des packs pour révéler votre confiance",
+    cta: "Commander",
+    link: "/femme",
+    badge: "✨ Glow & Élégance",
   },
   {
     id: 4,
-    image: '/h4.jpeg',
-    title: 'Win\'S PACKS',
-    subtitle: 'Tout en un pour votre quotidien',
-    cta: 'Découvrir',
-    link: '/homme',
-    badge: '💪 Nouveauté'
-  }
+    image: "/h4.jpeg",
+    title: "Win'S PACKS",
+    subtitle: "Tout en un pour votre quotidien",
+    cta: "Découvrir",
+    link: "/homme",
+    badge: "💪 Nouveauté",
+  },
 ];
 
 const Hero = () => {
   const { isDark } = useTheme();
   const [current, setCurrent] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [progress, setProgress] = useState(0);
-  
-  const timerRef = useRef(null);
-  const autoPlayRef = useRef(isAutoPlay);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // ✅ Un seul ref pour l'animation
+  const rafRef = useRef(null);
   const startTimeRef = useRef(Date.now());
+  const isPausedRef = useRef(isPaused);
 
+  // Synchronise le ref avec le state (pour l'utiliser dans la boucle RAF)
   useEffect(() => {
-    autoPlayRef.current = isAutoPlay;
-  }, [isAutoPlay]);
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
-  const nextSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrent((prev) => (prev + 1) % slides.length);
-    setProgress(0);
+  // ✅ Reset du timer quand on change de slide manuellement
+  const resetTimer = () => {
     startTimeRef.current = Date.now();
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  const prevSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
     setProgress(0);
-    startTimeRef.current = Date.now();
-    setTimeout(() => setIsTransitioning(false), 500);
   };
 
   const goToSlide = (index) => {
-    if (isTransitioning || index === current) return;
-    setIsTransitioning(true);
+    if (index === current) return;
     setCurrent(index);
-    setProgress(0);
-    startTimeRef.current = Date.now();
-    setIsAutoPlay(false);
-    setTimeout(() => {
-      setIsTransitioning(false);
-      setTimeout(() => setIsAutoPlay(true), 5000);
-    }, 500);
+    resetTimer();
   };
 
-  // Progression
+  const nextSlide = () => {
+    setCurrent((prev) => (prev + 1) % slides.length);
+    resetTimer();
+  };
+
+  const prevSlide = () => {
+    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+    resetTimer();
+  };
+
+  // ✅ UN SEUL useEffect : progression + auto-advance
   useEffect(() => {
-    let animationFrame;
-    const interval = 3000;
+    const tick = () => {
+      if (isPausedRef.current) {
+        // Pause : on décale startTime pour "geler" la progression
+        startTimeRef.current = Date.now() - progress * (SLIDE_DURATION / 100);
+      } else {
+        const elapsed = Date.now() - startTimeRef.current;
+        const newProgress = Math.min((elapsed / SLIDE_DURATION) * 100, 100);
+        setProgress(newProgress);
 
-    const updateProgress = () => {
-      if (!autoPlayRef.current) {
-        animationFrame = requestAnimationFrame(updateProgress);
-        return;
-      }
-
-      const elapsed = Date.now() - startTimeRef.current;
-      const newProgress = Math.min((elapsed / interval) * 100, 100);
-      setProgress(newProgress);
-
-      if (newProgress >= 100) {
-        if (!isTransitioning) {
+        if (newProgress >= 100) {
           setCurrent((prev) => (prev + 1) % slides.length);
-          setProgress(0);
           startTimeRef.current = Date.now();
+          setProgress(0);
         }
       }
-
-      animationFrame = requestAnimationFrame(updateProgress);
+      rafRef.current = requestAnimationFrame(tick);
     };
 
-    animationFrame = requestAnimationFrame(updateProgress);
-
+    rafRef.current = requestAnimationFrame(tick);
     return () => {
-      if (animationFrame) cancelAnimationFrame(animationFrame);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [isTransitioning]);
+  }, [progress]);
 
-  // Auto-play
+  // ✅ Reset quand on change de slide
   useEffect(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    if (isAutoPlay) {
-      timerRef.current = setInterval(() => {
-        setCurrent((prev) => (prev + 1) % slides.length);
-      }, 10000);
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [isAutoPlay]);
-
-  const handleMouseEnter = () => setIsAutoPlay(false);
-  const handleMouseLeave = () => {
-    setIsAutoPlay(true);
     startTimeRef.current = Date.now();
     setProgress(0);
-  };
+  }, [current]);
 
   const slide = slides[current];
 
   return (
-    <section 
+    <section
       className="relative min-h-[70vh] xs:min-h-[75vh] sm:min-h-[80vh] flex items-center overflow-hidden"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Image de fond */}
-      <div 
+      <div
         className="absolute inset-0 z-0 transition-all duration-700 ease-out"
         style={{
           backgroundImage: `url(${slide.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
-      
-      {/* Overlay */}
-      <div 
-        className="absolute inset-0 z-10 transition-all duration-700"
-        style={{
-          background: isDark 
-            ? 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 100%)'
-            : 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.6) 100%)',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       />
 
-      {/* Barre de progression */}
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 z-10 transition-all duration-700"
+        style={{
+          background: isDark
+            ? "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 100%)"
+            : "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.6) 100%)",
+        }}
+      />
+
+      {/* Barre de progression bas d'écran */}
       <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/10">
-        <div 
+        <div
           className="h-full bg-gradient-to-r from-gold to-yellow-400 transition-all duration-100 ease-linear"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      {/* Flèches - Masquées sur mobile */}
+      {/* Flèches (desktop) */}
       <button
+        type="button"
         onClick={prevSlide}
-        className="hidden sm:flex absolute left-2 md:left-4 z-30 transition-all backdrop-blur-sm hover:scale-110 p-1.5 md:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white border border-white/10"
+        className="hidden sm:flex absolute left-2 md:left-4 z-30 backdrop-blur-sm hover:scale-110 p-1.5 md:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white border border-white/10 transition-all"
         aria-label="Image précédente"
       >
         <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
       </button>
-      
+
       <button
+        type="button"
         onClick={nextSlide}
-        className="hidden sm:flex absolute right-2 md:right-4 z-30 transition-all backdrop-blur-sm hover:scale-110 p-1.5 md:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white border border-white/10"
+        className="hidden sm:flex absolute right-2 md:right-4 z-30 backdrop-blur-sm hover:scale-110 p-1.5 md:p-3 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white border border-white/10 transition-all"
         aria-label="Image suivante"
       >
         <ChevronRight className="w-4 h-4 md:w-6 md:h-6" />
@@ -209,16 +182,17 @@ const Hero = () => {
         {slides.map((_, index) => (
           <button
             key={index}
+            type="button"
             onClick={() => goToSlide(index)}
             className={`relative h-1 md:h-2 rounded-full overflow-hidden transition-all duration-300 ${
-              index === current 
-                ? 'w-5 md:w-10 bg-white/30' 
-                : 'w-1.5 md:w-2.5 bg-white/30 hover:bg-white/50'
+              index === current
+                ? "w-5 md:w-10 bg-white/30"
+                : "w-1.5 md:w-2.5 bg-white/30 hover:bg-white/50"
             }`}
             aria-label={`Aller à l'image ${index + 1}`}
           >
             {index === current && (
-              <div 
+              <div
                 className="absolute inset-0 bg-gold rounded-full transition-all duration-100 ease-linear"
                 style={{ width: `${progress}%` }}
               />
@@ -231,35 +205,39 @@ const Hero = () => {
       <div className="container mx-auto px-4 relative z-20">
         <div className="max-w-3xl">
           {/* Badge */}
-          <div className={`inline-flex items-center gap-1 md:gap-2 px-2.5 md:px-4 py-1 md:py-2 rounded-full text-[10px] md:text-sm mb-2 md:mb-4 border animate-fade-in ${
-            isDark
-              ? 'bg-black/40 backdrop-blur-sm text-white border-white/10'
-              : 'bg-white/20 backdrop-blur-sm text-white border-white/20'
-          }`}>
+          <div
+            className={`inline-flex items-center gap-1 md:gap-2 px-2.5 md:px-4 py-1 md:py-2 rounded-full text-[10px] md:text-sm mb-2 md:mb-4 border animate-fade-in ${
+              isDark
+                ? "bg-black/40 backdrop-blur-sm text-white border-white/10"
+                : "bg-white/20 backdrop-blur-sm text-white border-white/20"
+            }`}
+          >
             <Sparkles className="w-2.5 h-2.5 md:w-4 md:h-4 text-gold" />
-            <span className="truncate max-w-[120px] xs:max-w-[200px] md:max-w-none">{slide.badge}</span>
+            <span className="truncate max-w-[120px] xs:max-w-[200px] md:max-w-none">
+              {slide.badge}
+            </span>
           </div>
 
           {/* Titre */}
-          <h1 
-            key={current}
+          <h1
+            key={`title-${current}`}
             className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black leading-[1.1] text-white animate-slide-up"
-            style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}
           >
             {slide.title}
           </h1>
-          
+
           {/* Sous-titre */}
-          <p 
+          <p
             key={`sub-${current}`}
             className="mt-1.5 md:mt-4 text-xs xs:text-sm sm:text-base md:text-xl text-white/80 md:text-white/90 max-w-2xl animate-slide-up [animation-delay:100ms]"
-            style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}
+            style={{ textShadow: "0 2px 15px rgba(0,0,0,0.4)" }}
           >
             {slide.subtitle}
           </p>
 
           {/* CTA */}
-          <div 
+          <div
             key={`cta-${current}`}
             className="mt-4 md:mt-8 animate-slide-up [animation-delay:200ms]"
           >

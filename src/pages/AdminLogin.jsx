@@ -1,7 +1,7 @@
-// 📄 src/pages/AdminLogin.jsx - Version corrigée
+// 📄 src/pages/AdminLogin.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Shield, Eye, EyeOff, Settings } from 'lucide-react';
+import { Lock, Shield, Eye, EyeOff, Mail, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -9,26 +9,31 @@ const AdminLogin = () => {
   const { login } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
+
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      const success = login(password);
-      if (success) {
-        navigate('/admin');
-      } else {
-        setError('Mot de passe incorrect');
-        setPassword('');
-        setIsLoading(false);
-      }
-    }, 500);
+    const result = await login(email.trim(), password);
+
+    if (result.success) {
+      navigate('/admin');
+    } else {
+      setError(
+        result.error === 'Invalid login credentials'
+          ? 'Email ou mot de passe incorrect'
+          : result.error
+      );
+      setPassword('');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -37,9 +42,8 @@ const AdminLogin = () => {
     }`}>
       <div className={`w-full max-w-md rounded-2xl ${
         isDark ? 'bg-[#1a1a2e]' : 'bg-white'
-      } shadow-2xl border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'} p-8 animate-fade-in`}>
-        
-        {/* Logo / En-tête */}
+      } shadow-2xl border ${isDark ? 'border-[#2d3748]' : 'border-gray-200'} p-8`}>
+
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-4">
             <Shield className="w-8 h-8 text-gold" />
@@ -48,12 +52,35 @@ const AdminLogin = () => {
             Administration
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Accès sécurisé au back-office
+            Connectez-vous avec votre compte admin
           </p>
         </div>
 
-        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Email
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@wins-pack.com"
+                autoComplete="username"
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm ${
+                  isDark
+                    ? 'bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400'
+                    : 'bg-gray-50 border-gray-200 text-gray-800'
+                } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Mot de passe */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Mot de passe
@@ -64,31 +91,28 @@ const AdminLogin = () => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Entrez le mot de passe"
-                // ✅ Ajout de autoComplete
-                autoComplete="new-password"
+                placeholder="••••••••"
+                autoComplete="current-password"
                 className={`w-full pl-10 pr-12 py-3 rounded-xl border text-sm ${
-                  isDark 
-                    ? 'bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400' 
-                    : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'
+                  isDark
+                    ? 'bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400'
+                    : 'bg-gray-50 border-gray-200 text-gray-800'
                 } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all ${
                   error ? 'border-red-500 ring-2 ring-red-500/20' : ''
                 }`}
-                autoFocus
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
             {error && (
               <p className="mt-2 text-sm text-red-500 flex items-center gap-1">
-                <span>⚠️</span> {error}
+                ⚠️ {error}
               </p>
             )}
           </div>
@@ -114,15 +138,9 @@ const AdminLogin = () => {
           </button>
         </form>
 
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            🔒 Accès réservé aux administrateurs
-          </p>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-            Contactez le support si vous avez perdu votre mot de passe
-          </p>
-        </div>
+        <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
+          🔒 Accès réservé aux administrateurs
+        </p>
       </div>
     </div>
   );

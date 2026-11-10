@@ -1,8 +1,16 @@
-// 📄 src/components/Layout/Header.jsx - Ajout du lien admin avec déconnexion
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X, Settings, LogOut } from "lucide-react";
-import { useCart } from "../../context/CartContext";
+// 📄 src/components/Layout/Header.jsx
+// ✅ Admin : bouton "Administration" + lien "Annonces" + déconnexion
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  ShoppingCart,
+  Menu,
+  X,
+  Settings,
+  LogOut,
+  Tag,
+} from "lucide-react";
 import { useState } from "react";
+import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import WomenLogo from "../Logo/WomenLogo";
 import MenLogo from "../Logo/MenLogo";
@@ -12,18 +20,21 @@ import ThemeToggle from "../Shared/ThemeToggle";
 const Header = ({ onCartClick }) => {
   const { totalItems } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isWomen = location.pathname === "/femme";
   const isMen = location.pathname === "/homme";
-  const isAdmin = location.pathname === "/admin";
+  const isAdmin = location.pathname.startsWith("/admin");
 
   const getLogo = () => {
-    if (isWomen)
+    if (isWomen) {
       return <WomenLogo className="w-8 h-8 md:w-10 md:h-10" text={true} />;
-    if (isMen)
+    }
+    if (isMen) {
       return <MenLogo className="w-8 h-8 md:w-10 md:h-10" text={true} />;
+    }
     return <MainLogo className="w-8 h-8 md:w-10 md:h-10" text={true} />;
   };
 
@@ -39,6 +50,21 @@ const Header = ({ onCartClick }) => {
     { to: "/homme", label: "Homme" },
   ];
 
+  // ✅ Déconnexion async (Supabase Auth)
+  const handleLogout = async () => {
+    await logout();
+    setIsMobileMenuOpen(false);
+    navigate("/");
+  };
+
+  // ✅ Classe active pour un lien admin (gère /admin ET /admin/announcements)
+  const getAdminLinkClass = (path) => {
+    const active = location.pathname === path;
+    return active
+      ? "bg-gold text-gray-900"
+      : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a4a]";
+  };
+
   return (
     <header className="bg-white dark:bg-[#1a1a2e] shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-[#2d3748] transition-colors duration-300">
       <div className="container mx-auto px-3 md:px-4">
@@ -51,27 +77,35 @@ const Header = ({ onCartClick }) => {
             {getLogo()}
           </Link>
 
-          {/* Espaceur */}
           <div className="flex-1" />
 
           {/* Actions */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* Admin - Desktop */}
+            {/* ===== ADMIN - Desktop ===== */}
             {isAuthenticated ? (
               <div className="hidden md:flex items-center gap-1">
                 <Link
                   to="/admin"
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isAdmin
-                      ? "bg-gold text-gray-900"
-                      : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a4a]"
-                  }`}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${getAdminLinkClass(
+                    "/admin"
+                  )}`}
                 >
                   <Settings className="w-4 h-4" />
                   Admin
                 </Link>
+                <Link
+                  to="/admin/announcements"
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${getAdminLinkClass(
+                    "/admin/announcements"
+                  )}`}
+                  title="Annonces & Promotions"
+                >
+                  <Tag className="w-4 h-4" />
+                  Annonces
+                </Link>
                 <button
-                  onClick={logout}
+                  type="button"
+                  onClick={handleLogout}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                   title="Déconnexion"
                 >
@@ -95,10 +129,12 @@ const Header = ({ onCartClick }) => {
 
             {/* Panier */}
             <button
+              type="button"
               onClick={onCartClick}
               className="relative p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-[#2a2a4a] rounded-lg transition-colors"
+              aria-label="Ouvrir le panier"
             >
-              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 text-gray-700 dark:text-gray-300" />
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
               {totalItems > 0 && (
                 <span
                   className={`absolute -top-0.5 -right-0.5 text-white text-[8px] sm:text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold ${getThemeBg()} shadow-lg`}
@@ -110,8 +146,10 @@ const Header = ({ onCartClick }) => {
 
             {/* Menu Burger */}
             <button
+              type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-[#2a2a4a] rounded-lg transition-colors md:hidden"
+              aria-label="Menu"
             >
               {isMobileMenuOpen ? (
                 <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
@@ -122,7 +160,7 @@ const Header = ({ onCartClick }) => {
           </div>
         </div>
 
-        {/* Menu Mobile */}
+        {/* ===== MENU MOBILE ===== */}
         {isMobileMenuOpen && (
           <nav className="md:hidden pb-3 pt-2 border-t border-gray-200 dark:border-[#2d3748]">
             <div className="flex flex-col gap-0.5">
@@ -136,12 +174,10 @@ const Header = ({ onCartClick }) => {
                     className={`font-medium py-2.5 px-3 rounded-lg transition-all text-sm ${
                       isActive
                         ? isWomen
-                          ? "bg-feminine-light dark:bg-feminine-primary/20 text-feminine-primary dark:text-feminine-primary"
+                          ? "bg-feminine-light dark:bg-feminine-primary/20 text-feminine-primary"
                           : isMen
-                          ? "bg-masculine-light dark:bg-masculine-primary/20 text-masculine-primary dark:text-masculine-primary"
-                          : isAdmin
-                          ? "bg-gold text-gray-900"
-                          : "bg-gray-100 dark:bg-[#2a2a4a] text-gold dark:text-gold"
+                          ? "bg-masculine-light dark:bg-masculine-primary/20 text-masculine-primary"
+                          : "bg-gray-100 dark:bg-[#2a2a4a] text-gold"
                         : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
                     }`}
                   >
@@ -156,20 +192,30 @@ const Header = ({ onCartClick }) => {
                   <Link
                     to="/admin"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`font-medium py-2.5 px-3 rounded-lg transition-all text-sm ${
-                      isAdmin
+                    className={`font-medium py-2.5 px-3 rounded-lg transition-all text-sm flex items-center gap-2 ${
+                      isAdmin && location.pathname === "/admin"
                         ? "bg-gold text-gray-900"
                         : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
                     }`}
                   >
-                    <Settings className="w-4 h-4 inline mr-2" />
+                    <Settings className="w-4 h-4" />
                     Administration
                   </Link>
+                  <Link
+                    to="/admin/announcements"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`font-medium py-2.5 px-3 rounded-lg transition-all text-sm flex items-center gap-2 ${
+                      location.pathname === "/admin/announcements"
+                        ? "bg-gold text-gray-900"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
+                    }`}
+                  >
+                    <Tag className="w-4 h-4" />
+                    Annonces & Promos
+                  </Link>
                   <button
-                    onClick={() => {
-                      logout();
-                      setIsMobileMenuOpen(false);
-                    }}
+                    type="button"
+                    onClick={handleLogout}
                     className="font-medium py-2.5 px-3 rounded-lg transition-all text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 text-left flex items-center gap-2"
                   >
                     <LogOut className="w-4 h-4" />
@@ -180,9 +226,9 @@ const Header = ({ onCartClick }) => {
                 <Link
                   to="/admin/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="font-medium py-2.5 px-3 rounded-lg transition-all text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a]"
+                  className="font-medium py-2.5 px-3 rounded-lg transition-all text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a4a] flex items-center gap-2"
                 >
-                  <Settings className="w-4 h-4 inline mr-2" />
+                  <Settings className="w-4 h-4" />
                   Administration
                 </Link>
               )}

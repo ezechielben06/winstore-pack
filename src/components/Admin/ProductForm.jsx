@@ -1,5 +1,6 @@
-// 📄 src/components/Admin/ProductForm.jsx - Version avec VariantManager
-import { useState, useEffect, useRef } from "react";
+// 📄 src/components/Admin/ProductForm.jsx
+// ✅ Version contrôlée (plus de refs fragiles)
+import { useState, useEffect } from "react";
 import {
   Save,
   X,
@@ -9,11 +10,52 @@ import {
   ChevronUp,
   Wand2,
   Check,
-  Palette,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import ImageUploader from "./ImageUploader";
 import VariantManager from "./VariantManager";
+
+// ✅ Génère l'ID suivant selon la convention w/p/m/mp
+const generateNextId = (category, type, existingProducts = []) => {
+  let prefix = "";
+  if (type === "women" && category === "product") prefix = "w";
+  else if (type === "women" && category === "pack") prefix = "p";
+  else if (type === "men" && category === "product") prefix = "m";
+  else if (type === "men" && category === "pack") prefix = "mp";
+
+  const ids = (existingProducts || [])
+    .filter((p) => {
+      const id = p.id || "";
+      if (!id.startsWith(prefix)) return false;
+      // Exclut les IDs de packs "mp" du préfixe "m"
+      if (prefix === "m" && id.startsWith("mp")) return false;
+      const rest = id.slice(prefix.length);
+      return /^\d+$/.test(rest);
+    })
+    .map((p) => parseInt(p.id.slice(prefix.length), 10))
+    .filter((n) => !isNaN(n));
+
+  const max = ids.length > 0 ? Math.max(...ids) : 0;
+  return `${prefix}${max + 1}`;
+};
+
+// ✅ Forme vide (réutilisable pour reset)
+const emptyForm = () => ({
+  id: "",
+  name: "",
+  category: "product",
+  type: "women",
+  price: "",
+  priceRange: "",
+  description: "",
+  emoji: "✨",
+  image: "",
+  tags: "",
+  popularity: "",
+  items: "",
+  color: "from-pink-400 to-rose-400",
+  variants: [],
+});
 
 const ProductForm = ({
   isOpen,
@@ -26,6 +68,7 @@ const ProductForm = ({
   const { isDark } = useTheme();
   const darkMode = themeIsDark !== undefined ? themeIsDark : isDark;
 
+  const [formData, setFormData] = useState(emptyForm());
   const [expandedSections, setExpandedSections] = useState({
     basic: true,
     pricing: false,
@@ -33,197 +76,140 @@ const ProductForm = ({
     variants: true,
     advanced: false,
   });
+  const [error, setError] = useState("");
 
-  const inputRefs = {
-    name: useRef(null),
-    description: useRef(null),
-    emoji: useRef(null),
-    price: useRef(null),
-    priceRange: useRef(null),
-    image: useRef(null),
-    tags: useRef(null),
-    color: useRef(null),
-    items: useRef(null),
-  };
-
-  const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    category: "product",
-    type: "women",
-    price: "",
-    priceRange: "",
-    description: "",
-    emoji: "✨",
-    image: "",
-    tags: "",
-    popularity: "",
-    items: "",
-    color: "from-pink-400 to-rose-400",
-    variants: [],
-  });
-
-  useEffect(() => {
-    Object.keys(inputRefs).forEach((key) => {
-      if (inputRefs[key]?.current && formData[key] !== undefined) {
-        inputRefs[key].current.value = formData[key] || "";
-      }
-    });
-  }, [formData]);
-
-  const handleImageUpload = (imageUrl) => {
-    setFormData((prev) => ({ ...prev, image: imageUrl }));
-    if (inputRefs.image?.current) {
-      inputRefs.image.current.value = imageUrl;
-    }
-  };
-
-  const handleVariantsChange = (variants) => {
-    setFormData((prev) => ({ ...prev, variants }));
-  };
-
-  const generateNextId = (category, type) => {
-    const existing = existingProducts || [];
-    let prefix = "";
-    if (type === "women" && category === "product") prefix = "w";
-    else if (type === "women" && category === "pack") prefix = "p";
-    else if (type === "men" && category === "product") prefix = "m";
-    else if (type === "men" && category === "pack") prefix = "mp";
-
-    const ids = existing
-      .filter(
-        (p) =>
-          p.id?.startsWith(prefix) && /^\d+$/.test(p.id.replace(prefix, "")),
-      )
-      .map((p) => parseInt(p.id.replace(prefix, "")))
-      .filter((n) => !isNaN(n));
-
-    const maxNum = ids.length > 0 ? Math.max(...ids) : 0;
-    return `${prefix}${maxNum + 1}`;
-  };
-
+  // ✅ Initialisation à l'ouverture
   useEffect(() => {
     if (!isOpen) return;
+    setError("");
 
     if (editingProduct) {
-      let type = "women";
-      if (editingProduct.id?.startsWith("m")) type = "men";
-
-      const data = {
+      const type = (editingProduct.id || "").startsWith("m") ? "men" : "women";
+      setFormData({
         id: editingProduct.id || "",
         name: editingProduct.name || "",
         category: editingProduct.category || "product",
-        type: type,
-        price: editingProduct.price || "",
+        type,
+        price:
+          editingProduct.price != null ? String(editingProduct.price) : "",
         priceRange: editingProduct.priceRange || "",
         description: editingProduct.description || "",
         emoji: editingProduct.emoji || "✨",
         image: editingProduct.image || "",
-        tags: editingProduct.tags ? editingProduct.tags.join(", ") : "",
+        tags: Array.isArray(editingProduct.tags)
+          ? editingProduct.tags.join(", ")
+          : "",
         popularity: editingProduct.popularity || "",
-        items: editingProduct.items ? editingProduct.items.join("\n") : "",
+        items: Array.isArray(editingProduct.items)
+          ? editingProduct.items.join("\n")
+          : "",
         color: editingProduct.color || "from-pink-400 to-rose-400",
         variants: editingProduct.variants || [],
-      };
-      setFormData(data);
-
-      Object.keys(inputRefs).forEach((key) => {
-        if (inputRefs[key]?.current && data[key] !== undefined) {
-          inputRefs[key].current.value = data[key] || "";
-        }
       });
     } else {
-      const newId = generateNextId("product", "women");
-      const data = {
-        id: newId,
-        name: "",
-        category: "product",
-        type: "women",
-        price: "",
-        priceRange: "",
-        description: "",
-        emoji: "✨",
-        image: "",
-        tags: "",
-        popularity: "",
-        items: "",
-        color: "from-pink-400 to-rose-400",
-        variants: [],
-      };
-      setFormData(data);
-
-      Object.keys(inputRefs).forEach((key) => {
-        if (inputRefs[key]?.current) {
-          inputRefs[key].current.value = data[key] || "";
-        }
-      });
+      const newId = generateNextId("product", "women", existingProducts);
+      setFormData({ ...emptyForm(), id: newId });
     }
-  }, [isOpen, editingProduct]);
+  }, [isOpen, editingProduct, existingProducts]);
 
-  const toggleSection = (section) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+  // ✅ Mise à jour d'un champ
+  const updateField = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const regenerateId = () => {
-    const newId = generateNextId(formData.category, formData.type);
+  // ✅ Changement de boutique (women/men)
+  const handleChangeType = (newType) => {
+    setFormData((prev) => {
+      const next = { ...prev, type: newType };
+      if (!editingProduct) {
+        next.id = generateNextId(prev.category, newType, existingProducts);
+      }
+      return next;
+    });
+  };
+
+  // ✅ Changement de type (product/pack)
+  const handleChangeCategory = (newCategory) => {
+    setFormData((prev) => {
+      const next = { ...prev, category: newCategory };
+      if (!editingProduct) {
+        next.id = generateNextId(newCategory, prev.type, existingProducts);
+      }
+      return next;
+    });
+  };
+
+  // ✅ Régénérer l'ID
+  const handleRegenerateId = () => {
+    const newId = generateNextId(
+      formData.category,
+      formData.type,
+      existingProducts
+    );
     setFormData((prev) => ({ ...prev, id: newId }));
   };
 
+  // ✅ Toggle section
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // ✅ Soumission
   const handleSubmit = () => {
-    const currentData = { ...formData };
-    Object.keys(inputRefs).forEach((key) => {
-      if (inputRefs[key]?.current) {
-        currentData[key] = inputRefs[key].current.value;
-      }
-    });
+    setError("");
 
-    setFormData(currentData);
-
-    if (!currentData.id) {
-      alert("L'ID est requis");
+    if (!formData.id?.trim()) {
+      setError("L'ID est requis");
+      return;
+    }
+    if (!formData.name?.trim()) {
+      setError("Le nom est requis");
       return;
     }
 
     if (!editingProduct) {
       const exists = (existingProducts || []).some(
-        (p) => p.id === currentData.id,
+        (p) => p.id === formData.id.trim()
       );
       if (exists) {
-        alert(`L'ID "${currentData.id}" existe déjà.`);
-        regenerateId();
+        setError(`L'ID "${formData.id}" existe déjà.`);
         return;
       }
     }
 
+    // ✅ Construction du produit à sauvegarder
     const newProduct = {
-      id: currentData.id,
-      name: currentData.name,
-      category: currentData.category,
-      description: currentData.description || "",
-      emoji: currentData.emoji || "✨",
-      image: currentData.image || "",
-      tags: currentData.tags
-        ? currentData.tags
+      id: formData.id.trim(),
+      name: formData.name.trim(),
+      category: formData.category,
+      description: formData.description.trim() || "",
+      emoji: formData.emoji || "✨",
+      image: formData.image || "",
+      tags: formData.tags
+        ? formData.tags
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean)
         : [],
-      popularity: currentData.popularity || "",
-      color: currentData.color || "from-pink-400 to-rose-400",
-      variants: currentData.variants || [],
+      popularity: formData.popularity || "",
+      color: formData.color || "from-pink-400 to-rose-400",
+      variants: formData.variants || [],
     };
 
-    if (currentData.price) {
-      newProduct.price = parseFloat(currentData.price);
+    if (formData.price !== "" && formData.price != null) {
+      const priceNum = parseFloat(formData.price);
+      if (!isNaN(priceNum)) newProduct.price = priceNum;
     }
-    if (currentData.priceRange) {
-      newProduct.priceRange = currentData.priceRange;
+
+    if (formData.priceRange.trim()) {
+      newProduct.priceRange = formData.priceRange.trim();
     }
-    if (currentData.items) {
-      newProduct.items = currentData.items.split("\n").filter((i) => i.trim());
+
+    if (formData.items.trim()) {
+      newProduct.items = formData.items
+        .split("\n")
+        .map((i) => i.trim())
+        .filter(Boolean);
     }
 
     onSave(newProduct);
@@ -231,31 +217,27 @@ const ProductForm = ({
 
   if (!isOpen) return null;
 
+  // ✅ Info préfixe
   const prefixInfo = {
     women: {
-      product: {
-        prefix: "w",
-        label: "Produit Femme",
-        example: "w1, w2, w3...",
-      },
-      pack: { prefix: "p", label: "Pack Femme", example: "p1, p2, p3..." },
+      product: { prefix: "w", label: "Produit Femme" },
+      pack: { prefix: "p", label: "Pack Femme" },
     },
     men: {
-      product: {
-        prefix: "m",
-        label: "Produit Homme",
-        example: "m1, m2, m3...",
-      },
-      pack: { prefix: "mp", label: "Pack Homme", example: "mp1, mp2, mp3..." },
+      product: { prefix: "m", label: "Produit Homme" },
+      pack: { prefix: "mp", label: "Pack Homme" },
     },
   };
-
   const currentPrefix =
-    prefixInfo[formData.type]?.[formData.category] || prefixInfo.women.product;
+    prefixInfo[formData.type]?.[formData.category] ||
+    prefixInfo.women.product;
 
+  // ✅ Composant Section
   const Section = ({ title, icon, section, children }) => (
     <div
-      className={`rounded-xl border ${darkMode ? "border-[#2d3748]" : "border-gray-200"} overflow-hidden`}
+      className={`rounded-xl border ${
+        darkMode ? "border-[#2d3748]" : "border-gray-200"
+      } overflow-hidden`}
     >
       <button
         type="button"
@@ -282,6 +264,7 @@ const ProductForm = ({
     </div>
   );
 
+  // ✅ Input contrôlé
   const Input = ({
     label,
     name,
@@ -290,9 +273,7 @@ const ProductForm = ({
     required,
     rows,
   }) => {
-    const ref = inputRefs[name];
     const Component = rows ? "textarea" : "input";
-
     return (
       <div>
         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -300,9 +281,9 @@ const ProductForm = ({
           {required && <span className="text-red-500 ml-0.5">*</span>}
         </label>
         <Component
-          ref={ref}
           type={type}
-          defaultValue={formData[name] || ""}
+          value={formData[name] ?? ""}
+          onChange={(e) => updateField(name, e.target.value)}
           placeholder={placeholder}
           rows={rows}
           className={`w-full px-3 py-2 rounded-xl border text-sm ${
@@ -319,11 +300,19 @@ const ProductForm = ({
   return (
     <div className="fixed inset-0 pb-[70px] z-50 flex items-end justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div
-        className={`w-full max-w-lg max-h-[90vh] rounded-t-2xl sm:rounded-2xl ${darkMode ? "bg-[#1a1a2e]" : "bg-white"} shadow-2xl border ${darkMode ? "border-[#2d3748]" : "border-gray-200"} flex flex-col`}
+        className={`w-full max-w-lg max-h-[90vh] rounded-t-2xl sm:rounded-2xl ${
+          darkMode ? "bg-[#1a1a2e]" : "bg-white"
+        } shadow-2xl border ${
+          darkMode ? "border-[#2d3748]" : "border-gray-200"
+        } flex flex-col`}
       >
         {/* HEADER */}
         <div
-          className={`sticky top-0 z-10 ${darkMode ? "bg-[#1a1a2e]" : "bg-white"} border-b ${darkMode ? "border-[#2d3748]" : "border-gray-200"} px-4 py-3 flex items-center justify-between flex-shrink-0`}
+          className={`sticky top-0 z-10 ${
+            darkMode ? "bg-[#1a1a2e]" : "bg-white"
+          } border-b ${
+            darkMode ? "border-[#2d3748]" : "border-gray-200"
+          } px-4 py-3 flex items-center justify-between flex-shrink-0`}
         >
           <div className="flex items-center gap-2">
             {formData.category === "pack" ? (
@@ -341,6 +330,7 @@ const ProductForm = ({
             )}
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:hover:bg-[#2a2a4a] rounded-full transition-colors"
           >
@@ -350,8 +340,16 @@ const ProductForm = ({
 
         {/* CORPS */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Erreur */}
+          {error && (
+            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+              <p className="text-xs text-red-600 dark:text-red-400">⚠️ {error}</p>
+            </div>
+          )}
+
           {/* Section: Informations de base */}
           <Section title="Informations" icon="📝" section="basic">
+            {/* Boutique */}
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Boutique
@@ -359,40 +357,26 @@ const ProductForm = ({
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    const newType = "women";
-                    setFormData((prev) => ({ ...prev, type: newType }));
-                    if (!editingProduct) {
-                      const newId = generateNextId(formData.category, newType);
-                      setFormData((prev) => ({ ...prev, id: newId }));
-                    }
-                  }}
+                  onClick={() => handleChangeType("women")}
                   className={`py-2 rounded-xl text-sm font-medium transition-all ${
                     formData.type === "women"
                       ? "bg-feminine-primary text-white"
                       : darkMode
-                        ? "bg-[#2a2a4a] text-gray-400"
-                        : "bg-gray-100 text-gray-600"
+                      ? "bg-[#2a2a4a] text-gray-400"
+                      : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   👩 Femme
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    const newType = "men";
-                    setFormData((prev) => ({ ...prev, type: newType }));
-                    if (!editingProduct) {
-                      const newId = generateNextId(formData.category, newType);
-                      setFormData((prev) => ({ ...prev, id: newId }));
-                    }
-                  }}
+                  onClick={() => handleChangeType("men")}
                   className={`py-2 rounded-xl text-sm font-medium transition-all ${
                     formData.type === "men"
                       ? "bg-masculine-primary text-white"
                       : darkMode
-                        ? "bg-[#2a2a4a] text-gray-400"
-                        : "bg-gray-100 text-gray-600"
+                      ? "bg-[#2a2a4a] text-gray-400"
+                      : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   👨 Homme
@@ -400,6 +384,7 @@ const ProductForm = ({
               </div>
             </div>
 
+            {/* Type */}
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Type
@@ -407,38 +392,26 @@ const ProductForm = ({
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormData((prev) => ({ ...prev, category: "product" }));
-                    if (!editingProduct) {
-                      const newId = generateNextId("product", formData.type);
-                      setFormData((prev) => ({ ...prev, id: newId }));
-                    }
-                  }}
+                  onClick={() => handleChangeCategory("product")}
                   className={`py-2 rounded-xl text-sm font-medium transition-all ${
                     formData.category === "product"
                       ? "bg-blue-500 text-white"
                       : darkMode
-                        ? "bg-[#2a2a4a] text-gray-400"
-                        : "bg-gray-100 text-gray-600"
+                      ? "bg-[#2a2a4a] text-gray-400"
+                      : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   🛍️ Produit
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormData((prev) => ({ ...prev, category: "pack" }));
-                    if (!editingProduct) {
-                      const newId = generateNextId("pack", formData.type);
-                      setFormData((prev) => ({ ...prev, id: newId }));
-                    }
-                  }}
+                  onClick={() => handleChangeCategory("pack")}
                   className={`py-2 rounded-xl text-sm font-medium transition-all ${
                     formData.category === "pack"
                       ? "bg-gold text-gray-900"
                       : darkMode
-                        ? "bg-[#2a2a4a] text-gray-400"
-                        : "bg-gray-100 text-gray-600"
+                      ? "bg-[#2a2a4a] text-gray-400"
+                      : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   📦 Pack
@@ -446,6 +419,7 @@ const ProductForm = ({
               </div>
             </div>
 
+            {/* ID */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -453,8 +427,8 @@ const ProductForm = ({
                 </label>
                 <button
                   type="button"
-                  onClick={regenerateId}
-                  className="flex items-center gap-1 text-[10px] text-gold hover:underline"
+                  onClick={handleRegenerateId}
+                  className="flex items-center gap-1 text-[10px] text-gold hover:underline disabled:opacity-50"
                   disabled={!!editingProduct}
                 >
                   <Wand2 className="w-3 h-3" />
@@ -464,17 +438,15 @@ const ProductForm = ({
               <input
                 type="text"
                 value={formData.id}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, id: e.target.value }))
-                }
+                onChange={(e) => updateField("id", e.target.value)}
                 className={`w-full px-3 py-2 rounded-xl border text-sm font-mono ${
                   editingProduct
                     ? darkMode
                       ? "bg-[#2a2a4a] border-[#2d3748] text-gray-400 cursor-not-allowed"
                       : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
                     : darkMode
-                      ? "bg-[#2a2a4a] border-[#2d3748] text-white"
-                      : "bg-gray-50 border-gray-200 text-gray-800"
+                    ? "bg-[#2a2a4a] border-[#2d3748] text-white"
+                    : "bg-gray-50 border-gray-200 text-gray-800"
                 } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
                 disabled={!!editingProduct}
                 required
@@ -499,14 +471,13 @@ const ProductForm = ({
           {/* Section: Variantes */}
           <Section title="Variantes" icon="🎨" section="variants">
             <div className="mb-2 flex items-center gap-2">
-              <Palette className="w-4 h-4 text-gold" />
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {formData.variants?.length || 0} variante(s)
               </span>
             </div>
             <VariantManager
               variants={formData.variants || []}
-              onVariantsChange={handleVariantsChange}
+              onVariantsChange={(variants) => updateField("variants", variants)}
               isDark={darkMode}
             />
           </Section>
@@ -514,17 +485,17 @@ const ProductForm = ({
           {/* Section: Image */}
           <Section title="Image du produit" icon="🖼️" section="media">
             <ImageUploader
-              onImageUpload={handleImageUpload}
+              onImageUpload={(url) => updateField("image", url)}
               currentImage={formData.image}
             />
-            
-            {formData.image && formData.image.includes('supabase.co') && (
+
+            {formData.image && formData.image.includes("supabase.co") && (
               <div className="flex items-center gap-2 text-xs text-green-500 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-500/20">
                 <Check className="w-3.5 h-3.5" />
-                <span className="truncate">✅ Image sur Supabase Storage</span>
+                <span className="truncate">Image sur Supabase Storage</span>
               </div>
             )}
-            
+
             <Input
               label="Tags (séparés par des virgules)"
               name="tags"
@@ -556,14 +527,8 @@ const ProductForm = ({
                 Popularité
               </label>
               <select
-                name="popularity"
                 value={formData.popularity}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    popularity: e.target.value,
-                  }))
-                }
+                onChange={(e) => updateField("popularity", e.target.value)}
                 className={`w-full px-3 py-2 rounded-xl border text-sm ${
                   darkMode
                     ? "bg-[#2a2a4a] border-[#2d3748] text-white"
@@ -581,11 +546,11 @@ const ProductForm = ({
             {formData.category === "pack" && (
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Articles du pack
+                  Articles du pack (1 par ligne)
                 </label>
                 <Input
                   name="items"
-                  placeholder="Parfum léger 🍭&#10;Petit carnet 📓&#10;Stylo unique 🧑‍🎨"
+                  placeholder={"Parfum léger 🍭\nPetit carnet 📓\nStylo unique 🧑‍🎨"}
                   rows="4"
                 />
               </div>
@@ -603,7 +568,11 @@ const ProductForm = ({
 
         {/* FOOTER */}
         <div
-          className={`sticky bottom-0 z-20 ${darkMode ? "bg-[#1a1a2e]" : "bg-white"} border-t ${darkMode ? "border-[#2d3748]" : "border-gray-200"} px-4 py-3 flex-shrink-0`}
+          className={`sticky bottom-0 z-20 ${
+            darkMode ? "bg-[#1a1a2e]" : "bg-white"
+          } border-t ${
+            darkMode ? "border-[#2d3748]" : "border-gray-200"
+          } px-4 py-3 flex-shrink-0`}
         >
           <div className="flex items-center gap-3 max-w-lg mx-auto">
             <button
