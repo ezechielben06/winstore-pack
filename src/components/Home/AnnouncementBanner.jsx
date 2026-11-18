@@ -1,4 +1,5 @@
 // 📄 src/components/Home/AnnouncementBanner.jsx
+// ✅ Version robuste : requête simplifiée pour éviter les blocages de filtres de date stricts
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, Tag, Calendar, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -34,17 +35,31 @@ const AnnouncementBanner = () => {
 
     const load = async () => {
       try {
+        // ✅ On récupère toutes les annonces actives et on filtre en JS si besoin
+        // pour éviter qu'un format de date SQL ne bloque l'affichage
         const { data, error } = await supabase
           .from('announcements')
           .select('*')
           .eq('is_active', true)
-          .or(`starts_at.is.null,starts_at.lte.${new Date().toISOString()}`)
-          .or(`ends_at.is.null,ends_at.gte.${new Date().toISOString()}`)
           .order('created_at', { ascending: false })
-          .limit(3);
+          .limit(5);
 
         if (error) throw error;
-        if (mounted) setAnnouncements(data || []);
+
+        const now = new Date();
+        const valid = (data || []).filter((ann) => {
+          if (ann.starts_at) {
+            const start = new Date(ann.starts_at);
+            if (!isNaN(start.getTime()) && now < start) return false;
+          }
+          if (ann.ends_at) {
+            const end = new Date(ann.ends_at);
+            if (!isNaN(end.getTime()) && now > end) return false;
+          }
+          return true;
+        });
+
+        if (mounted) setAnnouncements(valid);
       } catch (err) {
         console.error('Erreur annonces:', err);
       }
