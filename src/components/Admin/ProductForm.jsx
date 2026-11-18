@@ -1,5 +1,5 @@
 // 📄 src/components/Admin/ProductForm.jsx
-// ✅ Version contrôlée (plus de refs fragiles)
+// ✅ Fix : Section et FormInput sortis du composant pour éviter la perte de focus
 import { useState, useEffect } from "react";
 import {
   Save,
@@ -56,6 +56,74 @@ const emptyForm = () => ({
   color: "from-pink-400 to-rose-400",
   variants: [],
 });
+
+// ✅ Composant Section — HORS du composant parent pour éviter le remount
+const Section = ({ title, icon, section, expanded, onToggle, darkMode, children }) => (
+  <div
+    className={`rounded-xl border ${
+      darkMode ? "border-[#2d3748]" : "border-gray-200"
+    } overflow-hidden`}
+  >
+    <button
+      type="button"
+      onClick={() => onToggle(section)}
+      className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 dark:hover:bg-[#141425] transition-colors"
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-gray-400">{icon}</span>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {title}
+        </span>
+      </div>
+      {expanded ? (
+        <ChevronUp className="w-4 h-4 text-gray-400" />
+      ) : (
+        <ChevronDown className="w-4 h-4 text-gray-400" />
+      )}
+    </button>
+    {expanded && (
+      <div className="p-3 pt-0 space-y-3 border-t border-gray-100 dark:border-[#2d3748]">
+        {children}
+      </div>
+    )}
+  </div>
+);
+
+// ✅ Composant FormInput — HORS du composant parent pour éviter le remount
+const FormInput = ({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  required,
+  rows,
+  value,
+  onChange,
+  darkMode,
+}) => {
+  const Component = rows ? "textarea" : "input";
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
+      <Component
+        type={type}
+        value={value ?? ""}
+        onChange={(e) => onChange(name, e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className={`w-full px-3 py-2 rounded-xl border text-sm ${
+          darkMode
+            ? "bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400"
+            : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400"
+        } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
+        required={required}
+      />
+    </div>
+  );
+};
 
 const ProductForm = ({
   isOpen,
@@ -232,71 +300,6 @@ const ProductForm = ({
     prefixInfo[formData.type]?.[formData.category] ||
     prefixInfo.women.product;
 
-  // ✅ Composant Section
-  const Section = ({ title, icon, section, children }) => (
-    <div
-      className={`rounded-xl border ${
-        darkMode ? "border-[#2d3748]" : "border-gray-200"
-      } overflow-hidden`}
-    >
-      <button
-        type="button"
-        onClick={() => toggleSection(section)}
-        className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 dark:hover:bg-[#141425] transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">{icon}</span>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {title}
-          </span>
-        </div>
-        {expandedSections[section] ? (
-          <ChevronUp className="w-4 h-4 text-gray-400" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
-        )}
-      </button>
-      {expandedSections[section] && (
-        <div className="p-3 pt-0 space-y-3 border-t border-gray-100 dark:border-[#2d3748]">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-
-  // ✅ Input contrôlé
-  const Input = ({
-    label,
-    name,
-    type = "text",
-    placeholder,
-    required,
-    rows,
-  }) => {
-    const Component = rows ? "textarea" : "input";
-    return (
-      <div>
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
-        </label>
-        <Component
-          type={type}
-          value={formData[name] ?? ""}
-          onChange={(e) => updateField(name, e.target.value)}
-          placeholder={placeholder}
-          rows={rows}
-          className={`w-full px-3 py-2 rounded-xl border text-sm ${
-            darkMode
-              ? "bg-[#2a2a4a] border-[#2d3748] text-white placeholder-gray-400"
-              : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400"
-          } focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all`}
-          required={required}
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="fixed inset-0 pb-[70px] z-50 flex items-end justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div
@@ -348,7 +351,7 @@ const ProductForm = ({
           )}
 
           {/* Section: Informations de base */}
-          <Section title="Informations" icon="📝" section="basic">
+          <Section title="Informations" icon="📝" section="basic" expanded={expandedSections.basic} onToggle={toggleSection} darkMode={darkMode}>
             {/* Boutique */}
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -453,23 +456,29 @@ const ProductForm = ({
               />
             </div>
 
-            <Input
+            <FormInput
               label="Nom"
               name="name"
               placeholder="Nom du produit"
               required
+              value={formData.name}
+              onChange={updateField}
+              darkMode={darkMode}
             />
-            <Input
+            <FormInput
               label="Description"
               name="description"
               placeholder="Description"
               rows="2"
+              value={formData.description}
+              onChange={updateField}
+              darkMode={darkMode}
             />
-            <Input label="Emoji" name="emoji" placeholder="✨" />
+            <FormInput label="Emoji" name="emoji" placeholder="✨" value={formData.emoji} onChange={updateField} darkMode={darkMode} />
           </Section>
 
           {/* Section: Variantes */}
-          <Section title="Variantes" icon="🎨" section="variants">
+          <Section title="Variantes" icon="🎨" section="variants" expanded={expandedSections.variants} onToggle={toggleSection} darkMode={darkMode}>
             <div className="mb-2 flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {formData.variants?.length || 0} variante(s)
@@ -483,7 +492,7 @@ const ProductForm = ({
           </Section>
 
           {/* Section: Image */}
-          <Section title="Image du produit" icon="🖼️" section="media">
+          <Section title="Image du produit" icon="🖼️" section="media" expanded={expandedSections.media} onToggle={toggleSection} darkMode={darkMode}>
             <ImageUploader
               onImageUpload={(url) => updateField("image", url)}
               currentImage={formData.image}
@@ -496,32 +505,41 @@ const ProductForm = ({
               </div>
             )}
 
-            <Input
+            <FormInput
               label="Tags (séparés par des virgules)"
               name="tags"
               placeholder="Soin, Visage"
+              value={formData.tags}
+              onChange={updateField}
+              darkMode={darkMode}
             />
           </Section>
 
           {/* Section: Prix */}
-          <Section title="Prix" icon="💰" section="pricing">
+          <Section title="Prix" icon="💰" section="pricing" expanded={expandedSections.pricing} onToggle={toggleSection} darkMode={darkMode}>
             <div className="grid grid-cols-2 gap-3">
-              <Input
+              <FormInput
                 label="Prix fixe"
                 name="price"
                 type="number"
                 placeholder="5000"
+                value={formData.price}
+                onChange={updateField}
+                darkMode={darkMode}
               />
-              <Input
+              <FormInput
                 label="Fourchette"
                 name="priceRange"
                 placeholder="1000-3000"
+                value={formData.priceRange}
+                onChange={updateField}
+                darkMode={darkMode}
               />
             </div>
           </Section>
 
           {/* Section: Options avancées */}
-          <Section title="Options avancées" icon="⚙️" section="advanced">
+          <Section title="Options avancées" icon="⚙️" section="advanced" expanded={expandedSections.advanced} onToggle={toggleSection} darkMode={darkMode}>
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Popularité
@@ -548,18 +566,24 @@ const ProductForm = ({
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Articles du pack (1 par ligne)
                 </label>
-                <Input
+                <FormInput
                   name="items"
                   placeholder={"Parfum léger 🍭\nPetit carnet 📓\nStylo unique 🧑‍🎨"}
                   rows="4"
+                  value={formData.items}
+                  onChange={updateField}
+                  darkMode={darkMode}
                 />
               </div>
             )}
 
-            <Input
+            <FormInput
               label="Couleur du gradient"
               name="color"
               placeholder="from-pink-400 to-rose-400"
+              value={formData.color}
+              onChange={updateField}
+              darkMode={darkMode}
             />
           </Section>
 

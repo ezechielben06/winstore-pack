@@ -1,5 +1,5 @@
-// 📄 src/components/Admin/ImageUploader.jsx - Avec compression
-import { useState } from 'react';
+// 📄 src/components/Admin/ImageUploader.jsx - Avec compression et synchronisation de prop
+import { useState, useEffect } from 'react';
 import { Upload, X, Check, AlertCircle, Camera } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { supabase } from '../../config/supabase';
@@ -11,6 +11,11 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState(currentImage || null);
+
+  // ✅ Synchroniser la preview lorsque currentImage change (ex: changement de produit édité)
+  useEffect(() => {
+    setPreview(currentImage || null);
+  }, [currentImage]);
 
   // ✅ Compression d'image
   const compressImage = (file) => {
@@ -26,7 +31,7 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
           const MAX_HEIGHT = 600;
           let width = img.width;
           let height = img.height;
-          
+
           if (width > height) {
             if (width > MAX_WIDTH) {
               height = height * (MAX_WIDTH / width);
@@ -38,12 +43,12 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
               height = MAX_HEIGHT;
             }
           }
-          
+
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
+
           canvas.toBlob((blob) => {
             const compressedFile = new File([blob], file.name, {
               type: 'image/jpeg',
@@ -60,7 +65,6 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
 
   const uploadToSupabase = async (file) => {
     try {
-      const ext = file.name.split('.').pop().toLowerCase();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.jpg`;
 
       const { error: uploadError } = await supabase.storage
@@ -107,7 +111,7 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
     try {
       // ✅ Compression de l'image
       const compressedFile = await compressImage(file);
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreview(e.target.result);
@@ -117,11 +121,11 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
       let progress = 0;
       const interval = setInterval(() => {
         progress += 10;
-        setUploadProgress(progress);
+        setUploadProgress((prev) => (prev >= 90 ? 90 : prev + 10));
       }, 100);
 
       const imageUrl = await uploadToSupabase(compressedFile);
-      
+
       clearInterval(interval);
       setUploadProgress(100);
       setUploading(false);
@@ -147,14 +151,14 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
     input.type = 'file';
     input.accept = 'image/*';
     input.multiple = false;
-    
+
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
         handleFileSelect(file);
       }
     };
-    
+
     input.click();
   };
 
@@ -173,8 +177,8 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
         className={`relative rounded-xl p-4 text-center transition-all ${
           uploading ? 'opacity-50 pointer-events-none' : ''
         } ${
-          isDark 
-            ? 'bg-[#2a2a4a] border border-[#2d3748]' 
+          isDark
+            ? 'bg-[#2a2a4a] border border-[#2d3748]'
             : 'bg-gray-50 border border-gray-200'
         }`}
       >
@@ -274,4 +278,4 @@ const ImageUploader = ({ onImageUpload, currentImage }) => {
   );
 };
 
-export default ImageUploader; 
+export default ImageUploader;
