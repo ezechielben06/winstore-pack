@@ -350,14 +350,14 @@ const AdminAnnouncements = () => {
 
       {/* ===== MODAL PLEIN ÉCRAN MOBILE FIRST ===== */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 pb-[70px] z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div
             className={`w-full max-w-lg rounded-t-3xl sm:rounded-3xl ${
               isDark ? "bg-[#16162c] border-t sm:border border-[#2d3748]" : "bg-white"
             } shadow-2xl overflow-hidden max-h-[90vh] sm:max-h-[85vh] flex flex-col animate-slide-up`}
           >
             {/* Modal Header */}
-            <div className={`p-4 sm:p-5 border-b ${isDark ? "border-[#2d3748]" : "border-gray-100"} flex items-center justify-between flex-shrink-0`}>
+            <div className={`sticky top-0 z-10 p-4 sm:p-5 border-b ${isDark ? "bg-[#16162c] border-[#2d3748]" : "bg-white border-gray-100"} flex items-center justify-between flex-shrink-0`}>
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-gold/20 text-gold">
                   <Tag className="w-4 h-4" />
@@ -531,11 +531,11 @@ const AdminAnnouncements = () => {
             </div>
 
             {/* Modal Footer (Sticky bas pour pouce) */}
-            <div className={`p-4 border-t ${isDark ? "border-[#2d3748]" : "border-gray-100"} flex items-center gap-3 flex-shrink-0`}>
+            <div className={`sticky bottom-0 z-20 p-4 border-t ${isDark ? "bg-[#16162c] border-[#2d3748]" : "bg-white border-gray-100"} flex items-center gap-3 flex-shrink-0 shadow-lg`}>
               <button
                 type="button"
                 onClick={closeForm}
-                className="w-1/3 py-3 rounded-xl border border-gray-200 dark:border-[#2d3748] text-gray-600 dark:text-gray-300 text-xs font-bold"
+                className="w-1/3 py-3 rounded-xl border border-gray-200 dark:border-[#2d3748] text-gray-600 dark:text-gray-300 text-xs font-bold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
               >
                 Annuler
               </button>
@@ -543,7 +543,7 @@ const AdminAnnouncements = () => {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="w-2/3 bg-gold text-gray-900 py-3 rounded-xl font-bold text-xs shadow-lg shadow-gold/20 flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                className="w-2/3 bg-gold text-gray-900 py-3 rounded-xl font-bold text-xs shadow-lg shadow-gold/20 flex items-center justify-center gap-2 hover:bg-gold/90 active:scale-95 transition-transform"
               >
                 {saving ? (
                   <span>Enregistrement...</span>

@@ -211,7 +211,7 @@ const ProductDetailsPage = () => {
   if (!product) return null;
 
   const isPack = product.category === 'pack';
-  const isWomen = allProducts.women.some(p => p.id === product.id);
+  const isWomen = allProducts.women.some(p => p.id === product.id) || product.id?.startsWith('w') || product.id?.startsWith('p');
   const theme = isWomen ? 'feminine' : 'masculine';
   const themeBg = isWomen ? 'bg-feminine-primary' : 'bg-masculine-primary';
   const price = getCurrentPrice();
