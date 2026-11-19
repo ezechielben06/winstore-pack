@@ -141,30 +141,32 @@ const AnnouncementBanner = () => {
                   : `bg-gradient-to-r ${style.bg} bg-white text-gray-900 shadow-xl ${style.glow}`
               } p-4 sm:p-5 transition-all duration-300 animate-slide-up`}
             >
-              <div className="flex items-center gap-3 sm:gap-4 pr-8">
-                <div className={`p-3 rounded-xl border ${style.badge} flex-shrink-0 flex items-center justify-center shadow-md`}>
-                  {icon}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold border ${style.badge}`}>
-                      {type === 'promo' ? '🔥 Offre Spéciale' : type === 'event' ? '📅 Événement' : '✨ Annonce'}
-                    </span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pr-8">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                  <div className={`p-3 rounded-xl border ${style.badge} flex-shrink-0 flex items-center justify-center shadow-md mt-0.5 sm:mt-0`}>
+                    {icon}
                   </div>
-                  <h3 className="font-display font-bold text-base sm:text-lg text-gray-900 dark:text-white leading-tight">
-                    {ann.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
-                    {ann.message}
-                  </p>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold border ${style.badge}`}>
+                        {type === 'promo' ? '🔥 Offre Spéciale' : type === 'event' ? '📅 Événement' : '✨ Annonce'}
+                      </span>
+                    </div>
+                    <h3 className="font-display font-bold text-base sm:text-lg text-gray-900 dark:text-white leading-snug">
+                      {ann.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                      {ann.message}
+                    </p>
+                  </div>
                 </div>
 
                 {ann.link && (
-                  <div className="flex-shrink-0">
+                  <div className="w-full sm:w-auto flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200/20 dark:border-white/10 flex justify-end">
                     <Link
                       to={ann.link}
-                      className="inline-flex items-center gap-1.5 bg-gold text-gray-900 hover:bg-gold/90 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg shadow-gold/30 hover:scale-105 active:scale-95"
+                      className="inline-flex items-center justify-center gap-1.5 bg-gold text-gray-900 hover:bg-gold/90 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg shadow-gold/30 hover:scale-105 active:scale-95 w-full sm:w-auto"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>{ann.link_label || 'Découvrir'}</span>
