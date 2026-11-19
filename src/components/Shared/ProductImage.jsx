@@ -26,6 +26,7 @@ const ProductImage = ({
           src={src}
           alt={alt}
           loading="lazy"
+          decoding="async"
           className={`w-full h-full transition-opacity duration-300 ${
             fit === 'contain' ? 'object-contain' : 'object-cover'
           } ${loading ? 'opacity-0' : 'opacity-100'}`}
