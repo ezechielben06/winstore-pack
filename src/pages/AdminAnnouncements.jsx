@@ -465,60 +465,52 @@ const AdminAnnouncements = () => {
                 />
               </div>
 
-              {/* Lien & Bouton simplifiés avec des boutons tactiles */}
+              {/* Destination simplifiée pour non-informaticien */}
               <div className="space-y-3">
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Où doit amener le bouton de l'annonce ?
+                  Où doit apparaître ou mener cette annonce ?
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, link: '/', link_label: "Découvrir" })}
+                    className={`py-3 px-2 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
+                      form.link === '/'
+                        ? 'border-gold bg-gold/20 text-gray-900 dark:text-white shadow-sm'
+                        : isDark ? 'border-[#2d3748] bg-[#2a2a4a]/40 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    <span className="text-base">🏠</span>
+                    <span>Accueil</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, link: '/femme', link_label: "Boutique Femme" })}
-                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    className={`py-3 px-2 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
                       form.link === '/femme'
                         ? 'border-pink-500 bg-pink-500/20 text-pink-500 dark:text-pink-400 shadow-sm'
                         : isDark ? 'border-[#2d3748] bg-[#2a2a4a]/40 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-600'
                     }`}
                   >
-                    <span>👩 Boutique Femme</span>
+                    <span className="text-base">👩</span>
+                    <span>Boutique Femme</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, link: '/homme', link_label: "Boutique Homme" })}
-                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    className={`py-3 px-2 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
                       form.link === '/homme'
                         ? 'border-blue-500 bg-blue-500/20 text-blue-500 dark:text-blue-400 shadow-sm'
                         : isDark ? 'border-[#2d3748] bg-[#2a2a4a]/40 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-600'
                     }`}
                   >
-                    <span>👨 Boutique Homme</span>
+                    <span className="text-base">👨</span>
+                    <span>Boutique Homme</span>
                   </button>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <label className="block text-[11px] font-medium mb-1 text-gray-500 dark:text-gray-400">
-                      Lien personnalisé (optionnel)
-                    </label>
-                    <input
-                      value={form.link}
-                      onChange={(e) => setForm({ ...form, link: e.target.value })}
-                      placeholder="Ex: /femme ou /homme"
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium mb-1 text-gray-500 dark:text-gray-400">
-                      Texte affiché sur le bouton
-                    </label>
-                    <input
-                      value={form.link_label}
-                      onChange={(e) => setForm({ ...form, link_label: e.target.value })}
-                      placeholder="Ex: J'en profite"
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
+                <p className="text-[11px] text-gray-400 italic">
+                  💡 L'annonce s'affichera directement sur la page choisie avec un bouton d'action adapté.
+                </p>
               </div>
 
               {/* Dates */}
