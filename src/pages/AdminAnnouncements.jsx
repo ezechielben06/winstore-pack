@@ -18,11 +18,13 @@ import {
 } from "lucide-react";
 import { supabase } from "../config/supabase";
 import { useTheme } from "../context/ThemeContext";
+import ImageUploader from "../components/Admin/ImageUploader";
 
 const emptyForm = () => ({
   title: "",
   message: "",
   type: "promo",
+  image: "",
   link: "/femme",
   link_label: "J'en profite",
   is_active: true,
@@ -108,6 +110,7 @@ const AdminAnnouncements = () => {
       title: ann.title || "",
       message: ann.message || "",
       type: ann.type || "promo",
+      image: ann.image || "",
       link: ann.link || "",
       link_label: ann.link_label || "",
       is_active: ann.is_active !== false,
@@ -146,6 +149,7 @@ const AdminAnnouncements = () => {
       title: form.title.trim(),
       message: form.message.trim(),
       type: form.type,
+      image: form.image.trim(),
       link: form.link.trim(),
       link_label: form.link_label.trim(),
       is_active: form.is_active,
@@ -391,6 +395,11 @@ const AdminAnnouncements = () => {
                   <span>Aperçu en direct</span>
                 </label>
                 <div className={`relative rounded-xl border ${getTypeColor(form.type)} p-3.5 ${isDark ? 'bg-[#1a1a35]' : 'bg-gray-50'}`}>
+                  {form.image && (
+                    <div className="mb-3 rounded-lg overflow-hidden h-32 bg-black/10">
+                      <img src={form.image} alt="Aperçu annonce" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2.5">
                     <div className="p-2 rounded-lg bg-white/20 flex-shrink-0">
                       {getTypeIcon(form.type)}
@@ -405,6 +414,17 @@ const AdminAnnouncements = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Image de l'annonce */}
+              <div>
+                <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
+                  Image de l'annonce (optionnel)
+                </label>
+                <ImageUploader
+                  currentImage={form.image}
+                  onImageUpload={(url) => setForm({ ...form, image: url })}
+                />
               </div>
 
               {/* Type d'annonce (Grid 3 boutons tactiles) */}

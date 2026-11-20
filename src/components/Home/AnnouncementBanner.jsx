@@ -141,6 +141,12 @@ const AnnouncementBanner = () => {
                   : `bg-gradient-to-r ${style.bg} bg-white text-gray-900 shadow-xl ${style.glow}`
               } p-4 sm:p-5 transition-all duration-300 animate-slide-up`}
             >
+              {ann.image && (
+                <div className="mb-4 rounded-xl overflow-hidden h-40 sm:h-52 bg-black/10 shadow-md">
+                  <img src={ann.image} alt={ann.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pr-8">
                 <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
                   <div className={`p-3 rounded-xl border ${style.badge} flex-shrink-0 flex items-center justify-center shadow-md mt-0.5 sm:mt-0`}>

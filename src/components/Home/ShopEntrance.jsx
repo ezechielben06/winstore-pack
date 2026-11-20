@@ -13,7 +13,7 @@ const ShopEntrance = () => {
       icon: <Sparkles className="w-8 h-8" />,
       link: '/femme',
       emojis: '💄✨🌸💎',
-      image: '/car1.png'
+      image: '/images/boutique-femme.jpeg'
     },
     {
       id: 'homme',
@@ -24,7 +24,7 @@ const ShopEntrance = () => {
       icon: <Crown className="w-8 h-8" />,
       link: '/homme',
       emojis: '👔💪🔥⌚',
-      image: '/car4.jpg'
+      image: '/images/boutique-homme.jpeg'
     },
   ];
 
