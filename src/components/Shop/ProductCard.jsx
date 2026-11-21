@@ -96,7 +96,12 @@ const ProductCard = ({ product, isWomen }) => {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product);
+    // ✅ Ne pas injecter de variante par défaut si le produit n'en a pas ou si aucune n'est choisie
+    addToCart({
+      ...product,
+      variant: null,
+      price: product.price || (product.priceRange ? parseInt(product.priceRange.split('-')[0]) : 0)
+    });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
