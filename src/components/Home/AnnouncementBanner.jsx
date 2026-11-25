@@ -1,7 +1,7 @@
 // 📄 src/components/Home/AnnouncementBanner.jsx
 // ✅ Version ultra-robuste avec données de secours et affichage garanti
 import { useState, useEffect } from 'react';
-import { X, ExternalLink, Tag, Calendar, Info, Sparkles } from 'lucide-react';
+import { ExternalLink, Tag, Calendar, Info, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../config/supabase';
 import { useTheme } from '../../context/ThemeContext';
@@ -36,14 +36,6 @@ const STYLES = {
 const AnnouncementBanner = () => {
   const { isDark } = useTheme();
   const [announcements, setAnnouncements] = useState([]);
-  const [dismissedIds, setDismissedIds] = useState(() => {
-    try {
-      const saved = localStorage.getItem('dismissed_announcements');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
 
   useEffect(() => {
     let mounted = true;
@@ -112,22 +104,12 @@ const AnnouncementBanner = () => {
     return () => { mounted = false; };
   }, []);
 
-  const handleDismiss = (id) => {
-    const next = [...dismissedIds, id];
-    setDismissedIds(next);
-    try {
-      localStorage.setItem('dismissed_announcements', JSON.stringify(next));
-    } catch {}
-  };
-
-  const visible = announcements.filter((a) => !dismissedIds.includes(a.id));
-
-  if (visible.length === 0) return null;
+  if (announcements.length === 0) return null;
 
   return (
     <div className="container mx-auto px-4 py-4">
       <div className="space-y-3">
-        {visible.map((ann) => {
+        {announcements.map((ann) => {
           const type = ann.type || 'promo';
           const icon = ICONS[type] || ICONS.promo;
           const style = STYLES[type] || STYLES.promo;
@@ -147,7 +129,7 @@ const AnnouncementBanner = () => {
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pr-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pr-4">
                 <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
                   <div className={`p-3 rounded-xl border ${style.badge} flex-shrink-0 flex items-center justify-center shadow-md mt-0.5 sm:mt-0`}>
                     {icon}
@@ -181,15 +163,6 @@ const AnnouncementBanner = () => {
                   </div>
                 )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => handleDismiss(ann.id)}
-                className="absolute top-3 right-3 p-1.5 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                aria-label="Fermer l'annonce"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
           );
         })}
