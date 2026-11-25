@@ -142,7 +142,7 @@ const AnnouncementBanner = () => {
               } p-4 sm:p-5 transition-all duration-300 animate-slide-up`}
             >
               {ann.image && (
-                <div className="mb-4 rounded-xl overflow-hidden h-40 sm:h-52 bg-black/10 shadow-md">
+                <div className="mb-4 rounded-xl overflow-hidden h-64 sm:h-96 bg-black/10 shadow-md">
                   <img src={ann.image} alt={ann.title} className="w-full h-full object-cover" />
                 </div>
               )}
